@@ -1,6 +1,5 @@
 from sequence_analysis import seq_set
 from sequence_analysis import sequence
-import pdb
 
 # create sequence set object
 test = seq_set.seq_set()

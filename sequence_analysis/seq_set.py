@@ -44,7 +44,7 @@ class seq_set:
     def get_letters(self):
         all_letters = set()
         for seq in self.records:
-            s = seq.seq
+            s = seq.seq.upper()
             all_letters = all_letters.union(set([*s]))
         return all_letters
 
@@ -78,6 +78,9 @@ class seq_set:
 
         self.set_type()
 
+        for seq in self.records:
+            seq.type = self.type
+
     def add_sequence(self,sequences):
         if isinstance(sequences, list):
             for seq in sequences:
@@ -86,11 +89,13 @@ class seq_set:
             old_type = self.type
             self.set_type()
             assert(old_type == self.type)
+            self.records[-1].type = self.type
         elif isinstance(sequences, sequence):
             self.records.append(sequences)
             old_type = self.type
             assert(old_type == self.type)
             self.set_type()
+            self.records[-1].type = self.type
         else:
             print("ERROR: incorrect format for adding sequence. Please provide a list of sequences or a sequence object. Sequence was not added.")
 
