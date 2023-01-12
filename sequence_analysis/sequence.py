@@ -11,7 +11,6 @@ class sequence:
     def __init__(self,seq,name=None,type=None):
         self.seq = seq.upper()
         self.name = name
-        # TODO: assign type in seq_set creation
         self.type = type
 
     def frame_shift(self, frame=0):
@@ -41,7 +40,6 @@ class sequence:
     def six_frame_check(self, regex):
         # does a 6-frame translation and checks for the existence of a given regex pattern
         selected = False
-        true_sequence = ""
         for frame in range(3):
             for order in range(1):
                 if order == 0:
@@ -55,5 +53,6 @@ class sequence:
                 selected = check_for_pattern(s,regex)
                 if selected:
                     true_sequence = str(s)
+                    return true_sequence
 
-        return selected, true_sequence
+        return None

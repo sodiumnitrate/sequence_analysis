@@ -23,3 +23,4 @@ class TestUtils:
         s = Seq(s.seq)
         assert( sa_utils.check_for_pattern(s, "MMM"))
         assert(sa_utils.check_for_pattern(s, "M+"))
+
