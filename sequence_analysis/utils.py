@@ -4,7 +4,6 @@ This file holds some basic tools and definitions, mostly for sequence I/O.
 import re
 from sequence_analysis import sequence
 from Bio.Seq import Seq
-import pdb
 import Bio.Align.substitution_matrices
 blosum_50 = Bio.Align.substitution_matrices.load(name="BLOSUM50")
 
