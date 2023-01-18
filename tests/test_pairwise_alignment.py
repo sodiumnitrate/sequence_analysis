@@ -21,3 +21,17 @@ class TestPairwiseAlignment:
         assert(new_alignment.score == 29)
         assert(x == "ALKALIMDMKALI")
         assert(y == "ALKAKIW-MKAL-")
+
+    def test_needleman_wunsch_3(self):
+        seq1 = "HEAGAWGHEE"
+        seq2 = "PAWHEAE"
+
+        new_alignment = pairwise_alignment(seq1, seq2)
+        new_alignment.align()
+
+        x = new_alignment.sequence1_aligned.seq
+        y = new_alignment.sequence2_aligned.seq
+
+        assert(new_alignment.score == 1)
+        assert(x == "HEAGAWGHE-E")
+        assert(y == "--P-AW-HEAE")
