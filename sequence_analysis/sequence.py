@@ -1,10 +1,9 @@
 """
 This file holds the sequence class and related methods.
 """
-import re
 from Bio.Seq import Seq
-import pdb
-from sequence_analysis.utils import check_for_pattern
+import sequence_analysis.utils as utils
+import re
 
 class sequence:
     # TODO: inherit from the Seq class?
@@ -49,10 +48,18 @@ class sequence:
                     s = Seq(self.frame_shift(frame=frame)).reverse_complement().translate()
                     print(s)
 
+                # create sequence object with the translated sequence
+                seq = sequence(str(s))
+
                 # NOTE: the following implicitly assumes that only one reading frame is valid
-                selected = check_for_pattern(s,regex)
+                selected = seq.check_for_pattern(regex)
                 if selected:
                     true_sequence = str(s)
                     return true_sequence
 
         return None
+
+    def check_for_pattern(self, regex):
+        # TODO: rethink this wrapper situation
+        # TODO: check if regex and seq from the same alphabet?
+        return utils.check_for_pattern(self.seq, regex)

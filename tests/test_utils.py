@@ -16,11 +16,6 @@ class TestUtils:
 
         # check sequence obj
         s = sequence(seq=s, type='protein')
-        assert( sa_utils.check_for_pattern(s, "MMM"))
-        assert(sa_utils.check_for_pattern(s, "M+"))
-
-        # check biopythons seq object
-        s = Seq(s.seq)
-        assert( sa_utils.check_for_pattern(s, "MMM"))
-        assert(sa_utils.check_for_pattern(s, "M+"))
+        assert( s.check_for_pattern("MMM"))
+        assert( s.check_for_pattern("M+"))
 
