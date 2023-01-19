@@ -6,3 +6,15 @@ class TestFilters:
         assert(len(prots.records)==6)
         prots.remove_duplicates()
         assert(len(prots.records)==3)
+
+    def test_add_test(self):
+        prots = seq_set(file_name="aux_files/dup_test.fasta")
+        dnas = seq_set(file_name="aux_files/dna_ex.fasta")
+        len_prots = prots.get_len()
+        prots.add_set(dnas)
+        assert(len_prots == prots.get_len())
+
+    def test_filter_by_regex(self):
+        prots = seq_set(file_name="aux_files/filter_test.fasta")
+        prots.filter_by_pattern("MDM")
+        assert(prots.get_len() == 2)

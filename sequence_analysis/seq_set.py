@@ -25,6 +25,9 @@ class seq_set:
 
         if type is None and len(self.records) > 0:
             self.set_type()
+    
+    def get_len(self):
+        return len(self.records)
 
     def write_fasta(self,file_name):
         # function to write all sequences within the list to a fasta file
@@ -115,4 +118,26 @@ class seq_set:
         else:
             print("ERROR: incorrect format for adding sequence. Please provide a list of sequences or a sequence object. Sequence was not added.")
 
+    def add_set(self,set2):
+        # merges two sets of sequences
 
+        # make sure the set being added is of type seq_set
+        if not isinstance(set2,seq_set):
+            print("ERROR: cannot add the two sets. Set2 is not of type seq_set.")
+            return
+
+        # make sure types are the same
+        if set2.type != self.type:
+            print("ERROR: cannot add two sets. They are not of the same type.")
+            return
+
+        # add set2's records to the list of records 
+        self.records += set2.records
+
+    def filter_by_pattern(self,regex):
+        new_records = []
+        for s in self.records:
+            if s.check_for_pattern(regex):
+                new_records.append(s)
+
+        self.records = new_records
