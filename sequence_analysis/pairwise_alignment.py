@@ -23,7 +23,7 @@ class pairwise_alignment:
     def align(self,d=8,verbose=False):
         if self.algorithm == "needleman-wunsch":
             self.needleman_wunsch(d=d,verbose=verbose)
-        elif self.algorithm == "smith_waterman":
+        elif self.algorithm == "smith-waterman":
             self.smith_waterman(d=d, verbose=verbose)
 
     def needleman_wunsch(self,d=8,verbose=False):
@@ -139,15 +139,15 @@ class pairwise_alignment:
         m = len(self.sequence2.seq)
 
         # initialize matrix
-        F = [[0 for _ in range(m+1)] for _ in range(n+1)]
-        pointers = [["" for _ in range(m+1)] for _ in range(n+1)]
+        F = [[0 for _ in range(n+1)] for _ in range(m+1)]
+        pointers = [["" for _ in range(n+1)] for _ in range(m+1)]
 
         # TODO: rewrite in C++
-        for i in range(1,n+1):
-            for j in range(1,m+1):
+        for i in range(1,m+1):
+            for j in range(1,n+1):
                 possible_values = []
-                aa1 = self.sequence1.seq[i-1]
-                aa2 = self.sequence2.seq[j-1]
+                aa1 = self.sequence1.seq[j-1]
+                aa2 = self.sequence2.seq[i-1]
 
                 # start a new alignment
                 possible_values.append(0)
@@ -167,13 +167,13 @@ class pairwise_alignment:
 
                 F[i][j] = max_val
                 if max_ind == 0:
-                    pointers[i][j] == ""
+                    pointers[i][j] = ""
                 elif max_ind == 1:
-                    pointers[i][j] == "ul"
+                    pointers[i][j] = "ul"
                 elif max_ind == 2:
-                    pointers[i][j] == "l"
+                    pointers[i][j] = "u"
                 elif max_ind == 3:
-                    pointers[i][j] == "u"
+                    pointers[i][j] = "l"
 
         self.score = max(max(F, key=max))
         self.F = F
@@ -185,5 +185,41 @@ class pairwise_alignment:
         self.traceback_sw()
 
     def traceback_sw(self):
+        i_start = None
+        j_start = None
         # find index of max score
-        pass
+        for i in range(len(self.F)):
+            for j in range(len(self.F[0])):
+                if self.F[i][j] == self.score:
+                    i_start = i 
+                    j_start = j
+                    break
+            if i_start is not None:
+                break
+
+        assert(i_start is not None)
+
+        x_str = ""
+        y_str = ""
+
+        curr_score = self.F[i_start][j_start]
+        while curr_score != 0:
+            direction = self.pointers[i_start][j_start]
+            if direction == "u":
+                x_str = "-" + x_str
+                y_str = self.sequence2.seq[i_start-1] + y_str
+                i_start -= 1
+            elif direction == "l":
+                x_str = self.sequence1.seq[j_start-1] + x_str
+                y_str = "-" + y_str
+                j_start -= 1
+            elif direction == "ul":
+                x_str = self.sequence1.seq[j_start-1] + x_str
+                y_str = self.sequence2.seq[i_start-1] + y_str
+                i_start -= 1
+                j_start -= 1
+
+            curr_score = self.F[i_start][j_start]
+
+        self.sequence1_aligned = sequence(x_str)
+        self.sequence2_aligned = sequence(y_str)
