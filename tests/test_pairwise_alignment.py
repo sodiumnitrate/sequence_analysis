@@ -49,3 +49,16 @@ class TestPairwiseAlignment:
         assert(new_alignment.score == 28)
         assert(x == "AWGHE")
         assert(y == "AW-HE")
+
+    def test_smith_waterman_1(self):
+        seq1 = "ALKALIMDMALKALI"
+        seq2 = "WWWWWWMDMKALI"
+        new_alignment = pairwise_alignment(seq1,seq2,algorithm="smith-waterman")
+        new_alignment.align()
+
+        x = new_alignment.sequence1_aligned.seq
+        y = new_alignment.sequence2_aligned.seq
+
+        assert(new_alignment.score == 29)
+        assert(x == "MALKALI")
+        assert(y == "MDMKALI")
