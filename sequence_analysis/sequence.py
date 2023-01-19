@@ -63,3 +63,46 @@ class sequence:
         # TODO: rethink this wrapper situation
         # TODO: check if regex and seq from the same alphabet?
         return utils.check_for_pattern(self.seq, regex)
+
+    def choose_all_matching_patterns(self, regex):
+        s = self.seq
+        p = re.compile(regex)
+
+        x = p.findall(s)
+
+        '''
+        spans = []
+        for match in x:
+            # TODO: edit this to make sure duplicates are treated correctly
+            # regex to match the match
+            p2 = re.compile(match)
+            # search seq for match
+            x2 = p2.search(s)
+            # get range of chards for match
+            span = x2.span()
+            # append to list of spans
+            spans.append(span)
+
+        # sort spans based on their lower bound
+        spans.sort(key=lambda y: y[1])
+
+        # merge any overlapping spans (not sure why this is happening in the first place)
+        new_spans = []
+        for span1 in spans:
+            overlap = False
+            for span2 in spans:
+                # check if the two spans overlap
+                cond1 = (span1[0] < span2[0] and span1[1] > span2[0]) 
+                cond2 = (span2[0] < span1[0] and span2[1] > span1[0])
+                if cond1 or cond2:
+                    merged = (min(span1[0],span2[0]), max(span1[1],span2[1]))
+                    overlap = True
+                    if merged not in new_spans:
+                        new_spans.append(merged)
+            if not overlap:
+                new_spans.append(span1)
+        '''
+
+        spans = utils.find_spans(s,x)
+
+        return x, spans
