@@ -7,7 +7,6 @@ import re
 from sequence_analysis.utils import dna_alphabet
 from sequence_analysis.utils import rna_alphabet
 from sequence_analysis.utils import diff_letters
-import pdb
 
 class sequence:
     # TODO: inherit from the Seq class?
@@ -89,7 +88,7 @@ class sequence:
         # TODO: check if regex and seq from the same alphabet?
         return utils.check_for_pattern(self.seq, regex)
 
-    def choose_all_matching_patterns(self, regex):
+    def choose_all_matching_patterns(self, regex, return_between_matching=False):
         s = self.seq
         p = re.compile(regex)
 
@@ -97,4 +96,10 @@ class sequence:
 
         spans = utils.find_spans(s,x)
 
+        if return_between_matching:
+            inverted = utils.invert_spans(spans)
+            return x, spans, inverted        
+
         return x, spans
+
+

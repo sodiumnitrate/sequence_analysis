@@ -12,6 +12,12 @@ class TestSequence:
         assert(spans[1][0] == 12)
         assert(spans[1][1] == 14)
 
+    def test_choose_in_between_matching(self):
+        seq1 = sequence("AAAAMDMAAAAAMDMAAA")
+        matching, spans, inverted = seq1.choose_all_matching_patterns("MDM",return_between_matching=True)
+        assert(seq1.seq[spans[0][0]:spans[0][1]+1] == "MDM")
+        assert(seq1.seq[inverted[0][0]:inverted[0][1]+1] == "AAAAA")
+
     def test_six_frame(self):
         seq = sequence("gcgctgaaagcgctgattatggatatggcgctgaaagcgctgatt".upper())
         check = seq.six_frame_check("MDM")

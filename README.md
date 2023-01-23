@@ -1,6 +1,6 @@
 # sequence_analysis
 
-This python module puts together some tools to do very basic (protein/dna/rna) sequence analysis. Some of these were created for research and some for my own education. Please use at your own risk. :upside_down_face:
+This python module puts together some tools to do very basic (protein/dna/rna) sequence analysis. Some of these were created for research and some for my own education. Please use at your own risk. 
 
 ## installation
 

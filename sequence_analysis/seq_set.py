@@ -4,7 +4,6 @@ Includes I/O of .fasta files.
 """
 from Bio import SeqIO
 from sequence_analysis.sequence import sequence
-import pdb
 from sequence_analysis.utils import dna_alphabet
 from sequence_analysis.utils import rna_alphabet
 from sequence_analysis.utils import diff_letters

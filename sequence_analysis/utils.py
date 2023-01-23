@@ -62,3 +62,12 @@ def find_spans(full_string, matches):
         spans.append((start_ind,start_ind+len(match)-1))
 
     return spans
+
+def invert_spans(spans):
+    inverted = []
+    for i in range(len(spans)-1):
+        start = spans[i][1] + 1
+        end = spans[i+1][0] - 1
+        inverted.append((start,end))
+
+    return inverted
