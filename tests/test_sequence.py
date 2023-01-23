@@ -16,7 +16,7 @@ class TestSequence:
         seq = sequence("gcgctgaaagcgctgattatggatatggcgctgaaagcgctgatt".upper())
         check = seq.six_frame_check("MDM")
         # TODO: why is there an X at the end?
-        assert(check == "ALKALIMDMALKALIX")
+        assert(check == "ALKALIMDMALKALI")
 
         check2 = seq.six_frame_check("WWWW")
         assert(check2 == None)

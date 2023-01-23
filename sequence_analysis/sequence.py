@@ -7,6 +7,7 @@ import re
 from sequence_analysis.utils import dna_alphabet
 from sequence_analysis.utils import rna_alphabet
 from sequence_analysis.utils import diff_letters
+import pdb
 
 class sequence:
     # TODO: inherit from the Seq class?
@@ -43,13 +44,14 @@ class sequence:
 
         # returns frame shifted sequence
         if frame == 0:
-            pass
-
-        if frame == 1:
+            if len(seq) % 3 == 0:
+                return seq
+        elif frame == 1:
             seq = seq[1:]
-
-        if frame == 2:
+        elif frame == 2:
             seq = seq[2:]
+        else:
+            print("ERROR: problem with frame shifting. Frame should be 0, 1, or 2.")
 
         N_to_be_added = 3 - len(seq) % 3
         seq = seq + "N" * N_to_be_added
@@ -73,6 +75,7 @@ class sequence:
 
                 # create sequence object with the translated sequence
                 seq = sequence(str(s))
+                print(frame,order,seq.seq)
 
                 # NOTE: the following implicitly assumes that only one reading frame is valid
                 selected = seq.check_for_pattern(regex)
@@ -83,7 +86,6 @@ class sequence:
         return None
 
     def check_for_pattern(self, regex):
-        # TODO: rethink this wrapper situation
         # TODO: check if regex and seq from the same alphabet?
         return utils.check_for_pattern(self.seq, regex)
 
