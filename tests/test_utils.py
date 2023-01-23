@@ -19,3 +19,6 @@ class TestUtils:
         assert( s.check_for_pattern("MMM"))
         assert( s.check_for_pattern("M+"))
 
+    def test_check_for_pattern_wrong_input(self):
+        s = 50
+        assert(sa_utils.check_for_pattern(s, "MMM") is None)

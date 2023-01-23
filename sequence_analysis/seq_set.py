@@ -5,12 +5,12 @@ Includes I/O of .fasta files.
 from Bio import SeqIO
 from sequence_analysis.sequence import sequence
 import pdb
-from sequence_analysis.utils import aa_alphabet
 from sequence_analysis.utils import dna_alphabet
 from sequence_analysis.utils import rna_alphabet
 from sequence_analysis.utils import diff_letters
 
 class seq_set:
+    # TODO: store sequences alphabetically?
     def __init__(self, list_of_sequences=None, file_name=None, type=None):
         if list_of_sequences is None:
             list_of_sequences = []
@@ -34,7 +34,7 @@ class seq_set:
         f = open(file_name,'w')
         for seq in self.records:
             s = seq.seq
-            name = "> " + seq.name
+            name = ">" + seq.name
             f.write(name)
             f.write('\n')
             for ct, char in enumerate(s):
@@ -47,6 +47,7 @@ class seq_set:
     def remove_duplicates(self):
         # keeps only the first occurrence of sequences that are identical
         # TODO: this is a horrible way of doing it -- fix it
+        # TODO: overwrite eq and ne?
         seq_strs = []
         for s in self.records:
             seq_strs.append(s.seq)
@@ -101,19 +102,22 @@ class seq_set:
             seq.type = self.type
 
     def add_sequence(self,sequences):
+        # TODO: refactor, because you have an add_set method as well
         if isinstance(sequences, list):
             for seq in sequences:
                 assert(isinstance(seq, sequence))
                 self.records.append(seq)
             old_type = self.type
             self.set_type()
-            assert(old_type == self.type)
+            if old_type != None:
+                assert(old_type == self.type)
             self.records[-1].type = self.type
         elif isinstance(sequences, sequence):
             self.records.append(sequences)
             old_type = self.type
-            assert(old_type == self.type)
             self.set_type()
+            if old_type != None:
+                assert(old_type == self.type)
             self.records[-1].type = self.type
         else:
             print("ERROR: incorrect format for adding sequence. Please provide a list of sequences or a sequence object. Sequence was not added.")

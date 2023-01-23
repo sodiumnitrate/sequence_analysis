@@ -4,6 +4,9 @@ This file holds the sequence class and related methods.
 from Bio.Seq import Seq
 import sequence_analysis.utils as utils
 import re
+from sequence_analysis.utils import dna_alphabet
+from sequence_analysis.utils import rna_alphabet
+from sequence_analysis.utils import diff_letters
 
 class sequence:
     # TODO: inherit from the Seq class?
@@ -11,6 +14,25 @@ class sequence:
         self.seq = seq.upper()
         self.name = name
         self.type = type
+
+        if type is None:
+            self.set_type()
+
+    def set_type(self):
+        s = self.seq.upper()
+        all_letters = set([*s])
+
+        if len(diff_letters.intersection(all_letters)):
+            self.type = 'protein'
+        elif set(dna_alphabet).issubset(all_letters) or set(rna_alphabet).issubset(all_letters):
+            if 'U' in all_letters:
+                self.type = 'rna'
+            else:
+                # this could fail if we have RNA sequences that happens to have no Us, but that's unlikely
+                self.type = 'dna'
+        else:
+            print("I can't assign a type, please specify manually.")
+
 
     def frame_shift(self, frame=0):
         if self.type != 'rna' and self.type != 'dna':
@@ -32,6 +54,7 @@ class sequence:
         N_to_be_added = 3 - len(seq) % 3
         seq = seq + "N" * N_to_be_added
 
+        # TODO: move to the test?
         assert(len(seq) % 3 == 0)
 
         return seq
@@ -69,39 +92,6 @@ class sequence:
         p = re.compile(regex)
 
         x = p.findall(s)
-
-        '''
-        spans = []
-        for match in x:
-            # TODO: edit this to make sure duplicates are treated correctly
-            # regex to match the match
-            p2 = re.compile(match)
-            # search seq for match
-            x2 = p2.search(s)
-            # get range of chards for match
-            span = x2.span()
-            # append to list of spans
-            spans.append(span)
-
-        # sort spans based on their lower bound
-        spans.sort(key=lambda y: y[1])
-
-        # merge any overlapping spans (not sure why this is happening in the first place)
-        new_spans = []
-        for span1 in spans:
-            overlap = False
-            for span2 in spans:
-                # check if the two spans overlap
-                cond1 = (span1[0] < span2[0] and span1[1] > span2[0]) 
-                cond2 = (span2[0] < span1[0] and span2[1] > span1[0])
-                if cond1 or cond2:
-                    merged = (min(span1[0],span2[0]), max(span1[1],span2[1]))
-                    overlap = True
-                    if merged not in new_spans:
-                        new_spans.append(merged)
-            if not overlap:
-                new_spans.append(span1)
-        '''
 
         spans = utils.find_spans(s,x)
 

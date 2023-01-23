@@ -50,7 +50,7 @@ class TestPairwiseAlignment:
         assert(x == "AWGHE")
         assert(y == "AW-HE")
 
-    def test_smith_waterman_1(self):
+    def test_smith_waterman_2(self):
         seq1 = "ALKALIMDMALKALI"
         seq2 = "WWWWWWMDMKALI"
         new_alignment = pairwise_alignment(seq1,seq2,algorithm="smith-waterman")
@@ -62,3 +62,6 @@ class TestPairwiseAlignment:
         assert(new_alignment.score == 29)
         assert(x == "MALKALI")
         assert(y == "MDMKALI")
+
+    # TODO: check empty string or string of numbers, etc.
+    # pytest coverage?
