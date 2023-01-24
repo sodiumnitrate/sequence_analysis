@@ -18,3 +18,11 @@ class TestFilters:
         prots = seq_set(file_name="aux_files/filter_test.fasta")
         prots.filter_by_pattern("MDM")
         assert(prots.get_len() == 2)
+
+    def test_get_frequencies(self):
+        prots = seq_set(file_name="aux_files/dup_test.fasta")
+        unique_records, freqs = prots.get_frequencies()
+        assert(unique_records.get_len() == 3)
+        assert(freqs[0] == 2)
+        assert(freqs[1] == 2)
+        assert(freqs[2] == 2)

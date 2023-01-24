@@ -44,21 +44,35 @@ class seq_set:
         f.close()
 
     def remove_duplicates(self):
-        # keeps only the first occurrence of sequences that are identical
-        # TODO: this is a horrible way of doing it -- fix it
-        # TODO: overwrite eq and ne?
-        seq_strs = []
-        for s in self.records:
-            seq_strs.append(s.seq)
-
+        # NOTE: this is allowed for by overwriting the eq operator in the sequence class
         new_records = []
-        seq_strs = list(set(seq_strs))
-        for s in seq_strs:
-            for s2 in self.records:
-                if s == s2.seq:
-                    new_records.append(s2)
-                    break
+        for seq in self.records:
+            if seq not in new_records:
+                new_records.append(seq)
+
         self.records = new_records
+
+    def get_frequencies(self):
+        # TODO: can I optimize?
+
+        unique_records = []
+        for seq in self.records:
+            if seq not in unique_records:
+                unique_records.append(seq)
+
+        # initialize freq array
+        n = len(unique_records)
+        freqs = [0 for i in range(n)]
+        for i, seq in enumerate(unique_records):
+            count = 0
+            for seq2 in self.records:
+                if seq == seq2:
+                    count += 1
+
+            freqs[i] = count
+
+        return unique_records, freqs
+
 
     def get_letters(self):
         all_letters = set()

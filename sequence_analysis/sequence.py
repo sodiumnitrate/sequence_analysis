@@ -18,6 +18,15 @@ class sequence:
         if type is None:
             self.set_type()
 
+    def __eq__(self,seq2):
+        if type(self) == type(seq2):
+            if self.type == seq2.type:
+                return self.seq == seq2.seq
+            else:
+                return False
+        else:
+            return False
+
     def set_type(self):
         s = self.seq.upper()
         all_letters = set([*s])

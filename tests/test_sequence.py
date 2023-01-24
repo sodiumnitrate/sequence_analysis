@@ -39,3 +39,15 @@ class TestSequence:
         assert(a1.extract_span(inverted[0]) == "NPFGQMWHGRQGHYPGYMSSHSMYGRNMYNPYHSHYASRH")
         assert(len(spans) == 5)
         assert(len(spans) == len(inverted) + 1)
+
+    def test_equality_1(self):
+        seq1 = sequence("ALKALI")
+        seq2 = sequence("ALKALI")
+
+        assert(seq1 == seq2)
+
+    def test_equality_2(self):
+        seq1 = sequence("ALKALI")
+        seq2 = sequence("ALKALI")
+        seq2.type = "rna"
+        assert(seq1 != seq2)
