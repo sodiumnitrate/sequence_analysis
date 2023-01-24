@@ -18,12 +18,30 @@ class sequence:
         if type is None:
             self.set_type()
 
-    def __eq__(self,seq2):
-        if type(self) == type(seq2):
-            if self.type == seq2.type:
-                return self.seq == seq2.seq
+    def __eq__(self, other):
+        if type(self) == type(other):
+            if self.type == other.type:
+                return self.seq == other.seq
             else:
                 return False
+        else:
+            return False
+
+    def __gt__(self, other):
+        assert(type(self) == type(other))
+        assert(self.type == other.type)
+
+        if self.seq > other.seq:
+            return True
+        else:
+            return False
+
+    def __lt__(self, other):
+        assert(type(self) == type(other))
+        assert(self.type == other.type)
+
+        if self.seq < other.seq:
+            return True
         else:
             return False
 

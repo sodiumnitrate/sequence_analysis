@@ -51,3 +51,11 @@ class TestSequence:
         seq2 = sequence("ALKALI")
         seq2.type = "rna"
         assert(seq1 != seq2)
+
+    def test_lt_gt(self):
+        seq1 = sequence("ALKALI")
+        seq2 = sequence("BLKALI")
+        seq3 = sequence("AALKALI")
+
+        assert((seq1 < seq2) == (seq1.seq < seq2.seq))
+        assert((seq3 < seq1) == (seq3.seq < seq1.seq))

@@ -3,6 +3,7 @@ This file holds the sequence set (seq_set) class and attributed methods.
 Includes I/O of .fasta files.
 """
 from Bio import SeqIO
+from numpy import rec
 from sequence_analysis.sequence import sequence
 from sequence_analysis.utils import dna_alphabet
 from sequence_analysis.utils import rna_alphabet
@@ -53,26 +54,32 @@ class seq_set:
         self.records = new_records
 
     def get_frequencies(self):
-        # TODO: can I optimize?
+        # start with alphabetically sorted records
+        records = self.records
+        records.sort()
 
         unique_records = []
-        for seq in self.records:
-            if seq not in unique_records:
-                unique_records.append(seq)
-
-        # initialize freq array
-        n = len(unique_records)
-        freqs = [0 for i in range(n)]
-        for i, seq in enumerate(unique_records):
-            count = 0
-            for seq2 in self.records:
-                if seq == seq2:
+        frequencies = []
+        for i in range(len(records)):
+            if i == 0:
+                count = 1
+                unique_records.append(records[0])
+            else:
+                if records[i] == records[i-1]:
                     count += 1
+                else:
+                    frequencies.append(count)
+                    count = 1
+                    unique_records.append(records[i])
 
-            freqs[i] = count
+        frequencies.append(count)
+        
+        return unique_records, frequencies
 
-        return unique_records, freqs
-
+    def alphabetize(self):
+        records = self.records
+        records.sort()
+        self.records = records
 
     def get_letters(self):
         all_letters = set()

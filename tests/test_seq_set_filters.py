@@ -1,4 +1,5 @@
 from sequence_analysis.seq_set import seq_set
+import pdb
 
 class TestFilters:
     def test_remove_duplicates(self):
@@ -22,7 +23,25 @@ class TestFilters:
     def test_get_frequencies(self):
         prots = seq_set(file_name="aux_files/dup_test.fasta")
         unique_records, freqs = prots.get_frequencies()
-        assert(unique_records.get_len() == 3)
+
+        assert(len(unique_records) == 3)
         assert(freqs[0] == 2)
         assert(freqs[1] == 2)
         assert(freqs[2] == 2)
+
+        prots.remove_duplicates()
+        assert(len(unique_records) == prots.get_len())
+
+    def test_get_frequencies_2(self):
+        prots = seq_set(file_name="aux_files/dup_test_2.fasta")
+        unique_records, freqs = prots.get_frequencies()
+
+        assert(len(unique_records) == 3)
+        assert(freqs[0] == 2)
+        assert(freqs[1] == 2)
+        assert(freqs[2] == 1)
+
+    def test_sort(self):
+        prots = seq_set(file_name="aux_files/dup_test.fasta")
+        prots.alphabetize()
+        assert(prots.records[0] == prots.records[1])
