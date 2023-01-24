@@ -102,4 +102,7 @@ class sequence:
 
         return x, spans
 
+    def extract_span(self,span):
+        substring = self.seq[span[0]:span[1]+1]
+        return substring
 
