@@ -3,11 +3,11 @@ This file holds the sequence set (seq_set) class and attributed methods.
 Includes I/O of .fasta files.
 """
 from Bio import SeqIO
-from numpy import rec
 from sequence_analysis.sequence import sequence
 from sequence_analysis.utils import dna_alphabet
 from sequence_analysis.utils import rna_alphabet
 from sequence_analysis.utils import diff_letters
+from sequence_analysis.pairwise_alignment import pairwise_alignment
 
 class seq_set:
     # TODO: store sequences alphabetically?
@@ -165,3 +165,15 @@ class seq_set:
                 new_records.append(s)
 
         self.records = new_records
+
+    def get_similarity_matrix(self,algorithm="needleman-wunsch"):
+        # pairwise alignment between all pairs of sequences
+        n = self.get_len()
+        similarity_matrix = {}
+        for i in range(n):
+            for j in range(i+1,n):
+                alignment = pairwise_alignment(self.records[i],self.records[j],algorithm=algorithm)
+                alignment.align()
+                similarity_matrix[(i,j)] = alignment.score
+
+        return similarity_matrix

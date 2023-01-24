@@ -4,7 +4,7 @@ import pdb
 
 class pairwise_alignment:
     def __init__(self, sequence1, sequence2, algorithm="needleman-wunsch"):
-        # TODO: check input data structures
+        # TODO: add support for different scores
         if isinstance(sequence1, str):
             sequence1 = sequence(sequence1)
         if isinstance(sequence2, str):
