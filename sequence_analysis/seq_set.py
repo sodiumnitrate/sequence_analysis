@@ -45,14 +45,27 @@ class seq_set:
             f.write('\n')
         f.close()
 
-    def remove_duplicates(self):
+    def remove_duplicates(self,alphabetize=True):
         # NOTE: this is allowed for by overwriting the eq operator in the sequence class
-        new_records = []
-        for seq in self.records:
-            if seq not in new_records:
-                new_records.append(seq)
 
-        self.records = new_records
+        if not alphabetize:
+            new_records = []
+            for seq in self.records:
+                if seq not in new_records:
+                    new_records.append(seq)
+
+            self.records = new_records
+        else:
+            self.alphabetize()
+            unique_records = []
+            for i in range(len(self.records)):
+                if i == 0:
+                    unique_records.append(self.records[0])
+                else:
+                    if self.records[i] != self.records[i-1]:
+                        unique_records.append(self.records[i])
+
+            self.records = unique_records
 
     def get_frequencies(self):
         # start with alphabetically sorted records
@@ -167,16 +180,19 @@ class seq_set:
 
         self.records = new_records
 
-    def get_similarity_matrix(self,algorithm="needleman-wunsch"):
+    def get_similarity_matrix(self,algorithm="needleman-wunsch",use_blosum_50=False,match=2,unmatch=-1,gap=-0.1,gap_open=-0.5,verbose=False):
         # pairwise alignment between all pairs of sequences
         n = self.get_len()
         similarity_matrix = {}
         for i in range(n):
             for j in range(i+1,n):
                 start = time.time()
-                alignment = pairwise_alignment(self.records[i],self.records[j],algorithm=algorithm)
+                alignment = pairwise_alignment(self.records[i],self.records[j],algorithm=algorithm,use_blosum_50=use_blosum_50,match=match,unmatch=unmatch,gap=gap,gap_open=gap_open)
                 alignment.align()
                 similarity_matrix[(i,j)] = alignment.score
                 end = time.time()
+
+                if verbose:
+                    print(i,j,end-start)
 
         return similarity_matrix

@@ -4,7 +4,7 @@ import Bio.pairwise2 as biopython_pairwise2
 from sequence_analysis.utils import blosum_50
 
 class pairwise_alignment:
-    def __init__(self, sequence1, sequence2, match=1, unmatch=0, gap=-8, gap_open=-0.5, use_blosum_50=True, algorithm="needleman-wunsch"):
+    def __init__(self, sequence1, sequence2, match=1, unmatch=0, gap=-8, gap_open=-9, use_blosum_50=True, algorithm="needleman-wunsch"):
         # TODO: add support for different scores
         if isinstance(sequence1, str):
             sequence1 = sequence(sequence1)
