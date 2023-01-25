@@ -8,6 +8,7 @@ from sequence_analysis.utils import dna_alphabet
 from sequence_analysis.utils import rna_alphabet
 from sequence_analysis.utils import diff_letters
 from sequence_analysis.pairwise_alignment import pairwise_alignment
+import time
 
 class seq_set:
     # TODO: store sequences alphabetically?
@@ -172,8 +173,10 @@ class seq_set:
         similarity_matrix = {}
         for i in range(n):
             for j in range(i+1,n):
+                start = time.time()
                 alignment = pairwise_alignment(self.records[i],self.records[j],algorithm=algorithm)
                 alignment.align()
                 similarity_matrix[(i,j)] = alignment.score
+                end = time.time()
 
         return similarity_matrix

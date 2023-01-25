@@ -1,6 +1,7 @@
 from sequence_analysis.utils import query_blosum50
 from sequence_analysis.sequence import sequence
-import pdb
+import Bio.pairwise2 as biopython_pairwise2
+from sequence_analysis.utils import blosum_50
 
 class pairwise_alignment:
     def __init__(self, sequence1, sequence2, algorithm="needleman-wunsch"):
@@ -20,11 +21,28 @@ class pairwise_alignment:
         self.F = None
         self.pointers = None
 
-    def align(self,d=8,verbose=False):
+    def align(self,d=8,verbose=False,score_only=False):
         if self.algorithm == "needleman-wunsch":
             self.needleman_wunsch(d=d,verbose=verbose)
         elif self.algorithm == "smith-waterman":
             self.smith_waterman(d=d, verbose=verbose)
+        elif self.algorithm == "biopython-global":
+            # TODO: figure out how to deal with the score-only option
+            self.biopython_global(d=8,score_only=score_only)
+
+    def biopython_global(self,d=8,score_only=True):
+        seq1 = self.sequence1.seq
+        seq2 = self.sequence2.seq
+
+        if score_only:
+            alignment = biopython_pairwise2.align.globalds(seq1, seq2, blosum_50, -1*d, -1*d, score_only=True)
+            self.score = alignment
+        else:
+            alignment = biopython_pairwise2.align.globalds(seq1, seq2, blosum_50, -1*d, -1*d)
+            self.score = alignment[0].score
+            self.sequence1_aligned = sequence(alignment[0].seqB)
+            self.sequence1_aligned = sequence(alignment[0].seqA)
+
 
     def needleman_wunsch(self,d=8,verbose=False):
         # get lengths of sequences
@@ -128,7 +146,7 @@ class pairwise_alignment:
             return 
 
         if matrix is None:
-            print("ERROR: matrix is empty. Did you run align() first?")
+            print("ERROR: matrix is empty. Did you run align() first? Note that the biopython implementation does not return this matrix.")
             return
 
         for line in matrix:

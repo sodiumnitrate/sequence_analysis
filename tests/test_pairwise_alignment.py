@@ -63,5 +63,16 @@ class TestPairwiseAlignment:
         assert(x == "MALKALI")
         assert(y == "MDMKALI")
 
+    def test_biopython_vs_needleman_wunsch(self):
+        seq1 = "HEAGAWGHEE"
+        seq2 = "PAWHEAE"
+        alignment_nw = pairwise_alignment(seq1,seq2,algorithm="needleman-wunsch")
+        alignment_nw.align()
+        alignment_bp = pairwise_alignment(seq1,seq2,algorithm="biopython-global")
+        alignment_bp.align()
+
+        assert(alignment_nw.score == alignment_bp.score)
+        assert(alignment_nw.sequence1_aligned.seq == alignment_bp.sequence1_aligned.seq)
+
+
     # TODO: check empty string or string of numbers, etc.
-    # pytest coverage?
