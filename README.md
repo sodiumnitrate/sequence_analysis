@@ -29,3 +29,7 @@ Creating a sequence object from a string (e.g. `"ALKALI"`)
 Writing a `seq_set` object to `output.fasta`
 
     sequences.write_fasta("output.fasta")
+
+## notes about performance
+
+I have implemented global (Needleman-Wunsch) and local (Smith-Waterman) pairwise alignment algorithms in *pure python*. Their performance isn't great, as there are two nested for loops in the python code. I hope to implement these in C++ for funsies in the near future. For now, I am running Biopython's `pairwise2` submodule under the hood, using the `algorithm="biopython-global"` parameter in the `alignment` class.
