@@ -1,4 +1,4 @@
-from hashlib import new
+from matplotlib import use
 from sequence_analysis.pairwise_alignment import pairwise_alignment
 
 class TestPairwiseAlignment:
@@ -72,7 +72,20 @@ class TestPairwiseAlignment:
         alignment_bp.align()
 
         assert(alignment_nw.score == alignment_bp.score)
+        # NOTE: in general, it's unreasonable to expect the following to match because of the ambiguity in situations where two scores are equal while forming F_ij. It does work out for this particular example, though.
         assert(alignment_nw.sequence1_aligned.seq == alignment_bp.sequence1_aligned.seq)
+
+    def test_biopython_vs_needleman_wunsch_custom_params(self):
+        seq1 = "HEAGAWGHEE"
+        seq2 = "PAWHEAE"
+        alignment_nw = pairwise_alignment(seq1,seq2, match=2, unmatch=-1,gap=-0.1,gap_open=-0.1,algorithm="needleman-wunsch", use_blosum_50=False)
+        alignment_nw.align()
+        alignment_bp = pairwise_alignment(seq1,seq2,match=2, unmatch=-1,gap=-0.1,gap_open=-0.1,algorithm="biopython-global", use_blosum_50=False)
+        alignment_bp.align()
+
+        assert(alignment_nw.score == alignment_bp.score)
+        # TODO: extend function to access all possibilities within the list of alignments biopython returns?
+        #assert(alignment_nw.sequence1_aligned.seq == alignment_bp.sequence1_aligned.seq)
 
 
     # TODO: check empty string or string of numbers, etc.
