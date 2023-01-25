@@ -196,3 +196,14 @@ class seq_set:
                     print(i,j,end-start)
 
         return similarity_matrix
+
+    def filter_by_frequency(self,threshold=10):
+        # deletes sequences that have frequency lower than the given threshold
+        # NOTE: does not return duplicates!
+        recs, frequencies = self.get_frequencies()
+        new_recs = []
+        for i, rec in enumerate(recs):
+            if frequencies[i] >= threshold:
+                new_recs.append(rec)
+
+        self.records = new_recs

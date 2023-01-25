@@ -52,3 +52,8 @@ class TestFilters:
         n = prots.get_len()
         m = (n-1) * n / 2
         assert(len(sim_matrix) == m)
+
+    def test_filter_by_frequency(self):
+        prots = seq_set(file_name="aux_files/dup_test_2.fasta")
+        prots.filter_by_frequency(threshold=2)
+        assert(prots.get_len() == 2)
