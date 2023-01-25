@@ -208,6 +208,7 @@ class pairwise_alignment:
             print(line)
 
     def smith_waterman(self,verbose=False):
+        print("WARNING: this function is not tested for custom alignment scoring.")
         n = len(self.sequence1.seq)
         m = len(self.sequence2.seq)
 
