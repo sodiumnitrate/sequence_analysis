@@ -12,7 +12,7 @@ setup(
         author_email='irem.altan@yale.edu',
         license='',
         packages=find_packages(),
-        install_requires=['numpy','matplotlib','biopython'],
+        install_requires=['numpy','matplotlib','biopython>=1.80'],
         python_requires='>=3.6'
         #ext_modules=ext_modules
     )

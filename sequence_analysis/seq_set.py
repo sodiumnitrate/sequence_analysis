@@ -207,3 +207,7 @@ class seq_set:
                 new_recs.append(rec)
 
         self.records = new_recs
+
+    def remove_before_pattern(self, regex, verbose=False):
+        for seq in self.records:
+            seq.remove_before_pattern(regex,verbose=verbose)

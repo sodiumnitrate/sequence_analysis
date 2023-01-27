@@ -1,6 +1,6 @@
 from sequence_analysis.utils import query_blosum50
 from sequence_analysis.sequence import sequence
-import Bio.pairwise2 as biopython_pairwise2
+from Bio import Align
 from sequence_analysis.utils import blosum_50
 
 class pairwise_alignment:
@@ -31,7 +31,7 @@ class pairwise_alignment:
         self.F = None
         self.pointers = None
 
-    def align(self,verbose=False,score_only=False):
+    def align(self,verbose=False):
         # TODO: d no longer needs to be passed as a function argument. FIX.
         d = self.gap
         if self.algorithm == "needleman-wunsch":
@@ -40,31 +40,33 @@ class pairwise_alignment:
             self.smith_waterman(verbose=verbose)
         elif self.algorithm == "biopython-global":
             # TODO: is this the best way of dealing with the score-only option?
-            self.biopython_global(score_only=score_only)
+            self.biopython_global()
 
-    def biopython_global(self,score_only=True):
+    def biopython_global(self):
         seq1 = self.sequence1.seq
         seq2 = self.sequence2.seq
 
         if self.use_blosum_50:
-            if score_only:
-                alignment = biopython_pairwise2.align.globalds(seq1, seq2, blosum_50, self.gap, self.gap, score_only=True)
-                self.score = alignment
-            else:
-                alignment = biopython_pairwise2.align.globalds(seq1, seq2, blosum_50, self.gap, self.gap)
-                self.score = alignment[0].score
-                self.sequence1_aligned = sequence(alignment[0].seqB)
-                self.sequence1_aligned = sequence(alignment[0].seqA)
-        else:
-            if score_only:
-                alignment = biopython_pairwise2.align.globalms(seq1, seq2, self.match, self.unmatch, self.gap_open, self.gap, score_only=True)
-                self.score = alignment
-            else:
-                alignment = biopython_pairwise2.align.globalms(seq1, seq2, self.match, self.unmatch, self.gap_open, self.gap)
-                self.score = alignment[0].score
-                self.sequence1_aligned = sequence(alignment[0].seqB)
-                self.sequence2_aligned = sequence(alignment[0].seqA)
+            aligner = Align.PairwiseAligner()
+            aligner.mode = 'global'
+            aligner.substitution_matrix = blosum_50
+            alignments = aligner.align(seq1, seq2)
 
+            self.score = alignments.score
+            self.sequence1_aligned = sequence(alignments[0][1])
+            self.sequence1_aligned = sequence(alignments[0][0])
+        else:
+            aligner = Align.PairwiseAligner()
+            aligner.mode = 'global'
+            aligner.match_score = self.match
+            aligner.mismatch_score = self.unmatch
+            aligner.open_gap_score = self.gap_open
+            aligner.extend_gap_score = self.gap
+            alignments = aligner.align(seq1, seq2)
+            
+            self.score = alignments.score
+            self.sequence1_aligned = sequence(alignments[0][1])
+            self.sequence2_aligned = sequence(alignments[0][0])
 
     def needleman_wunsch(self,verbose=False):
         # get lengths of sequences

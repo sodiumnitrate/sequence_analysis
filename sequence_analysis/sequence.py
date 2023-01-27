@@ -129,6 +129,24 @@ class sequence:
 
         return x, spans
 
+    def remove_before_pattern(self, regex, verbose=True):
+        x, spans = self.choose_all_matching_patterns(regex)
+        if verbose:
+            if len(spans) == 0:
+                print("ERROR: no matching pattern found")
+            elif len(spans) > 1:
+                print("WARNING: there are multiple matches. Deleting before the first match")
+        
+        ind = spans[0][0] 
+
+        if verbose:
+            if ind == 0:
+                print("WARNING: the match already happens at the beginning -- not deleting anything.")
+
+        if ind > 0:
+            self.seq = self.seq[ind:]
+
+
     def extract_span(self,span):
         substring = self.seq[span[0]:span[1]+1]
         return substring
