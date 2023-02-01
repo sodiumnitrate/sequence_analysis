@@ -9,9 +9,11 @@ from sequence_analysis.utils import rna_alphabet
 from sequence_analysis.utils import diff_letters
 from sequence_analysis.pairwise_alignment import pairwise_alignment
 import time
+from sklearn.cluster import SpectralClustering
+import numpy as np
 
 class seq_set:
-    # TODO: store sequences alphabetically?
+    # TODO: test deepcopy on obj
     def __init__(self, list_of_sequences=None, file_name=None, type=None):
         if list_of_sequences is None:
             list_of_sequences = []
@@ -180,7 +182,9 @@ class seq_set:
 
         self.records = new_records
 
-    def get_similarity_matrix(self,algorithm="needleman-wunsch",use_blosum_50=False,match=2,unmatch=-1,gap=-0.1,gap_open=-0.5,verbose=False):
+    def get_similarity_matrix(self,algorithm="biopython-global",use_blosum_50=False,match=2,unmatch=-1,gap=-0.1,gap_open=-0.5,verbose=False):
+        # TODO: add option to write stuff to file as things are calculated
+    
         # pairwise alignment between all pairs of sequences
         n = self.get_len()
         similarity_matrix = {}
@@ -211,3 +215,22 @@ class seq_set:
     def remove_before_pattern(self, regex, verbose=False):
         for seq in self.records:
             seq.remove_before_pattern(regex,verbose=verbose)
+
+
+    def cluster(self,n_clusters,algorithm="biopython-global", use_blosum_50=False, match=2, unmatch=-1, gap=-0.1, gap_open=-0.5, verbose=False):
+        sim = self.get_similarity_matrix(algorithm=algorithm, use_blosum_50=use_blosum_50, match=match, unmatch=unmatch, gap=gap, gap_open=gap_open, verbose=verbose)
+
+        n = self.get_len()
+        sim_matrix = np.zeros((n,n))
+        for el in sim.keys():
+            sim_matrix[el[0],el[1]] = sim[el]
+            sim_matrix[el[1],el[0]] = sim[el]
+
+        # shift all values so there are no negative numbers
+        if np.amin(sim_matrix) < 0:
+            sim_matrix += -1*np.amin(sim_matrix)
+
+        clustering = SpectralClustering(n_clusters=n_clusters, affinity="precomputed").fit(sim_matrix)
+        labels = clustering.labels_
+
+        return labels

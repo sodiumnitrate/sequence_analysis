@@ -41,6 +41,8 @@ class pairwise_alignment:
         elif self.algorithm == "biopython-global":
             # TODO: is this the best way of dealing with the score-only option?
             self.biopython_global()
+        else:
+            print(f"ERROR: algorithm {self.algorithm} is not recognized. Not aligning.")
 
     def biopython_global(self):
         seq1 = self.sequence1.seq
