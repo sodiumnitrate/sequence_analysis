@@ -45,6 +45,12 @@ class sequence:
         else:
             return False
 
+    def __str__(self):
+        return f"{self.seq}"
+
+    def __repr__(self):
+        return f"<Sequence object of type {self.type} with '{self.seq:.5}...' at {hex(id(self))}>" 
+
     def set_type(self):
         s = self.seq.upper()
         all_letters = set([*s])

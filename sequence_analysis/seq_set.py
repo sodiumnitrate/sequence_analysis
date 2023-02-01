@@ -28,6 +28,12 @@ class seq_set:
 
         if type is None and len(self.records) > 0:
             self.set_type()
+
+    def __str__(self):
+        return f"Sequence set object with {self.get_len()} sequences of type {self.type}"
+
+    def __repr__(self):
+        return f"<seq_set object of size {self.get_len()} and type {self.type} at {hex(id(self))}>"
     
     def get_len(self):
         return len(self.records)
