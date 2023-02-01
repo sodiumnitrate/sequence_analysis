@@ -48,7 +48,8 @@ class TestFilters:
 
     def test_similarity_matrix(self):
         prots = seq_set(file_name="aux_files/dup_test.fasta")
-        sim_matrix = prots.get_similarity_matrix()
+        prots.get_similarity_matrix()
+        sim_matrix = prots.sim_matrix
         n = prots.get_len()
         m = (n-1) * n / 2
         assert(len(sim_matrix) == m)

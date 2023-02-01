@@ -7,6 +7,7 @@ import re
 from sequence_analysis.utils import dna_alphabet
 from sequence_analysis.utils import rna_alphabet
 from sequence_analysis.utils import diff_letters
+from colorama import Fore, Back, Style
 
 class sequence:
     # TODO: inherit from the Seq class?
@@ -134,6 +135,23 @@ class sequence:
             return x, spans, inverted        
 
         return x, spans
+
+    def choose_all_matching_patterns_and_print(self, regex):
+        matching, spans, inverted = self.choose_all_matching_patterns(regex,return_between_matching=True)
+
+        seq = self.seq
+
+        to_print = f""
+        initial = seq[:spans[0][0]]
+        to_print += initial
+        for i, span in enumerate(spans):
+            to_print += f"{Fore.BLUE}" + seq[span[0]:span[1]+1] + f"{Style.RESET_ALL}"
+            if i < len(spans) - 1:
+                to_print += f"{Fore.RED}" + seq[inverted[i][0]:inverted[i][1]+1] + f"{Style.RESET_ALL}"
+        tail = seq[spans[-1][1]+1:]
+        to_print += tail
+
+        print(to_print)
 
     def remove_before_pattern(self, regex, verbose=True):
         x, spans = self.choose_all_matching_patterns(regex)

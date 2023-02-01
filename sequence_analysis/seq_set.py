@@ -20,6 +20,8 @@ class seq_set:
         self.records = list_of_sequences
         self.type = type
 
+        self.sim_matrix = None
+
         if len(list_of_sequences) == 0 and file_name is None:
             print("WARNING: sequence set initialized without sequences or file name to read from. Please use read_fasta() to read in sequences or use add_sequence() to add sequences.")
 
@@ -205,7 +207,7 @@ class seq_set:
                 if verbose:
                     print(i,j,end-start)
 
-        return similarity_matrix
+        self.sim_matrix = similarity_matrix
 
     def filter_by_frequency(self,threshold=10):
         # deletes sequences that have frequency lower than the given threshold
@@ -224,7 +226,15 @@ class seq_set:
 
 
     def cluster(self,n_clusters,algorithm="biopython-global", use_blosum_50=False, match=2, unmatch=-1, gap=-0.1, gap_open=-0.5, verbose=False):
-        sim = self.get_similarity_matrix(algorithm=algorithm, use_blosum_50=use_blosum_50, match=match, unmatch=unmatch, gap=gap, gap_open=gap_open, verbose=verbose)
+        if self.sim_matrix is None:
+            self.get_similarity_matrix(algorithm=algorithm, use_blosum_50=use_blosum_50, match=match, unmatch=unmatch, gap=gap, gap_open=gap_open, verbose=verbose)
+        else:
+            n = self.get_len()
+            N = len(self.sim_matrix)
+            if N != (n-1)*n/2:
+                self.get_similarity_matrix(algorithm=algorithm, use_blosum_50=use_blosum_50, match=match, unmatch=unmatch, gap=gap, gap_open=gap_open, verbose=verbose)
+
+        sim = self.sim_matrix
 
         n = self.get_len()
         sim_matrix = np.zeros((n,n))
