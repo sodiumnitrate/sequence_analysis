@@ -22,3 +22,11 @@ class TestUtils:
     def test_check_for_pattern_wrong_input(self):
         s = 50
         assert(sa_utils.check_for_pattern(s, "MMM") is None)
+
+    def test_add_dicts(self):
+        dict1 = {0:1, 1:2}
+        dict2 = {0:1, 1:5}
+
+        dict3 = sa_utils.add_dicts(dict1,dict2)
+        assert(dict3[0] == 2)
+        assert(dict3[1] == 7)

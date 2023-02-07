@@ -59,3 +59,16 @@ class TestSequence:
 
         assert((seq1 < seq2) == (seq1.seq < seq2.seq))
         assert((seq3 < seq1) == (seq3.seq < seq1.seq))
+
+    def test_calculate_weight(self):
+        # TODO: test all amino acids?
+        seq = sequence("ALKALI")
+        assert(seq.calculate_weight() == 609.8099)
+
+    def test_calculate_composition(self):
+        seq = sequence("ALKALI")
+        freqs = seq.calculate_composition()
+
+        assert(freqs['A'] == 2)
+        assert(freqs['K'] == 1)
+        assert(freqs['W'] == 0)

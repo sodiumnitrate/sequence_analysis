@@ -4,10 +4,13 @@ This file holds the sequence class and related methods.
 from Bio.Seq import Seq
 import sequence_analysis.utils as utils
 import re
+from sequence_analysis.utils import aa_alphabet
 from sequence_analysis.utils import dna_alphabet
 from sequence_analysis.utils import rna_alphabet
 from sequence_analysis.utils import diff_letters
 from colorama import Fore, Back, Style
+from sequence_analysis.utils import ww
+from  sequence_analysis.utils import mw_aa
 
 class sequence:
     # TODO: inherit from the Seq class?
@@ -175,3 +178,44 @@ class sequence:
         substring = self.seq[span[0]:span[1]+1]
         return substring
 
+    def calculate_interface_affinity(self, span=None, kcal_per_mol=True):
+        if span is None:
+            span = (0, len(self.seq))
+        else:
+            assert(len(span)==2)
+            span = (min(span), max(span))
+
+        assert(self.type == 'protein')
+
+        seq = []
+        int_affinity = []
+
+        for i in range(span[0],span[1]):
+            aa = self.seq[i]
+            int_affinity.append(ww[aa]*-1)
+            seq.append(aa)
+
+        return int_affinity, seq
+
+    def calculate_weight(self):
+        assert(self.type == 'protein')
+        weight = 0
+        for aa in self.seq:
+            weight += mw_aa[aa]
+
+        return weight
+
+    def calculate_composition(self):
+        if self.type == "protein":
+            freqs = {i:0 for i in aa_alphabet}
+        elif self.type == "rna":
+            freqs = {i:0 for i in rna_alphabet}
+        elif self.type == "dna":
+            freqs = {i:0 for i in dna_alphabet}
+        else:
+            print("ERROR: sequence type cannot be recognized")
+
+        for aa in self.seq:
+            freqs[aa] += 1
+
+        return freqs

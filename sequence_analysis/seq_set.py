@@ -11,6 +11,7 @@ from sequence_analysis.pairwise_alignment import pairwise_alignment
 import time
 from sklearn.cluster import SpectralClustering
 import numpy as np
+from sequence_analysis.utils import add_dicts
 
 class seq_set:
     # TODO: test deepcopy on obj
@@ -250,3 +251,21 @@ class seq_set:
         labels = clustering.labels_
 
         return labels
+
+    def calculate_composition(self,collate=False):
+        if not collate:
+            all_freqs = []
+            for seq in self.records:
+                freq = seq.calculate_composition()
+                all_freqs.append(freq)
+
+            return all_freqs
+
+        else:
+            for i, seq in enumerate(self.records):
+                if i == 0:
+                    freq = seq.calculate_composition()
+                else:
+                    freq = add_dicts(freq, seq.calculate_composition())
+
+            return freq

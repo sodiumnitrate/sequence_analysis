@@ -58,3 +58,29 @@ class TestFilters:
         prots = seq_set(file_name="aux_files/dup_test_2.fasta")
         prots.filter_by_frequency(threshold=2)
         assert(prots.get_len() == 2)
+
+    def test_calculate_composition_dna_collate(self):
+        dnas = seq_set(file_name="aux_files/dna_ex.fasta")
+        freqs = dnas.calculate_composition(collate=True)
+
+        assert(freqs['A'] == 4)
+        assert(freqs['C'] == 1)
+        assert(freqs['T'] == 4)
+        assert(freqs['G'] == 2)
+
+        assert('W' not in freqs.keys())
+
+    def test_calculate_composition_dna_individual(self):
+        dnas = seq_set(file_name="aux_files/dna_ex.fasta")
+        freqs = dnas.calculate_composition()
+
+        assert(type(freqs) == type([]))
+        assert(len(freqs) == dnas.get_len())
+
+        assert(freqs[0]['A'] == 2)
+
+    def test_calculate_composition_protein_collate(self):
+        prots = seq_set(file_name="aux_files/filter_test.fasta")
+        freqs = prots.calculate_composition(collate=True)
+
+        assert(freqs['W'] == 19)

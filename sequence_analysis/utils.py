@@ -27,6 +27,12 @@ diff_letters = set(aa_alphabet) - (set(dna_alphabet).union(set(rna_alphabet)))
 ww = {'A':-0.17, 'R':0, 'N':-0.42, 'D':-1.23, 'C':0.24, 'Q':-0.58, 'E':-2.02, 'G':-0.01, 
 'H':-0.17, 'I':0.31,'L':0.56, 'K':0, 'M':0.23, 'F':1.13, 'P':-0.45, 'S':-0.13, 'T':-0.14, 'W':1.85, 'Y':0.94, 'V':-0.07}
 
+# amino acid molecular weights (https://education.expasy.org/student_projects/isotopident/htdocs/aa-list.html)
+mw_aa = {'A':71.0788, 'R':156.1875, 'N':114.1038, 'D':115.0886, 'C':103.1388,
+'E':129.1155, 'Q':128.1307, 'G':57.0519, 'H':137.1411, 'I':113.1594,
+'L':113.1594, 'K':128.1741, 'M':131.1926, 'F':147.1766, 'P':97.1167,
+'S':87.0782, 'T':101.1051, 'W':186.2132, 'Y':163.1760, 'V':99.1326}
+
 # function to convert energies from kcal/mol to kBT, at a given T
 def kcal_mol_to_kbt(en,T):
     return en * (4184/6.0221409e23)/(1.38064852e-23*T)
@@ -71,3 +77,12 @@ def invert_spans(spans):
         inverted.append((start,end))
 
     return inverted
+
+def add_dicts(dict1, dict2):
+    # adds together values in dicts given the keys are exactly the same
+    assert(dict1.keys() == dict2.keys())
+
+    for key in dict1.keys():
+        dict1[key] += dict2[key]
+
+    return dict1
