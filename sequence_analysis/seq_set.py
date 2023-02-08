@@ -269,3 +269,13 @@ class seq_set:
                     freq = add_dicts(freq, seq.calculate_composition())
 
             return freq
+
+    def filter_by_weight(self,threshold=1000,remove_below=True):
+        # threshold in units of Da
+        new_recs = []
+        for seq in self.records:
+            weight = seq.calculate_weight()
+            if (weight >= threshold and remove_below) or (weight <= threshold and not remove_below):
+                new_recs.append(seq)
+
+        self.records = new_recs

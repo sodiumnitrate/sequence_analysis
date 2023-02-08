@@ -84,3 +84,9 @@ class TestFilters:
         freqs = prots.calculate_composition(collate=True)
 
         assert(freqs['W'] == 19)
+
+    def test_filter_by_weight(self):
+        prots = seq_set(file_name="aux_files/test.fasta")
+        prots.filter_by_weight(threshold=7000)
+
+        assert(prots.get_len() == 2)
