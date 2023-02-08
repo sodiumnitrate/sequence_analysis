@@ -30,3 +30,17 @@ class TestUtils:
         dict3 = sa_utils.add_dicts(dict1,dict2)
         assert(dict3[0] == 2)
         assert(dict3[1] == 7)
+
+    def test_movmean(self):
+        nums = [1,2,5,3,10,5]
+        averaged = sa_utils.movmean(nums, window=2)
+        assert(averaged == [1,1.5,3.5,4,6.5,7.5])
+
+        averaged = sa_utils.movmean(nums, window=3)
+        assert(averaged == [1.5, 8/3, 10/3, 6, 6, 7.5])
+
+        averaged = sa_utils.movmean(nums, window=20)
+        assert(averaged == [13/3, 13/3, 13/3, 13/3, 13/3, 13/3])
+
+        averaged = sa_utils.movmean(5,window=10)
+        assert(averaged is None)

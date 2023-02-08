@@ -6,6 +6,8 @@ from Bio.Seq import Seq
 import Bio.Align.substitution_matrices
 import string
 import random
+from statistics import mean
+import numpy as np
 
 # the BLOSUM50 matrix
 blosum_50 = Bio.Align.substitution_matrices.load(name="BLOSUM50")
@@ -86,3 +88,31 @@ def add_dicts(dict1, dict2):
         dict1[key] += dict2[key]
 
     return dict1
+
+def movmean(nums,window=5):
+    # implement a simple moving mean
+    assert(window > 0)
+    assert(isinstance(window,int))
+
+    # check if nums is a list of numbers
+    if np.isscalar(nums):
+        print("ERROR: you must provide a list or array of numbers for calculating moving mean.")
+        return None
+
+    # determine radius
+    if window % 2 != 0:
+        lr = window // 2
+        rr = window // 2
+    else:
+        # matlab style
+        lr = window // 2
+        rr = window // 2 - 1
+
+    averaged = []
+    for i in range(len(nums)):
+        start = max(i-lr,0)
+        end = min(i+rr,len(nums))
+
+        averaged.append(mean(nums[start:end+1]))
+
+    return averaged
