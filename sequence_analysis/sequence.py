@@ -13,8 +13,9 @@ from sequence_analysis.utils import ww
 from  sequence_analysis.utils import mw_aa
 
 class sequence:
-    # TODO: inherit from the Seq class?
+    """This class corresponds to a single biological sequence (protein, rna, or dna)"""
     def __init__(self,seq,name=None,type=None):
+        """This function initializes the sequence object."""
         self.seq = seq.upper()
         self.name = name
         self.type = type
@@ -23,6 +24,10 @@ class sequence:
             self.set_type()
 
     def __eq__(self, other):
+        """
+        This function overloads the __eq__ function such that if two sequences are of the
+        same type and have the same exact string for sequence, they are deemed equal.
+        """
         if type(self) == type(other):
             if self.type == other.type:
                 return self.seq == other.seq
@@ -32,6 +37,7 @@ class sequence:
             return False
 
     def __gt__(self, other):
+        """This function overloads __gt__ to use the string __gt__ on the seq attribute."""
         assert(type(self) == type(other))
         assert(self.type == other.type)
 
@@ -41,6 +47,7 @@ class sequence:
             return False
 
     def __lt__(self, other):
+        """"This function overloads __lt__ to use the string __lt__ on the seq attribute."""
         assert(type(self) == type(other))
         assert(self.type == other.type)
 
@@ -50,12 +57,15 @@ class sequence:
             return False
 
     def __str__(self):
+        """Function that overloads __str__ for sequence object."""
         return f"{self.seq}"
 
     def __repr__(self):
+        """Function that overloas __repr__ for sequence object."""
         return f"<Sequence object of type {self.type} with '{self.seq:.5}...' at {hex(id(self))}>" 
 
     def set_type(self):
+        """Function that sets the type of sequence based on the letters it contains."""
         s = self.seq.upper()
         all_letters = set([*s])
 
@@ -72,6 +82,7 @@ class sequence:
 
 
     def frame_shift(self, frame=0):
+        """Function to frame shift a dna or rna sequence."""
         if self.type != 'rna' and self.type != 'dna':
             print(f"ERROR: type {self.type} is not meaningful for frame shifting. Please provide RNA or DNA sequences.")
             return None
@@ -92,13 +103,16 @@ class sequence:
         N_to_be_added = 3 - len(seq) % 3
         seq = seq + "N" * N_to_be_added
 
-        # TODO: move to the test?
-        assert(len(seq) % 3 == 0)
-
         return seq
 
     def six_frame_check(self, regex):
-        # does a 6-frame translation and checks for the existence of a given regex pattern
+        """
+        Function that performs a 6-frame translation and checks for the existence 
+        of a given regex pattern.
+
+        If the pattern matches in any of the reading frames, the translated sequence
+        is returned.
+        """
         selected = False
         for frame in range(3):
             for order in range(1):
@@ -122,10 +136,12 @@ class sequence:
         return None
 
     def check_for_pattern(self, regex):
+        """Function that checks for a given regex pattern in the sequence."""
         # TODO: check if regex and seq from the same alphabet?
         return utils.check_for_pattern(self.seq, regex)
 
     def choose_all_matching_patterns(self, regex, return_between_matching=False):
+        """Function that chooses all matching regex patterns in the sequence."""
         s = self.seq
         p = re.compile(regex)
 
@@ -140,6 +156,7 @@ class sequence:
         return x, spans
 
     def choose_all_matching_patterns_and_print(self, regex):
+        """Function to print spans of matches in blue, and inverted spans in red."""
         matching, spans, inverted = self.choose_all_matching_patterns(regex,return_between_matching=True)
 
         seq = self.seq
@@ -157,6 +174,7 @@ class sequence:
         print(to_print)
 
     def remove_before_pattern(self, regex, verbose=True):
+        """Function that removes the letters before the matching regex."""
         x, spans = self.choose_all_matching_patterns(regex)
         if verbose:
             if len(spans) == 0:
@@ -175,10 +193,12 @@ class sequence:
 
 
     def extract_span(self,span):
+        """Function to extract a substring given a span of indices."""
         substring = self.seq[span[0]:span[1]+1]
         return substring
 
     def calculate_interface_affinity(self, span=None, kcal_per_mol=True):
+        """Function to calculate interface affinity of the sequence using the Wimley-White scale."""
         if span is None:
             span = (0, len(self.seq))
         else:
@@ -198,6 +218,7 @@ class sequence:
         return int_affinity, seq
 
     def calculate_weight(self):
+        """Function to calculate the weight in Da of the given sequence."""
         assert(self.type == 'protein')
         weight = 0
         for aa in self.seq:
@@ -206,6 +227,7 @@ class sequence:
         return weight
 
     def calculate_composition(self):
+        """Function to calculate the composition of a given sequence. Returns frequency of each letter (either amino acid or nucleic acid)."""
         if self.type == "protein":
             freqs = {i:0 for i in aa_alphabet}
         elif self.type == "rna":

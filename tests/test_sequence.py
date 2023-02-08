@@ -20,10 +20,19 @@ class TestSequence:
         assert(seq1.seq[spans[0][0]:spans[0][1]+1] == "MDM")
         assert(seq1.seq[inverted[0][0]:inverted[0][1]+1] == "AAAAA")
 
+    
+    def test_frame_shift(self):
+        seq = sequence("gcgctgaaagcgctgattatggatatggcgctgaaagcgctgatt".upper())
+        seq2 = seq.frame_shift(frame=0)
+        assert(len(seq2) % 3 == 0)
+        seq2 = seq.frame_shift(frame=1)
+        assert(len(seq2) % 3 == 0)
+        seq2 = seq.frame_shift(frame=2)
+        assert(len(seq2) % 3 == 0)
+
     def test_six_frame(self):
         seq = sequence("gcgctgaaagcgctgattatggatatggcgctgaaagcgctgatt".upper())
         check = seq.six_frame_check("MDM")
-        # TODO: why is there an X at the end?
         assert(check == "ALKALIMDMALKALI")
 
         check2 = seq.six_frame_check("WWWW")

@@ -35,11 +35,12 @@ mw_aa = {'A':71.0788, 'R':156.1875, 'N':114.1038, 'D':115.0886, 'C':103.1388,
 'L':113.1594, 'K':128.1741, 'M':131.1926, 'F':147.1766, 'P':97.1167,
 'S':87.0782, 'T':101.1051, 'W':186.2132, 'Y':163.1760, 'V':99.1326}
 
-# function to convert energies from kcal/mol to kBT, at a given T
 def kcal_mol_to_kbt(en,T):
+    """Function to convert energies from kcal/mol to kBT at a given temperature T."""
     return en * (4184/6.0221409e23)/(1.38064852e-23*T)
 
 def check_for_pattern(seq_string, regex):
+    """Function that checks for a regex pattern in a given string."""
     if not isinstance(seq_string, str):
         print("ERROR: need to provide either a string or a sequence object")
         return None
@@ -53,12 +54,14 @@ def check_for_pattern(seq_string, regex):
         return True
 
 def query_blosum50(aa1, aa2):
+    """Function that returns score from BLOSUM50 given a pair of amino acid letters."""
     aa1_ind = blosum_50.alphabet.find(aa1)
     aa2_ind = blosum_50.alphabet.find(aa2)
 
     return blosum_50[aa1_ind,aa2_ind]
 
 def find_spans(full_string, matches):
+    """Function that finds the spans of the matching substrings in a given string."""
     p = list(set(string.ascii_uppercase) - set(full_string))
     c = random.choice(p)
 
@@ -72,6 +75,7 @@ def find_spans(full_string, matches):
     return spans
 
 def invert_spans(spans):
+    """Function that returns a list spans in between spans in a given list."""
     inverted = []
     for i in range(len(spans)-1):
         start = spans[i][1] + 1
@@ -81,6 +85,10 @@ def invert_spans(spans):
     return inverted
 
 def add_dicts(dict1, dict2):
+    """
+    Function that adds two dictionaries with identical keys such that
+    the values corresponding to the same key get added.
+    """
     # adds together values in dicts given the keys are exactly the same
     assert(dict1.keys() == dict2.keys())
 
@@ -90,6 +98,7 @@ def add_dicts(dict1, dict2):
     return dict1
 
 def movmean(nums,window=5):
+    """Function that calculates the moving mean of a list of numbers."""
     # implement a simple moving mean
     assert(window > 0)
     assert(isinstance(window,int))

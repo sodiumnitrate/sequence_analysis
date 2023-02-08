@@ -1,11 +1,23 @@
+"""
+This module holds the pairwise_alignment object and its relevant methods,
+most importantly the align() method. The most efficient global alignment
+setting uses biopython's pairwise alignment methods under the hood.
+
+Note that my own (purely python) implementations of Needleman-Wunsch and 
+Smith-Waterman are also in this module for educational purposes.
+"""
 from sequence_analysis.utils import query_blosum50
 from sequence_analysis.sequence import sequence
 from Bio import Align
 from sequence_analysis.utils import blosum_50
 
 class pairwise_alignment:
+    """
+    This class sets up pairwise alignment with the given parameters.
+    After the necessary parameters have been set up, the align() method
+    can be run to compute pairwise alignments.
+    """
     def __init__(self, sequence1, sequence2, match=1, unmatch=0, gap=-8, gap_open=-9, use_blosum_50=True, algorithm="needleman-wunsch"):
-        # TODO: add support for different scores
         if isinstance(sequence1, str):
             sequence1 = sequence(sequence1)
         if isinstance(sequence2, str):
@@ -32,19 +44,19 @@ class pairwise_alignment:
         self.pointers = None
 
     def align(self,verbose=False):
-        # TODO: d no longer needs to be passed as a function argument. FIX.
+        """Function that aligns the two sequences held in pairwise_alignment."""
         d = self.gap
         if self.algorithm == "needleman-wunsch":
             self.needleman_wunsch(verbose=verbose)
         elif self.algorithm == "smith-waterman":
             self.smith_waterman(verbose=verbose)
         elif self.algorithm == "biopython-global":
-            # TODO: is this the best way of dealing with the score-only option?
             self.biopython_global()
         else:
             print(f"ERROR: algorithm {self.algorithm} is not recognized. Not aligning.")
 
     def biopython_global(self):
+        """Function that sets up a global alignment usin biopython's PairwiseAligner."""
         seq1 = self.sequence1.seq
         seq2 = self.sequence2.seq
 
@@ -71,6 +83,12 @@ class pairwise_alignment:
             self.sequence2_aligned = sequence(alignments[0][0])
 
     def needleman_wunsch(self,verbose=False):
+        """
+        Function that calculates the score matrix for Needleman-Wunsch.
+
+        Warning: exists for educational purposes. Significantly slower 
+        than biopython-global.
+        """
         # get lengths of sequences
         n = len(self.sequence1.seq)
         m = len(self.sequence2.seq)
@@ -163,6 +181,10 @@ class pairwise_alignment:
         self.traceback_nw()
 
     def traceback_nw(self):
+        """
+        Function that performs traceback on the score matrix of Needleman-Wunsch to
+        obtain the final alignment strings.
+        """
         n = len(self.sequence1.seq)
         m = len(self.sequence2.seq)
 
@@ -195,6 +217,7 @@ class pairwise_alignment:
         self.sequence2_aligned = sequence(y_str)
 
     def print_matrix(self,type="score"):
+        """Function that prints either the score or pointer matrix."""
         # method to print either the score or pointer matrix for debugging/visualization purposes
         if type == "score":
             matrix = self.F
@@ -212,6 +235,7 @@ class pairwise_alignment:
             print(line)
 
     def smith_waterman(self,verbose=False):
+        """Function that calculates the score matrix for local alignment with Smith-Waterman."""
         print("WARNING: this function is not tested for custom alignment scoring.")
         n = len(self.sequence1.seq)
         m = len(self.sequence2.seq)
@@ -263,6 +287,10 @@ class pairwise_alignment:
         self.traceback_sw()
 
     def traceback_sw(self):
+        """
+        Function that performs traceback on the score matrix of Smith-Waterman to
+        obtain the final alignment strings.
+        """
         i_start = None
         j_start = None
         # find index of max score

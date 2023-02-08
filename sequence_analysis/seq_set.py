@@ -1,6 +1,6 @@
 """
 This file holds the sequence set (seq_set) class and attributed methods.
-Includes I/O of .fasta files.
+Includes I/O of .fasta files, and various filtering methods.
 """
 from Bio import SeqIO
 from sequence_analysis.sequence import sequence
@@ -14,7 +14,7 @@ import numpy as np
 from sequence_analysis.utils import add_dicts
 
 class seq_set:
-    # TODO: test deepcopy on obj
+    """This class holds a list of sequence objects of a given type."""
     def __init__(self, list_of_sequences=None, file_name=None, type=None):
         if list_of_sequences is None:
             list_of_sequences = []
@@ -33,16 +33,19 @@ class seq_set:
             self.set_type()
 
     def __str__(self):
+        """__str__ function for sequence set (seq_set) object."""
         return f"Sequence set object with {self.get_len()} sequences of type {self.type}"
 
     def __repr__(self):
+        """"__repr__ function for sequence set (seq_set) object."""
         return f"<seq_set object of size {self.get_len()} and type {self.type} at {hex(id(self))}>"
     
     def get_len(self):
+        """Function that returns the number of sequences within seq_set."""
         return len(self.records)
 
     def write_fasta(self,file_name):
-        # function to write all sequences within the list to a fasta file
+        """"Function to write all sequences within seq_set to a fasta file."""
         f = open(file_name,'w')
         for seq in self.records:
             s = seq.seq
@@ -57,8 +60,12 @@ class seq_set:
         f.close()
 
     def remove_duplicates(self,alphabetize=True):
-        # NOTE: this is allowed for by overwriting the eq operator in the sequence class
-
+        """
+        Function that removes duplicates within seq_set.
+        Also alphabetizes records. Keeps the first occurence in the set.
+        
+        NOTE: this is allowed for by overwriting the eq operator in the sequence class.
+        """
         if not alphabetize:
             new_records = []
             for seq in self.records:
@@ -79,7 +86,7 @@ class seq_set:
             self.records = unique_records
 
     def get_frequencies(self):
-        # start with alphabetically sorted records
+        """Function that gets frequencies of all unique sequences."""
         records = self.records
         records.sort()
 
@@ -102,11 +109,13 @@ class seq_set:
         return unique_records, frequencies
 
     def alphabetize(self):
+        """Function to sort sequences within seq_set in alphabetical order."""
         records = self.records
         records.sort()
         self.records = records
 
     def get_letters(self):
+        """"Function to get all unique letters in the seq_set sequences."""
         all_letters = set()
         for seq in self.records:
             s = seq.seq.upper()
@@ -114,12 +123,13 @@ class seq_set:
         return all_letters
 
     def set_type(self,type=None):
+        """Function to detect and set the type of sequences in seq_set."""
         # TODO: do further testing of type detection
         all_letters = self.get_letters()
         
         if type is not None:
             self.type = type
-            # check that the assigned type is consistent
+            # TODO: check that the assigned type is consistent
             return
 
         if len(diff_letters.intersection(all_letters)):
@@ -128,13 +138,14 @@ class seq_set:
             if 'U' in all_letters:
                 self.type = 'rna'
             else:
-                # this could fail if we have RNA sequences that happens to have no Us, but that's unlikely
+                # TODO: this could fail if we have RNA sequences that happens to have no Us, but that's unlikely
                 self.type = 'dna'
         else:
             print("I can't assign a type, please specify manually.")
 
 
     def read_fasta(self,file_name):
+        """Function to read sequences into seq_set from a .fasta file."""
         if len(self.records) > 0:
             print("Warning: overwriting existing data")
         for record in SeqIO.parse(file_name,"fasta"):
@@ -147,6 +158,7 @@ class seq_set:
             seq.type = self.type
 
     def add_sequence(self,sequences):
+        """Function that adds another sequence to seq_set."""
         # TODO: refactor, because you have an add_set method as well
         if isinstance(sequences, list):
             for seq in sequences:
@@ -168,14 +180,13 @@ class seq_set:
             print("ERROR: incorrect format for adding sequence. Please provide a list of sequences or a sequence object. Sequence was not added.")
 
     def add_set(self,set2):
-        # merges two sets of sequences
-
+        """Function that merges two sets of sequences (two seq_sets)."""
         # make sure the set being added is of type seq_set
         if not isinstance(set2,seq_set):
             print("ERROR: cannot add the two sets. Set2 is not of type seq_set.")
             return
 
-        # make sure types are the same
+        # make sure sequence types are the same
         if set2.type != self.type:
             print("ERROR: cannot add two sets. They are not of the same type.")
             return
@@ -184,6 +195,7 @@ class seq_set:
         self.records += set2.records
 
     def filter_by_pattern(self,regex):
+        """Filter sequences in seq_set by the given regex pattern."""
         new_records = []
         for s in self.records:
             if s.check_for_pattern(regex):
@@ -192,7 +204,11 @@ class seq_set:
         self.records = new_records
 
     def get_similarity_matrix(self,algorithm="biopython-global",use_blosum_50=False,match=2,unmatch=-1,gap=-0.1,gap_open=-0.5,verbose=False):
-        # TODO: add option to write stuff to file as things are calculated
+        """
+        Function that calculates similarity matrix for the sequences in seq_set.
+
+        For a seq_set containing N sequences, calculates (N-1)N/2 pairwise alignment scores.
+        """
     
         # pairwise alignment between all pairs of sequences
         n = self.get_len()
@@ -211,8 +227,12 @@ class seq_set:
         self.sim_matrix = similarity_matrix
 
     def filter_by_frequency(self,threshold=10):
-        # deletes sequences that have frequency lower than the given threshold
-        # NOTE: does not return duplicates!
+        """
+        Function that deletes sequences that have a frequency lower than the 
+        given threshold.
+
+        By construction, does not return duplicates of the sequences.
+        """
         recs, frequencies = self.get_frequencies()
         new_recs = []
         for i, rec in enumerate(recs):
@@ -222,11 +242,21 @@ class seq_set:
         self.records = new_recs
 
     def remove_before_pattern(self, regex, verbose=False):
+        """
+        Function that, for each sequence in seq_set, removes the letters before the 
+        matching regex pattern.
+        """
         for seq in self.records:
             seq.remove_before_pattern(regex,verbose=verbose)
 
 
     def cluster(self,n_clusters,algorithm="biopython-global", use_blosum_50=False, match=2, unmatch=-1, gap=-0.1, gap_open=-0.5, verbose=False):
+        """
+        Function that clusters the sequences in seq_set.
+
+        Similarity matrix is calculated based on pairwise alignments, and then used to 
+        perform spectral clustering.
+        """
         if self.sim_matrix is None:
             self.get_similarity_matrix(algorithm=algorithm, use_blosum_50=use_blosum_50, match=match, unmatch=unmatch, gap=gap, gap_open=gap_open, verbose=verbose)
         else:
@@ -253,6 +283,13 @@ class seq_set:
         return labels
 
     def calculate_composition(self,collate=False):
+        """
+        Function that returns the frequency of each letter in the seq_set.
+        
+        If collate is True, a single frequency dictionary is returned for the entire
+        sequence set. If False, a list of frequency dictionaries is returned, corresponding
+        to each sequence in the set.
+        """
         if not collate:
             all_freqs = []
             for seq in self.records:
@@ -271,7 +308,7 @@ class seq_set:
             return freq
 
     def filter_by_weight(self,threshold=1000,remove_below=True):
-        # threshold in units of Da
+        """Function to filter sequences in seq_set by weight (in units of Da)"""
         new_recs = []
         for seq in self.records:
             weight = seq.calculate_weight()
