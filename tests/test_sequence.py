@@ -1,6 +1,5 @@
 from sequence_analysis.sequence import sequence
 from sequence_analysis.seq_set import seq_set
-import pdb
 
 class TestSequence:
     def test_choose_matching(self):
@@ -32,11 +31,12 @@ class TestSequence:
 
     def test_six_frame(self):
         seq = sequence("gcgctgaaagcgctgattatggatatggcgctgaaagcgctgatt".upper())
-        check = seq.six_frame_check("MDM")
+        check, _ = seq.six_frame_check("MDM")
         assert(check == "ALKALIMDMALKALI")
 
         check2 = seq.six_frame_check("WWWW")
-        assert(check2 == None)
+        assert(check2[0] == None)
+        assert(check2[1] == None)
 
     def test_choose_matching_2(self):
         set1 = seq_set(file_name="aux_files/pub.fasta")

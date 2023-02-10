@@ -66,6 +66,8 @@ class sequence:
 
     def set_type(self):
         """Function that sets the type of sequence based on the letters it contains."""
+        # TODO: add custom input option
+        # TODO: add "N" to the rna and dna alphabet?
         s = self.seq.upper()
         all_letters = set([*s])
 
@@ -117,11 +119,11 @@ class sequence:
         for frame in range(3):
             for order in range(1):
                 if order == 0:
-                    s = Seq(self.frame_shift(frame=frame)).translate()
-                    print(s)
+                    shifted = Seq(self.frame_shift(frame=frame))
+                    s = shifted.translate()
                 else:
-                    s = Seq(self.frame_shift(frame=frame)).reverse_complement().translate()
-                    print(s)
+                    shifted = Seq(self.frame_shift(frame=frame)).reverse_complement()
+                    s = shifted.translate()
 
                 # create sequence object with the translated sequence
                 seq = sequence(str(s))
@@ -131,9 +133,10 @@ class sequence:
                 selected = seq.check_for_pattern(regex)
                 if selected:
                     true_sequence = str(s)
-                    return true_sequence
+                    untranslated = str(shifted)
+                    return true_sequence, untranslated
 
-        return None
+        return None, None
 
     def check_for_pattern(self, regex):
         """Function that checks for a given regex pattern in the sequence."""

@@ -34,14 +34,19 @@ class seq_set:
 
     def __str__(self):
         """__str__ function for sequence set (seq_set) object."""
-        return f"Sequence set object with {self.get_len()} sequences of type {self.type}"
+        return f"Sequence set object with {len(self)} sequences of type {self.type}"
 
     def __repr__(self):
         """"__repr__ function for sequence set (seq_set) object."""
-        return f"<seq_set object of size {self.get_len()} and type {self.type} at {hex(id(self))}>"
+        return f"<seq_set object of size {len(self)} and type {self.type} at {hex(id(self))}>"
+
+    def __len__(self):
+        """Overwrites __len__ to return number of sequences within set."""
+        return len(self.records)
     
     def get_len(self):
         """Function that returns the number of sequences within seq_set."""
+        # TODO: switch to len() in all instances and get rid of this function.
         return len(self.records)
 
     def write_fasta(self,file_name):
@@ -58,6 +63,29 @@ class seq_set:
                 f.write(char)
             f.write('\n')
         f.close()
+
+    def filter_by_six_frame_check_pattern(self, regex, overwrite_frame_shifted=True):
+        """
+        Function that checks pattern in the translated sequence and returns
+        the translated protein sequence.
+
+        If overwrite_frame_shifted is True, sequences in the set will be 
+        overwritten by the correct frame-shifted rna or dna sequence.
+        """
+        assert(self.type == 'rna' or self.type == 'dna')
+
+        true_records = []
+        untranslated_records = []
+        for seq in self.records:
+            true, untranslated = seq.six_frame_check(regex)
+            if true is not None:
+                true_records.append(true)
+                untranslated_records.append(untranslated)
+
+        if overwrite_frame_shifted:
+            self.records = untranslated_records
+
+        return true_records
 
     def remove_duplicates(self,alphabetize=True):
         """

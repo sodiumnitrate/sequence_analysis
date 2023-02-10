@@ -1,6 +1,11 @@
 from sequence_analysis.seq_set import seq_set
+import pdb
 
 class TestFilters:
+    def test_len(self):
+        prots = seq_set(file_name="aux_files/dup_test.fasta")
+        assert(len(prots) == 6)
+
     def test_remove_duplicates(self):
         prots = seq_set(file_name="aux_files/dup_test.fasta")
         assert(len(prots.records)==6)
@@ -89,3 +94,8 @@ class TestFilters:
         prots.filter_by_weight(threshold=7000)
 
         assert(prots.get_len() == 2)
+
+    def test_filter_by_six_frame(self):
+        rnas = seq_set(file_name="aux_files/frame_shift.fasta")
+        prots = rnas.filter_by_six_frame_check_pattern("MDM")
+        assert(len(prots) == 3)
