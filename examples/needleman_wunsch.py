@@ -2,7 +2,7 @@ from sequence_analysis.pairwise_alignment import pairwise_alignment
 
 seq1 = "HEAGAWGHEE"
 seq2 = "PAWHEAE"
-new_alignment = pairwise_alignment(seq1,seq2)
+new_alignment = pairwise_alignment(seq1, seq2)
 new_alignment.align(verbose=True)
 
 print(new_alignment.sequence1_aligned.seq)
