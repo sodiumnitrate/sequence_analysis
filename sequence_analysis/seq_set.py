@@ -2,26 +2,28 @@
 This file holds the sequence set (seq_set) class and attributed methods.
 Includes I/O of .fasta files, and various filtering methods.
 """
-from Bio import SeqIO
-from sequence_analysis.sequence import sequence
-from sequence_analysis.utils import dna_alphabet
-from sequence_analysis.utils import rna_alphabet
-from sequence_analysis.utils import diff_letters
-from sequence_analysis.pairwise_alignment import pairwise_alignment
+
 import time
 from sklearn.cluster import SpectralClustering
 import numpy as np
+import networkx as nx
+from Bio import SeqIO
 from sequence_analysis.utils import add_dicts
+from sequence_analysis.sequence import sequence
+from sequence_analysis.utils import dna_alphabet, gen_non_overlapping_points, generate_random_color
+from sequence_analysis.utils import rna_alphabet, diff_letters
+from sequence_analysis.pairwise_alignment import pairwise_alignment
 
 class seq_set:
     """This class holds a list of sequence objects of a given type."""
-    def __init__(self, list_of_sequences=None, file_name=None, type=None):
+    def __init__(self, list_of_sequences=None, file_name=None, seq_type=None):
         if list_of_sequences is None:
             list_of_sequences = []
         self.records = list_of_sequences
-        self.type = type
+        self.type = seq_type
 
         self.sim_matrix = None
+        self.cluster_labels = None
 
         if len(list_of_sequences) == 0 and file_name is None:
             print("WARNING: sequence set initialized without sequences or file name to read from. Please use read_fasta() to read in sequences or use add_sequence() to add sequences.")
@@ -29,7 +31,7 @@ class seq_set:
         if file_name is not None:
             self.read_fasta(file_name)
 
-        if type is None and len(self.records) > 0:
+        if seq_type is None and len(self.records) > 0:
             self.set_type()
 
     def __str__(self):
@@ -51,18 +53,18 @@ class seq_set:
 
     def write_fasta(self,file_name):
         """"Function to write all sequences within seq_set to a fasta file."""
-        f = open(file_name,'w')
+        file = open(file_name, 'w', encoding="utf-8")
         for seq in self.records:
-            s = seq.seq
+            seq_string = seq.seq
             name = ">" + seq.name
-            f.write(name)
-            f.write('\n')
-            for ct, char in enumerate(s):
-                if ct % 79 == 0 and ct != 0:
-                    f.write('\n')
-                f.write(char)
-            f.write('\n')
-        f.close()
+            file.write(name)
+            file.write('\n')
+            for count, char in enumerate(seq_string):
+                if count % 79 == 0 and count != 0:
+                    file.write('\n')
+                file.write(char)
+            file.write('\n')
+        file.close()
 
     def filter_by_six_frame_check_pattern(self, regex, overwrite_frame_shifted=True):
         """
@@ -72,7 +74,7 @@ class seq_set:
         If overwrite_frame_shifted is True, sequences in the set will be 
         overwritten by the correct frame-shifted rna or dna sequence.
         """
-        assert(self.type == 'rna' or self.type == 'dna')
+        assert(self.type in ['dna', 'rna'])
 
         true_records = []
         untranslated_records = []
@@ -104,11 +106,11 @@ class seq_set:
         else:
             self.alphabetize()
             unique_records = []
-            for i in range(len(self.records)):
+            for i, record in enumerate(self.records):
                 if i == 0:
                     unique_records.append(self.records[0])
                 else:
-                    if self.records[i] != self.records[i-1]:
+                    if record != self.records[i-1]:
                         unique_records.append(self.records[i])
 
             self.records = unique_records
@@ -120,20 +122,19 @@ class seq_set:
 
         unique_records = []
         frequencies = []
-        for i in range(len(records)):
+        for i, record in enumerate(records):
             if i == 0:
                 count = 1
                 unique_records.append(records[0])
             else:
-                if records[i] == records[i-1]:
+                if record == records[i-1]:
                     count += 1
                 else:
                     frequencies.append(count)
                     count = 1
-                    unique_records.append(records[i])
+                    unique_records.append(record)
 
         frequencies.append(count)
-        
         return unique_records, frequencies
 
     def alphabetize(self):
@@ -146,17 +147,17 @@ class seq_set:
         """"Function to get all unique letters in the seq_set sequences."""
         all_letters = set()
         for seq in self.records:
-            s = seq.seq.upper()
-            all_letters = all_letters.union(set([*s]))
+            seq_string = seq.seq.upper()
+            all_letters = all_letters.union(set([*seq_string]))
         return all_letters
 
-    def set_type(self,type=None):
+    def set_type(self, seq_type=None):
         """Function to detect and set the type of sequences in seq_set."""
         # TODO: do further testing of type detection
         all_letters = self.get_letters()
-        
-        if type is not None:
-            self.type = type
+
+        if seq_type is not None:
+            self.type = seq_type
             # TODO: check that the assigned type is consistent
             return
 
@@ -166,7 +167,8 @@ class seq_set:
             if 'U' in all_letters:
                 self.type = 'rna'
             else:
-                # TODO: this could fail if we have RNA sequences that happens to have no Us, but that's unlikely
+                # TODO: this could fail if we have RNA sequences that happens 
+                # to have no Us, but that's unlikely
                 self.type = 'dna'
         else:
             print("I can't assign a type, please specify manually.")
@@ -194,18 +196,19 @@ class seq_set:
                 self.records.append(seq)
             old_type = self.type
             self.set_type()
-            if old_type != None:
+            if old_type is not None:
                 assert(old_type == self.type)
             self.records[-1].type = self.type
         elif isinstance(sequences, sequence):
             self.records.append(sequences)
             old_type = self.type
             self.set_type()
-            if old_type != None:
+            if old_type is not None:
                 assert(old_type == self.type)
             self.records[-1].type = self.type
         else:
-            print("ERROR: incorrect format for adding sequence. Please provide a list of sequences or a sequence object. Sequence was not added.")
+            print("ERROR: incorrect format for adding sequence.",
+             "Please provide a list of sequences or a sequence object. Sequence was not added.")
 
     def add_set(self,set2):
         """Function that merges two sets of sequences (two seq_sets)."""
@@ -219,19 +222,26 @@ class seq_set:
             print("ERROR: cannot add two sets. They are not of the same type.")
             return
 
-        # add set2's records to the list of records 
+        # add set2's records to the list of records
         self.records += set2.records
 
     def filter_by_pattern(self,regex):
         """Filter sequences in seq_set by the given regex pattern."""
         new_records = []
-        for s in self.records:
-            if s.check_for_pattern(regex):
-                new_records.append(s)
+        for seq in self.records:
+            if seq.check_for_pattern(regex):
+                new_records.append(seq)
 
         self.records = new_records
 
-    def get_similarity_matrix(self,algorithm="biopython-global",use_blosum_50=False,match=2,unmatch=-1,gap=-0.1,gap_open=-0.5,verbose=False):
+    def get_similarity_matrix(self,
+                              algorithm="biopython-global",
+                              use_blosum_50=False,
+                              match=2,
+                              unmatch=-1,
+                              gap=-0.1,
+                              gap_open=-0.5,
+                              verbose=False):
         """
         Function that calculates similarity matrix for the sequences in seq_set.
 
@@ -239,12 +249,19 @@ class seq_set:
         """
     
         # pairwise alignment between all pairs of sequences
-        n = self.get_len()
+        n_sequences = self.get_len()
         similarity_matrix = {}
-        for i in range(n):
-            for j in range(i+1,n):
+        for i in range(n_sequences):
+            for j in range(i+1, n_sequences):
                 start = time.time()
-                alignment = pairwise_alignment(self.records[i],self.records[j],algorithm=algorithm,use_blosum_50=use_blosum_50,match=match,unmatch=unmatch,gap=gap,gap_open=gap_open)
+                alignment = pairwise_alignment(self.records[i],
+                                               self.records[j],
+                                               algorithm=algorithm,
+                                               use_blosum_50=use_blosum_50,
+                                               match=match,
+                                               unmatch=unmatch,
+                                               gap=gap,
+                                               gap_open=gap_open)
                 alignment.align()
                 similarity_matrix[(i,j)] = alignment.score
                 end = time.time()
@@ -278,7 +295,15 @@ class seq_set:
             seq.remove_before_pattern(regex,verbose=verbose)
 
 
-    def cluster(self,n_clusters,algorithm="biopython-global", use_blosum_50=False, match=2, unmatch=-1, gap=-0.1, gap_open=-0.5, verbose=False):
+    def cluster(self,
+                n_clusters,
+                algorithm="biopython-global",
+                use_blosum_50=False,
+                match=2,
+                unmatch=-1,
+                gap=-0.1,
+                gap_open=-0.5,
+                verbose=False):
         """
         Function that clusters the sequences in seq_set.
 
@@ -286,17 +311,29 @@ class seq_set:
         perform spectral clustering.
         """
         if self.sim_matrix is None:
-            self.get_similarity_matrix(algorithm=algorithm, use_blosum_50=use_blosum_50, match=match, unmatch=unmatch, gap=gap, gap_open=gap_open, verbose=verbose)
+            self.get_similarity_matrix(algorithm=algorithm,
+                                       use_blosum_50=use_blosum_50,
+                                       match=match,
+                                       unmatch=unmatch,
+                                       gap=gap,
+                                       gap_open=gap_open,
+                                       verbose=verbose)
         else:
-            n = self.get_len()
-            N = len(self.sim_matrix)
-            if N != (n-1)*n/2:
-                self.get_similarity_matrix(algorithm=algorithm, use_blosum_50=use_blosum_50, match=match, unmatch=unmatch, gap=gap, gap_open=gap_open, verbose=verbose)
+            n_sequences = len(self)
+            n_sim_matrix_el = len(self.sim_matrix)
+            if n_sim_matrix_el != (n_sequences-1)*n_sequences/2:
+                self.get_similarity_matrix(algorithm=algorithm,
+                                           use_blosum_50=use_blosum_50,
+                                           match=match,
+                                           unmatch=unmatch,
+                                           gap=gap,
+                                           gap_open=gap_open,
+                                           verbose=verbose)
 
         sim = self.sim_matrix
 
-        n = self.get_len()
-        sim_matrix = np.zeros((n,n))
+        n_sequences = len(self)
+        sim_matrix = np.zeros((n_sequences,n_sequences))
         for el in sim.keys():
             sim_matrix[el[0],el[1]] = sim[el]
             sim_matrix[el[1],el[0]] = sim[el]
@@ -306,9 +343,70 @@ class seq_set:
             sim_matrix += -1*np.amin(sim_matrix)
 
         clustering = SpectralClustering(n_clusters=n_clusters, affinity="precomputed").fit(sim_matrix)
-        labels = clustering.labels_
+        self.cluster_labels = clustering.labels_
 
-        return labels
+    def visualize_clusters(self):
+        """Function that visualizes clusters."""
+        # TODO: refactor (break into more functions? too many local vars)
+        if self.cluster_labels is None:
+            print("ERROR: cannot visualize clusters because they don't exist. Run cluster() first.")
+            return
+
+        assert(self.sim_matrix is not None)
+
+        n_sequence = len(self)
+
+        n_clusters = np.unique(self.cluster_labels).size
+
+        G = nx.complete_graph(n_sequence)
+        colors = generate_random_color(n_clusters)
+        node_colors = []
+        subgraph_indices = {i:[] for i in range(n_clusters)}
+        for i in range(n_sequence):
+            label = self.cluster_labels[i]
+            subgraph_indices[label].append(i)
+            node_colors.append(colors[label])
+
+        # generate positions for nodes
+        pos = {}
+        box_lengths = []
+        for i in range(n_clusters):
+            subgraph = G.subgraph(subgraph_indices[i])
+            pos_subgraph = nx.spring_layout(subgraph)
+
+            coords = np.array([i for _, i in pos_subgraph.items()])
+
+            center = np.mean(coords, axis=0)
+
+            span = [[np.amin(coords[:,0]), np.amax(coords[:,0])],
+                    [np.amin(coords[:,1]), np.amax(coords[:,1])]]
+
+            box_lengths.append(max(abs(span[0][1]-span[0][0]), abs(span[1][1]-span[1][0])))
+
+            for _, coord in pos_subgraph.items():
+                coord[0] -= center[0]
+                coord[1] -= center[1]
+
+            pos |= pos_subgraph
+
+        # translate positions of each cluster
+        separation = max(box_lengths)
+        radius = 4 * separation / (2 * np.pi) * n_clusters
+        cluster_centroids = []
+        for cluster in range(n_clusters):
+            angle = cluster * (2 * np.pi) / n_clusters
+            centroid_x = radius * np.cos(angle)
+            centroid_y = radius * np.sin(angle)
+            cluster_centroids.append([centroid_x, centroid_y])
+
+        for ind, coord in pos.items():
+            label = self.cluster_labels[ind]
+            coord[0] += cluster_centroids[label][0]
+            coord[1] += cluster_centroids[label][1]
+
+        nx.draw_networkx_nodes(G,pos=pos,node_color=node_colors)
+        # TODO: implement edge weights
+        nx.draw_networkx_edges(G,pos=pos)
 
     def calculate_composition(self,collate=False):
         """
@@ -337,10 +435,15 @@ class seq_set:
 
     def filter_by_weight(self,threshold=1000,remove_below=True):
         """Function to filter sequences in seq_set by weight (in units of Da)"""
+        # TODO: clean up
         new_recs = []
+
+        if remove_below:
+            threshold *= -1
         for seq in self.records:
-            weight = seq.calculate_weight()
-            if (weight >= threshold and remove_below) or (weight <= threshold and not remove_below):
+            weight = seq.calculate_weight() * -1
+            #if (weight >= threshold and remove_below) or (weight <= threshold and not remove_below):
+            if weight <= threshold:
                 new_recs.append(seq)
 
         self.records = new_recs

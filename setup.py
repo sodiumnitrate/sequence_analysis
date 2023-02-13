@@ -1,7 +1,7 @@
-from setuptools import setup, find_packages
-import sequence_analysis
 import sys
 import os
+from setuptools import setup, find_packages
+import sequence_analysis
 
 setup(
         name='sequence_analysis',
@@ -12,7 +12,7 @@ setup(
         author_email='irem.altan@yale.edu',
         license='',
         packages=find_packages(),
-        install_requires=['numpy','matplotlib','biopython>=1.80','sklearn','colorama'],
+        install_requires=['numpy','matplotlib','biopython>=1.80','sklearn','colorama','networkx'],
         python_requires='>=3.6'
         #ext_modules=ext_modules
     )

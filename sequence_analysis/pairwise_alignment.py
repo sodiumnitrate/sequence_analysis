@@ -236,6 +236,7 @@ class pairwise_alignment:
 
     def smith_waterman(self,verbose=False):
         """Function that calculates the score matrix for local alignment with Smith-Waterman."""
+        # TODO: get rid of this properly
         print("WARNING: this function is not tested for custom alignment scoring.")
         n = len(self.sequence1.seq)
         m = len(self.sequence2.seq)

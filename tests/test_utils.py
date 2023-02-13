@@ -44,3 +44,8 @@ class TestUtils:
 
         averaged = sa_utils.movmean(5,window=10)
         assert(averaged is None)
+
+    def test_gen_non_overlapping_points(self):
+        coords = sa_utils.gen_non_overlapping_points(10,0.5,10)
+        assert(coords is not None)
+        assert(len(coords) == 10)
