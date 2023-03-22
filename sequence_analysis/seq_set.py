@@ -14,7 +14,6 @@ from sequence_analysis.utils import dna_alphabet, gen_non_overlapping_points, ge
 from sequence_analysis.utils import rna_alphabet, diff_letters
 from sequence_analysis.pairwise_alignment import pairwise_alignment
 
-
 class seq_set:
     """This class holds a list of sequence objects of a given type."""
 
@@ -139,6 +138,21 @@ class seq_set:
         frequencies.append(count)
         return unique_records, frequencies
 
+    def sort_by_frequency(self, increasing=False):
+        """Function to sort sequences in decreasing frequencies."""
+        unique_records, frequencies = self.get_frequencies()
+
+        if increasing:
+            order = np.argsort(frequencies)
+        else:
+            order = np.argsort(frequencies)[::-1]
+        sorted_seqs = [unique_records[i] for i in order]
+        sorted_freqs = [frequencies[i] for i in order]
+
+        sorted_seq_set = seq_set(list_of_sequences=sorted_seqs)
+
+        return sorted_seq_set, sorted_freqs
+
     def alphabetize(self):
         """Function to sort sequences within seq_set in alphabetical order."""
         records = sorted(self.records)
@@ -173,6 +187,10 @@ class seq_set:
                 self.type = 'dna'
         else:
             print("I can't assign a type, please specify manually.")
+
+        # translate the type to all sequences
+        for i in range(len(self.records)):
+            self.records[i].type = self.type
 
     def read_fasta(self, file_name):
         """Function to read sequences into seq_set from a .fasta file."""

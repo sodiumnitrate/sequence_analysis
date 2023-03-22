@@ -16,7 +16,7 @@ class TestUtils:
         assert (sa_utils.check_for_pattern(s, "M+"))
 
         # check sequence obj
-        s = sequence(seq=s, type='protein')
+        s = sequence(seq=s, seq_type='protein')
         assert (s.check_for_pattern("MMM"))
         assert (s.check_for_pattern("M+"))
 

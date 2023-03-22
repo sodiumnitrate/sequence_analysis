@@ -12,17 +12,18 @@ from colorama import Fore, Back, Style
 from sequence_analysis.utils import ww
 from sequence_analysis.utils import mw_aa
 
+import pdb
 
 class sequence:
     """This class corresponds to a single biological sequence (protein, rna, or dna)"""
 
-    def __init__(self, seq, name=None, type=None):
+    def __init__(self, seq, name=None, seq_type=None):
         """This function initializes the sequence object."""
         self.seq = seq.upper()
         self.name = name
         self.type = type
 
-        if type is None:
+        if seq_type is None:
             self.set_type()
 
     def __eq__(self, other):
@@ -41,7 +42,10 @@ class sequence:
     def __gt__(self, other):
         """This function overloads __gt__ to use the string __gt__ on the seq attribute."""
         assert (isinstance(self, type(other)))
-        assert (self.type == other.type)
+
+        if self.type != other.type:
+            if not(self.type is None and other.type is None):
+                return False
 
         if self.seq > other.seq:
             return True
@@ -51,7 +55,10 @@ class sequence:
     def __lt__(self, other):
         """"This function overloads __lt__ to use the string __lt__ on the seq attribute."""
         assert (isinstance(self, type(other)))
-        assert (self.type == other.type)
+
+        if self.type != other.type:
+            if not(self.type is None and other.type is None):
+                return False
 
         if self.seq < other.seq:
             return True
@@ -66,12 +73,16 @@ class sequence:
         """Function that overloas __repr__ for sequence object."""
         return f"<Sequence object of type {self.type} with '{self.seq:.5}...' at {hex(id(self))}>"
 
-    def set_type(self):
+    def set_type(self, seq_type=None):
         """Function that sets the type of sequence based on the letters it contains."""
         # TODO: add custom input option
         # TODO: add "N" to the rna and dna alphabet?
         s = self.seq.upper()
         all_letters = set([*s])
+
+        if seq_type is not None:
+            self.type = seq_type
+            return
 
         if len(diff_letters.intersection(all_letters)):
             self.type = 'protein'

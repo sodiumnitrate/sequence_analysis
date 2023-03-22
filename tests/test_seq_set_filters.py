@@ -3,6 +3,9 @@ Tests for the seq_seq class.
 """
 
 from sequence_analysis.seq_set import seq_set
+from sequence_analysis.seq_set import sequence
+
+import pdb
 
 class TestFilters:
     def test_len(self):
@@ -102,3 +105,16 @@ class TestFilters:
         rnas = seq_set(file_name="aux_files/frame_shift.fasta")
         prots = rnas.filter_by_six_frame_check_pattern("MDM")
         assert (len(prots) == 3)
+    
+    def test_sort_by_frequency(self):
+        sequences = seq_set(list_of_sequences=[sequence('AAA'),
+                                               sequence('AAA'),
+                                               sequence('AAA'),
+                                               sequence('YYY'),
+                                               sequence('YYY'),
+                                               sequence('WWW')])
+
+        sorted_seq,  sorted_freqs = sequences.sort_by_frequency()
+
+        assert(len(sorted_seq) == 3)
+        assert(sorted_freqs[0] == 3)        
