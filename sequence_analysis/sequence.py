@@ -73,6 +73,10 @@ class sequence:
         """Function that overloas __repr__ for sequence object."""
         return f"<Sequence object of type {self.type} with '{self.seq:.5}...' at {hex(id(self))}>"
 
+    def __len__(self):
+        """Overwrites __len__ to return the number of chars in seq.seq"""
+        return len(self.seq)
+
     def set_type(self, seq_type=None):
         """Function that sets the type of sequence based on the letters it contains."""
         # TODO: add custom input option

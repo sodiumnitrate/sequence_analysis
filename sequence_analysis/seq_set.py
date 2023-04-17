@@ -469,3 +469,9 @@ class seq_set:
                 new_recs.append(seq)
 
         self.records = new_recs
+
+    def crop_first_N(self, N):
+        """Function to cut sequences such that the first N chars are preserved."""
+        for seq in self.records:
+            n_cut = min(len(seq), N)
+            seq.seq = seq.seq[:n_cut]

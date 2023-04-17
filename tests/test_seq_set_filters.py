@@ -118,3 +118,14 @@ class TestFilters:
 
         assert(len(sorted_seq) == 3)
         assert(sorted_freqs[0] == 3)        
+
+    def test_crop_first_N(self):
+        sequences = seq_set(list_of_sequences=[sequence('AAAAA'),
+                                               sequence('AAAAA'),
+                                               sequence('AAAAA'),
+                                               sequence('YYYAA'),
+                                               sequence('YYYAA'),
+                                               sequence('WWWAA')])
+        sequences.crop_first_N(3)
+
+        assert(sequences.records[0])
