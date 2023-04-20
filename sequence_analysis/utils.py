@@ -24,6 +24,11 @@ rna_alphabet = ['G', 'C', 'U', 'A']
 # letters in aa alphabet but not in dna or rna
 diff_letters = set(aa_alphabet) - (set(dna_alphabet).union(set(rna_alphabet)))
 
+# start and stop codons (using standard eukaryotic ones)
+start_codon_rna = "AUG"
+stop_codon_rna = ["UAG", "UAA", "UGA"]
+stop_codon_rna_re = "|".join(map(re.escape, stop_codon_rna))
+
 # Wimley & White's hydrophobicity scale (kcal/mol, delta_G of transfer from POPC surface to water)
 # (Wimley & White, Nature Structural Biology, 1996)
 ww = {'A': -0.17, 'R': 0, 'N': -0.42, 'D': -1.23, 'C': 0.24, 'Q': -0.58, 'E': -2.02, 'G': -0.01,

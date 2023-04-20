@@ -1,8 +1,20 @@
 from sequence_analysis.sequence import sequence
 from sequence_analysis.seq_set import seq_set
 
-
 class TestSequence:
+    def test_translate(self):
+        seq = sequence("ATGGATCGGTTCGGTAGGGCTCGATCACATCGCTAG")
+        assert seq.type == 'dna'
+        seq = seq.translate()
+        assert seq.type == 'protein'
+        assert seq.seq == 'MDRFGRARSHR*'
+
+    def test_reverse_complement_rna(self):
+        seq = sequence("AUGAUGC")
+        assert seq.type == 'rna'
+        seq2 = seq.reverse_complement()
+        assert seq2.seq == "GCAUCAU"
+
     def test_choose_matching(self):
         seq1 = sequence("AAAAMDMAAAAAMDMAAA")
         matching, spans = seq1.choose_all_matching_patterns("MDM")
@@ -85,3 +97,8 @@ class TestSequence:
         assert (freqs['A'] == 2)
         assert (freqs['K'] == 1)
         assert (freqs['W'] == 0)
+
+    def test_find_open_reading_frames_1(self):
+        seq = sequence("CGCTACGTCTTACGCTGGAGCTCTCATGGATCGGTTCGGTAGGGCTCGATCACATCGCTAGCCAT".replace("T",'U'))
+        orfs = seq.find_open_reading_frames()
+        assert len(orfs) == 3

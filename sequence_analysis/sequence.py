@@ -11,8 +11,9 @@ from sequence_analysis.utils import diff_letters
 from colorama import Fore, Back, Style
 from sequence_analysis.utils import ww
 from sequence_analysis.utils import mw_aa
-
-import pdb
+from sequence_analysis.utils import start_codon_rna
+from sequence_analysis.utils import stop_codon_rna
+from sequence_analysis.utils import stop_codon_rna_re
 
 class sequence:
     """This class corresponds to a single biological sequence (protein, rna, or dna)"""
@@ -100,6 +101,43 @@ class sequence:
         else:
             print("I can't assign a type, please specify manually.")
 
+    def translate(self):
+        """
+        Function that translates DNA or RNA sequence into protein.
+        """
+        if self.type != 'rna' and self.type != 'dna':
+            print(f"WARNING: no translation for sequence type {self.type}.")
+            return
+        s = Seq(self.seq)
+        s = str(s.translate())
+        s = s.strip("X")
+
+        return sequence(s)
+
+    def reverse_complement(self):
+        if self.type != "rna" and self.type != "dna":
+            print(f"ERROR: cannot reverse complement: the sequence is of type {self.type}.")
+            return None
+
+        seq = self.seq
+
+        seq = seq.replace("C","X")
+        seq = seq.replace("G","C")
+        seq = seq.replace("X","G")
+
+        if self.type == "rna":
+            seq = seq.replace("A","X")
+            seq = seq.replace("U","A")
+            seq = seq.replace("X","U")
+        else:
+            seq = seq.replace("A","X")
+            seq = seq.replace("T","A")
+            seq = seq.replace("X","T")
+
+        # reverse
+        seq = seq[::-1]
+        return sequence(seq)
+
     def frame_shift(self, frame=0):
         """Function to frame shift a dna or rna sequence."""
         if self.type != 'rna' and self.type != 'dna':
@@ -112,6 +150,8 @@ class sequence:
         # returns frame shifted sequence
         if frame == 0:
             if len(seq) % 3 == 0:
+                seq = sequence(seq)
+                seq.type = self.type
                 return seq
         elif frame == 1:
             seq = seq[1:]
@@ -123,41 +163,72 @@ class sequence:
         N_to_be_added = 3 - len(seq) % 3
         seq = seq + "N" * N_to_be_added
 
+        seq = sequence(seq)
+        seq.type = self.type
+
         return seq
 
-    def six_frame_check(self, regex):
+    def six_frame_check(self, regex, verbose=False):
         """
         Function that performs a 6-frame translation and checks for the existence
         of a given regex pattern.
 
         If the pattern matches in any of the reading frames, the translated sequence
         is returned.
+
+        IMPORTANT: returns the first match, which is not necessarily the only match.
         """
+        # TODO: refactor to use with the find_open_readin_frames() func.
         selected = False
         for frame in range(3):
-            for order in range(1):
+            for order in range(2):
                 if order == 0:
-                    shifted = Seq(self.frame_shift(frame=frame))
-                    s = shifted.translate()
+                    shifted = self.frame_shift(frame=frame)
                 else:
-                    shifted = Seq(
-                        self.frame_shift(
-                            frame=frame)).reverse_complement()
-                    s = shifted.translate()
+                    shifted = self.reverse_complement().frame_shift(frame=frame)
 
-                # create sequence object with the translated sequence
-                seq = sequence(str(s))
-                print(frame, order, seq.seq)
+                seq = shifted.translate()
+
+                if verbose:
+                    print(frame, order, seq.seq)
 
                 # NOTE: the following implicitly assumes that only one reading
                 # frame is valid
                 selected = seq.check_for_pattern(regex)
                 if selected:
-                    true_sequence = str(s)
+                    true_sequence = str(seq.seq)
                     untranslated = str(shifted)
                     return true_sequence, untranslated
 
         return None, None
+
+    def find_open_reading_frames(self):
+        """
+        This function finds all open reading frames. Applies the steps in
+        https://vlab.amrita.edu/?sub=3&brch=273&sim=1432&cnt=1
+        """
+        # TODO: check sequence type
+        orfs = []
+        for frame in range(3):
+            for order in range(2):
+                if order == 0:
+                    shifted = self.frame_shift(frame=frame)
+                else:
+                    shifted = self.reverse_complement().frame_shift(frame=frame)
+
+                seq = shifted.translate()
+                seq_str = seq.seq
+
+                if 'M' in seq_str and '*' in seq_str:
+                    fragments = seq_str.split('*')
+                    for fragment in fragments:
+                        if 'M' in fragment:
+                            ind_M = fragment.index('M')
+                            frag = fragment[ind_M:]
+                            if len(frag) > 1:
+                                orfs.append(frag)
+
+        return orfs
 
     def check_for_pattern(self, regex):
         """Function that checks for a given regex pattern in the sequence."""

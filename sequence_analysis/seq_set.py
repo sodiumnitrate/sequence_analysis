@@ -55,9 +55,12 @@ class seq_set:
     def write_fasta(self, file_name):
         """"Function to write all sequences within seq_set to a fasta file."""
         file = open(file_name, 'w', encoding="utf-8")
-        for seq in self.records:
+        for i, seq in enumerate(self.records):
             seq_string = seq.seq
-            name = ">" + seq.name
+            if seq.name is not None:
+                name = ">" + seq.name
+            else:
+                name = f"> {i}"
             file.write(name)
             file.write('\n')
             for count, char in enumerate(seq_string):
