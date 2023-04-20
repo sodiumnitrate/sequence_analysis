@@ -114,6 +114,25 @@ class sequence:
 
         return sequence(s)
 
+    def find_codon(self, codon):
+        """
+        Function to search for codons. Returns index of first match.
+        Returns None if not rna or dna.
+        Returns -1 if no match.
+        """
+        if self.type != "rna" and self.type != "dna":
+            print("ERROR: cannot search for codons if the sequence isn't rna or dna.")
+            return None
+
+        seq_str = self.seq
+        codons = [seq_str[3*ptr:3*ptr+3] for ptr in range(len(seq_str) // 3)]
+        try:
+            ind = codons.index(codon)
+        except ValueError:
+            return -1
+
+        return ind * 3
+
     def reverse_complement(self):
         if self.type != "rna" and self.type != "dna":
             print(f"ERROR: cannot reverse complement: the sequence is of type {self.type}.")
@@ -202,7 +221,7 @@ class sequence:
 
         return None, None
 
-    def find_open_reading_frames(self):
+    def find_open_reading_frames(self, chop_before_first_M=True, translate=True):
         """
         This function finds all open reading frames. Applies the steps in
         https://vlab.amrita.edu/?sub=3&brch=273&sim=1432&cnt=1
@@ -223,10 +242,11 @@ class sequence:
                     fragments = seq_str.split('*')
                     for fragment in fragments:
                         if 'M' in fragment:
-                            ind_M = fragment.index('M')
-                            frag = fragment[ind_M:]
-                            if len(frag) > 1:
-                                orfs.append(frag)
+                            if chop_before_first_M:
+                                ind_M = fragment.index('M')
+                                fragment = fragment[ind_M:]
+                            if len(fragment) > 1:
+                                orfs.append(fragment)
 
         return orfs
 

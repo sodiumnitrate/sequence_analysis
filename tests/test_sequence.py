@@ -102,3 +102,16 @@ class TestSequence:
         seq = sequence("CGCTACGTCTTACGCTGGAGCTCTCATGGATCGGTTCGGTAGGGCTCGATCACATCGCTAGCCAT".replace("T",'U'))
         orfs = seq.find_open_reading_frames()
         assert len(orfs) == 3
+
+    def test_find_codon(self):
+        seq = sequence("CGTUAGCGT")
+        ind = seq.find_codon("UAG")
+        assert ind == 3
+
+        ind = seq.find_codon("AUG")
+        assert ind == -1
+
+        seq = sequence("ALKALI")
+        ind = seq.find_codon("AUG")
+        assert ind == None
+
