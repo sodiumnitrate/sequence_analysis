@@ -71,7 +71,8 @@ class seq_set:
         file.close()
 
     def filter_by_six_frame_check_pattern(
-            self, regex, overwrite_frame_shifted=True):
+            self, regex, overwrite_frame_shifted=True,
+            min_orf_len=90):
         """
         Function that checks pattern in the translated sequence and returns
         the translated protein sequence.
@@ -84,7 +85,7 @@ class seq_set:
         true_records = []
         untranslated_records = []
         for seq in self.records:
-            true, untranslated = seq.six_frame_check(regex)
+            true, untranslated = seq.six_frame_check(regex, min_orf_len=min_orf_len)
             if true is not None:
                 true_records.append(true)
                 untranslated_records.append(untranslated)

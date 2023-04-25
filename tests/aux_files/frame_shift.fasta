@@ -1,8 +1,9 @@
 >seq0
-gcgctgaaagcgctgattatggatatggcgctgaaagcgctgatt
+gcgctgaaagcgctgattatggatatggcgctgaaagcgctgatttag
 >seq1
-tggtggtggatggatatgtggtggtggatggatatg
+tggtggtggatggatatgtggtggtggatggatatgtag
 >seq2
-gcggaaagcgcggattatggctatggcgcggaaagcgcggat
+gcggaaagcgcggattatggctatggcgcggaaagcgcggattag
 >seq3
-GCTGAAAGCGCTGATTATGGATATGGCGCTGAAAGCGCTGATT
+GCTGAAAGCGCTGATTATGGATATGGCGCTGAAAGCGCTGATTTAG
+

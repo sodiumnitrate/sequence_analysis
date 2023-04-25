@@ -9,6 +9,13 @@ class TestSequence:
         assert seq.type == 'protein'
         assert seq.seq == 'MDRFGRARSHR*'
 
+    def test_translate_2(self):
+        seq = sequence("ATGGATC--GGTTC----GGTAGGGCTCGATCACATCGCTAG")
+        assert seq.type == 'dna'
+        seq = seq.translate()
+        assert seq.type == 'protein'
+        assert seq.seq == 'MDRFGRARSHR*'
+
     def test_reverse_complement_rna(self):
         seq = sequence("AUGAUGC")
         assert seq.type == 'rna'
@@ -43,9 +50,9 @@ class TestSequence:
         assert (len(seq2) % 3 == 0)
 
     def test_six_frame(self):
-        seq = sequence("gcgctgaaagcgctgattatggatatggcgctgaaagcgctgatt".upper())
-        check, _ = seq.six_frame_check("MDM")
-        assert (check == "ALKALIMDMALKALI")
+        seq = sequence("atggcgctgaaagcgctgattatggatatggcgctgaaagcgctgatttag".upper())
+        check, _ = seq.six_frame_check("MDM", min_orf_len=0)
+        assert (check == "MALKALIMDMALKALI")
 
         check2 = seq.six_frame_check("WWWW")
         assert (check2[0] is None)
@@ -100,7 +107,7 @@ class TestSequence:
 
     def test_find_open_reading_frames_1(self):
         seq = sequence("CGCTACGTCTTACGCTGGAGCTCTCATGGATCGGTTCGGTAGGGCTCGATCACATCGCTAGCCAT".replace("T",'U'))
-        orfs = seq.find_open_reading_frames()
+        orfs = seq.find_open_reading_frames(min_orf_len=4)
         assert len(orfs) == 3
 
     def test_find_codon(self):
@@ -113,5 +120,5 @@ class TestSequence:
 
         seq = sequence("ALKALI")
         ind = seq.find_codon("AUG")
-        assert ind == None
+        assert ind is None
 

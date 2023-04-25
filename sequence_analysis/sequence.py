@@ -1,6 +1,7 @@
 """
 This file holds the sequence class and related methods.
 """
+
 from Bio.Seq import Seq
 import sequence_analysis.utils as utils
 import re
@@ -11,9 +12,11 @@ from sequence_analysis.utils import diff_letters
 from colorama import Fore, Back, Style
 from sequence_analysis.utils import ww
 from sequence_analysis.utils import mw_aa
-from sequence_analysis.utils import start_codon_rna
-from sequence_analysis.utils import stop_codon_rna
-from sequence_analysis.utils import stop_codon_rna_re
+from sequence_analysis.utils import start_codon
+from sequence_analysis.utils import stop_codon
+from sequence_analysis.utils import stop_codon_re
+
+import pdb
 
 class sequence:
     """This class corresponds to a single biological sequence (protein, rna, or dna)"""
@@ -22,7 +25,7 @@ class sequence:
         """This function initializes the sequence object."""
         self.seq = seq.upper()
         self.name = name
-        self.type = type
+        self.type = seq_type
 
         if seq_type is None:
             self.set_type()
@@ -83,6 +86,10 @@ class sequence:
         # TODO: add custom input option
         # TODO: add "N" to the rna and dna alphabet?
         s = self.seq.upper()
+        if len(s) == 0:
+            print("WARNING: empty sequence. Can't set type.")
+            self.type = None
+            return 
         all_letters = set([*s])
 
         if seq_type is not None:
@@ -108,7 +115,7 @@ class sequence:
         if self.type != 'rna' and self.type != 'dna':
             print(f"WARNING: no translation for sequence type {self.type}.")
             return
-        s = Seq(self.seq)
+        s = Seq(self.seq.replace('-',""))
         s = str(s.translate())
         s = s.strip("X")
 
@@ -155,7 +162,7 @@ class sequence:
 
         # reverse
         seq = seq[::-1]
-        return sequence(seq)
+        return sequence(seq, seq_type=self.type)
 
     def frame_shift(self, frame=0):
         """Function to frame shift a dna or rna sequence."""
@@ -187,16 +194,8 @@ class sequence:
 
         return seq
 
+    """
     def six_frame_check(self, regex, verbose=False):
-        """
-        Function that performs a 6-frame translation and checks for the existence
-        of a given regex pattern.
-
-        If the pattern matches in any of the reading frames, the translated sequence
-        is returned.
-
-        IMPORTANT: returns the first match, which is not necessarily the only match.
-        """
         # TODO: refactor to use with the find_open_readin_frames() func.
         selected = False
         for frame in range(3):
@@ -220,13 +219,41 @@ class sequence:
                     return true_sequence, untranslated
 
         return None, None
+    """
+    def six_frame_check(self, regex,
+                              chop_before_first_M=True,
+                              min_orf_len=90):
+        """
+        docstring
+        """
+        orfs = self.find_open_reading_frames(chop_before_first_M=False, translate=False, min_orf_len=min_orf_len)
+        
+        if not orfs:
+            print("WARNING: no open reading frames were found")
 
-    def find_open_reading_frames(self, chop_before_first_M=True, translate=True):
+        for orf in orfs:
+            orf_seq = sequence(orf, seq_type=self.type)
+            seq = orf_seq.translate()
+            selected = seq.check_for_pattern(regex)
+            if selected:
+                ind = max(orf_seq.find_codon(start_codon[0]),
+                          orf_seq.find_codon(start_codon[1]))
+                if chop_before_first_M:
+                    curr = orf_seq.seq[ind:]
+                    if len(curr) >= min_orf_len:
+                        return sequence(curr, seq_type=self.type).translate().seq, curr
+        return None, None
+
+    def find_open_reading_frames(self, chop_before_first_M=True,
+                                       translate=True,
+                                       min_orf_len=90):
         """
         This function finds all open reading frames. Applies the steps in
         https://vlab.amrita.edu/?sub=3&brch=273&sim=1432&cnt=1
         """
-        # TODO: check sequence type
+        if self.type != 'rna' and self.type != 'dna':
+            print("ERROR: open reading frames can be found for DNA or RNA sequences only.")
+            return None
         orfs = []
         for frame in range(3):
             for order in range(2):
@@ -235,20 +262,37 @@ class sequence:
                 else:
                     shifted = self.reverse_complement().frame_shift(frame=frame)
 
-                seq = shifted.translate()
-                seq_str = seq.seq
+                seq_str = shifted.seq.strip('N')
+                n = len(seq_str) // 3
+                ptr = 0
+                curr_fragment = ""
+                for ptr in range(0, 3*n, 3):
+                    curr_codon = seq_str[ptr:ptr+3]
+                    if curr_codon in stop_codon:
+                        if len(curr_fragment) >= min_orf_len:
+                            # check if it contains a start codon
+                            ind1 = sequence(curr_fragment, seq_type=self.type).find_codon(start_codon[0])
+                            ind2 = sequence(curr_fragment, seq_type=self.type).find_codon(start_codon[1])
 
-                if 'M' in seq_str and '*' in seq_str:
-                    fragments = seq_str.split('*')
-                    for fragment in fragments:
-                        if 'M' in fragment:
-                            if chop_before_first_M:
-                                ind_M = fragment.index('M')
-                                fragment = fragment[ind_M:]
-                            if len(fragment) > 1:
-                                orfs.append(fragment)
+                            if ind1 != -1 or ind2 != -1:
+                                if chop_before_first_M:
+                                    curr_fragment = curr_fragment[max(ind1,ind2):]
+                                    if len(curr_fragment) < min_orf_len:
+                                        continue
+                                orfs.append(curr_fragment)
+                                curr_fragment = ""
+                    else:
+                        curr_fragment += curr_codon
 
-        return orfs
+        if not translate:
+            return orfs
+
+        new_orfs = []
+        for orf in orfs:
+            seq = sequence(orf, seq_type=self.type).translate()
+            new_orfs.append(seq.seq)
+
+        return new_orfs
 
     def check_for_pattern(self, regex):
         """Function that checks for a given regex pattern in the sequence."""

@@ -103,7 +103,7 @@ class TestFilters:
 
     def test_filter_by_six_frame(self):
         rnas = seq_set(file_name="aux_files/frame_shift.fasta")
-        prots = rnas.filter_by_six_frame_check_pattern("MDM")
+        prots = rnas.filter_by_six_frame_check_pattern("MDM", min_orf_len=0)
         assert (len(prots) == 3)
     
     def test_sort_by_frequency(self):
