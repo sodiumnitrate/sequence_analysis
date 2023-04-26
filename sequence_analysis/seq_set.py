@@ -16,7 +16,7 @@ from sequence_analysis.pairwise_alignment import pairwise_alignment
 
 class seq_set:
     """This class holds a list of sequence objects of a given type."""
-
+    # TODO: implement slicing
     def __init__(self, list_of_sequences=None, file_name=None, seq_type=None):
         if list_of_sequences is None:
             list_of_sequences = []

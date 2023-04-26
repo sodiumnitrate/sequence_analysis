@@ -3,8 +3,6 @@ Comparing with the results of ORFfinder:
 https://www.ncbi.nlm.nih.gov/orffinder/
 For human ubiquitin (see aux_files/ubb.fa).
 """
-from sequence_analysis.sequence import sequence
-from sequence_analysis.open_reading_frame import OpenReadingFrame
 from sequence_analysis.seq_set import seq_set
 
 class TestOrfUbb:

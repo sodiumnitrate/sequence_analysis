@@ -1,8 +1,7 @@
 """
 This file holds the sequence class and related methods.
 """
-
-from typing import Sequence
+import enum
 from Bio.Seq import Seq
 import sequence_analysis.utils as utils
 import re
@@ -447,3 +446,37 @@ class sequence:
                     orfs.append(orf)
 
         return orfs
+
+    def find_index_with_gaps(self,
+                             index_with_gaps=None,
+                             index_without_gaps=None):
+        """
+        Given an index, convert to index without gaps or with gaps.
+        """
+        if index_with_gaps is None and index_without_gaps is None:
+            print("ERROR: no index given.")
+            return None
+
+        if index_with_gaps is not None:
+            # we need to convert an index with gaps to index without gaps
+            if index_with_gaps >= len(self.seq):
+                print(f"ERROR: index out of range for sequence of length {len(self.seq)}.")
+                return None
+            if self.seq[index_with_gaps] == '-':
+                print("ERROR: given index corresponds to a gap.")
+                return None
+            substring = self.seq[:index_with_gaps+1]
+            return len(substring.replace('-',''))-1
+
+        if index_without_gaps is not None:
+            # we need to convert an index without gaps to index with gaps
+            seq_no_gaps = self.seq.replace('-','')
+            if index_without_gaps >= len(seq_no_gaps):
+                print(f"ERROR: index out of range for sequence without gaps of length {len(seq_no_gaps)}.")
+                return None
+            result = -1
+            for i, char in enumerate(self.seq):
+                if char != '-':
+                    result += 1
+                if result == index_without_gaps:
+                    return i
