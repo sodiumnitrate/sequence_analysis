@@ -20,6 +20,7 @@ from sequence_analysis.open_reading_frame import OpenReadingFrame
 
 class sequence:
     """This class corresponds to a single biological sequence (protein, rna, or dna)"""
+    # TODO: implement slicing
 
     def __init__(self, seq, name=None, seq_type=None):
         """This function initializes the sequence object."""
@@ -397,7 +398,7 @@ class sequence:
         orfs = []
         for ptr in range(0, 3*len_str, 3):
             curr_codon = seq_str[ptr:ptr+3]
-            if curr_codon in start_codon:
+            if curr_codon in start_codon and not recording:
                 start_ind = ptr
                 recording = True
             if recording:
@@ -421,7 +422,8 @@ class sequence:
                                                order,
                                                frame)
                         orfs.append(orf)
-                        recording = False
+                    recording = False
+                    curr_fragment = ""
         return orfs
 
     def detailed_orf_finder(self, min_orf_len=90):

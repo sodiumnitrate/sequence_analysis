@@ -95,6 +95,8 @@ class TestOrf:
             prot = orf.protein_sequence.seq
             start = orf.start
             stop = orf.stop
+
+            assert stop - start == len(orf.rna_sequence)
             
             if orf.strand == -1:
                 prot_from_ind = sequence(orf.parent_sequence.seq[start:stop],
