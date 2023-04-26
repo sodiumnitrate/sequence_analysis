@@ -49,6 +49,15 @@ class TestSequence:
         seq2 = seq.frame_shift(frame=2)
         assert (len(seq2) % 3 == 0)
 
+    def test_frame_shift_2(self):
+        seq = sequence("gcgctgaaagcgctgattatggatatggcgctgaaagcgctgatt".upper())
+        seq2 = seq.frame_shift(frame=0)
+        assert len(seq2) == len(seq)
+        seq2 = seq.frame_shift(frame=1)
+        assert len(seq2) == len(seq)
+        seq2 = seq.frame_shift(frame=2)
+        assert len(seq2) == len(seq)
+
     def test_six_frame(self):
         seq = sequence("atggcgctgaaagcgctgattatggatatggcgctgaaagcgctgatttag".upper())
         check, _ = seq.six_frame_check("MDM", min_orf_len=0)

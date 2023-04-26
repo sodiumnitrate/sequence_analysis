@@ -5,8 +5,6 @@ Tests for the seq_seq class.
 from sequence_analysis.seq_set import seq_set
 from sequence_analysis.seq_set import sequence
 
-import pdb
-
 class TestFilters:
     def test_len(self):
         prots = seq_set(file_name="aux_files/dup_test.fasta")

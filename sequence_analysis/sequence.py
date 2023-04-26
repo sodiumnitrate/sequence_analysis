@@ -2,6 +2,7 @@
 This file holds the sequence class and related methods.
 """
 
+from typing import Sequence
 from Bio.Seq import Seq
 import sequence_analysis.utils as utils
 import re
@@ -15,8 +16,7 @@ from sequence_analysis.utils import mw_aa
 from sequence_analysis.utils import start_codon
 from sequence_analysis.utils import stop_codon
 from sequence_analysis.utils import stop_codon_re
-
-import pdb
+from sequence_analysis.open_reading_frame import OpenReadingFrame
 
 class sequence:
     """This class corresponds to a single biological sequence (protein, rna, or dna)"""
@@ -89,7 +89,7 @@ class sequence:
         if len(s) == 0:
             print("WARNING: empty sequence. Can't set type.")
             self.type = None
-            return 
+            return
         all_letters = set([*s])
 
         if seq_type is not None:
@@ -185,8 +185,12 @@ class sequence:
             seq = seq[2:]
         else:
             print("ERROR: problem with frame shifting. Frame should be 0, 1, or 2.")
+            return None
 
-        N_to_be_added = 3 - len(seq) % 3
+        if len(seq) % 3 == 0:
+            N_to_be_added = 0
+        else:
+            N_to_be_added = 3 - len(seq) % 3
         seq = seq + "N" * N_to_be_added
 
         seq = sequence(seq)
@@ -194,32 +198,6 @@ class sequence:
 
         return seq
 
-    """
-    def six_frame_check(self, regex, verbose=False):
-        # TODO: refactor to use with the find_open_readin_frames() func.
-        selected = False
-        for frame in range(3):
-            for order in range(2):
-                if order == 0:
-                    shifted = self.frame_shift(frame=frame)
-                else:
-                    shifted = self.reverse_complement().frame_shift(frame=frame)
-
-                seq = shifted.translate()
-
-                if verbose:
-                    print(frame, order, seq.seq)
-
-                # NOTE: the following implicitly assumes that only one reading
-                # frame is valid
-                selected = seq.check_for_pattern(regex)
-                if selected:
-                    true_sequence = str(seq.seq)
-                    untranslated = str(shifted)
-                    return true_sequence, untranslated
-
-        return None, None
-    """
     def six_frame_check(self, regex,
                               chop_before_first_M=True,
                               min_orf_len=90):
@@ -404,3 +382,66 @@ class sequence:
             freqs[aa] += 1
 
         return freqs
+
+    def find_fragments(self, parent, frame, order, min_orf_len=90):
+        """
+        Given a sequence object (of type rna or dna), find orfs in a 
+        specific reading frame.
+        """
+        seq_str = self.seq
+        len_str = len(seq_str) // 3
+        start_ind = 0
+        end_ind = 0
+        curr_fragment = ""
+        recording = False
+        orfs = []
+        for ptr in range(0, 3*len_str, 3):
+            curr_codon = seq_str[ptr:ptr+3]
+            if curr_codon in start_codon:
+                start_ind = ptr
+                recording = True
+            if recording:
+                curr_fragment += curr_codon
+            if curr_codon in stop_codon:
+                if recording:
+                    end_ind = ptr + 3
+                    if len(curr_fragment) >= min_orf_len:
+                        seq = sequence(curr_fragment, seq_type=self.type)
+                        start_ind += frame
+                        end_ind += frame
+                        if order == -1:
+                            start_ind = len(parent.seq) - start_ind
+                            end_ind = len(parent.seq) - end_ind
+                        if start_ind > end_ind:
+                            start_ind, end_ind = end_ind, start_ind
+                        orf = OpenReadingFrame(seq,
+                                               parent,
+                                               start_ind,
+                                               end_ind,
+                                               order,
+                                               frame)
+                        orfs.append(orf)
+                        recording = False
+        return orfs
+
+    def detailed_orf_finder(self, min_orf_len=90):
+        """
+        Function to find open reading frames, and returns a list of OpenReadingFrame objects.
+        """
+        if self.type not in ('rna', 'dna'):
+            print("ERROR: open reading frames can be found for DNA or RNA sequences only.")
+            return None
+
+        orfs = []
+        for frame in range(3):
+            for order in [1, -1]:
+                if order == 1:
+                    shifted = self.frame_shift(frame=frame)
+                else:
+                    shifted = self.reverse_complement().frame_shift(frame=frame)
+
+                orfs_frame = shifted.find_fragments(self, frame, order, min_orf_len=min_orf_len)
+                for orf in orfs_frame:
+                    orfs.append(orf)
+
+        return orfs
