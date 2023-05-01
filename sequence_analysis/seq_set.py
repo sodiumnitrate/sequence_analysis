@@ -70,6 +70,34 @@ class seq_set:
             file.write('\n')
         file.close()
 
+    def write_fasta_in_parts(self, file_name, n_seq=1000):
+        """
+        Function to write N fasta files 
+        file_name_0.fasta
+        file_name_1.fasta
+        ...
+        file_name_N.fasta
+
+        such that each file contains n_seq sequences.
+        """
+        # strip any file extention
+        # TODO: make this more robust?
+        file_name = file_name.split('.')[0]
+
+        n_seqs = len(self)
+        if n_seqs % n_seq == 0:
+            number_of_files = len(self) // n_seq
+        else:
+            number_of_files = len(self) // n_seq + 1
+        for file_num in range(number_of_files):
+            start = file_num * n_seq
+            end = (file_num + 1) * n_seq
+            curr_file_name = f"{file_name}_{file_num}.fasta"
+            curr_set = seq_set(list_of_sequences=self.records[start:end])
+            curr_set.write_fasta(curr_file_name)
+
+        return
+
     def filter_by_six_frame_check_pattern(
             self, regex, overwrite_frame_shifted=True,
             min_orf_len=90):

@@ -1,3 +1,4 @@
+import os
 from sequence_analysis import seq_set
 from sequence_analysis import sequence
 
@@ -44,3 +45,10 @@ class TestIO:
             s1 = prot_test.records[i].seq
             s2 = test_read.records[i].seq
             assert (s1 == s2)
+
+    def test_write_fasta_in_parts(self):
+        test = seq_set.seq_set(file_name="aux_files/test_2.fasta")
+        test.write_fasta_in_parts("aux_files/write_parts.fasta", n_seq=2)
+        files = [i for i in os.listdir("aux_files/") if i.startswith("write_parts")]
+        
+        assert len(files) == 6
