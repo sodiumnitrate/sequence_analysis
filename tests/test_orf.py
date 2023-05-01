@@ -105,3 +105,22 @@ class TestOrf:
                 prot_from_ind = sequence(orf.parent_sequence.seq[start:stop],
                                          seq_type=orf.parent_sequence.type).translate().seq
             assert prot == prot_from_ind
+
+    def test_check_indices_with_gaps(self):
+        seq = sequence('CGCTACGTCTTACGCTGGAGCTCTCA----TGGATCGGTTCGGTAGGGCTCGATCACATCGCTAGCCAT')
+        orfs = seq.detailed_orf_finder(min_orf_len=0)
+        for orf in orfs:
+            assert (orf.stop - orf.start) % 3 == 0
+            prot = orf.protein_sequence.seq
+            start = orf.start
+            stop = orf.stop
+
+            assert stop - start == len(orf.rna_sequence)
+            
+            if orf.strand == -1:
+                prot_from_ind = sequence(orf.parent_sequence.seq[start:stop],
+                                         seq_type=orf.parent_sequence.type).reverse_complement().translate().seq
+            else:
+                prot_from_ind = sequence(orf.parent_sequence.seq[start:stop],
+                                         seq_type=orf.parent_sequence.type).translate().seq
+            assert prot == prot_from_ind

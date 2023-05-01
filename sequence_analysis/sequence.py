@@ -433,15 +433,17 @@ class sequence:
             print("ERROR: open reading frames can be found for DNA or RNA sequences only.")
             return None
 
+        seq = sequence(self.seq.replace('-',''), seq_type=self.type)
+
         orfs = []
         for frame in range(3):
             for order in [1, -1]:
                 if order == 1:
-                    shifted = self.frame_shift(frame=frame)
+                    shifted = seq.frame_shift(frame=frame)
                 else:
-                    shifted = self.reverse_complement().frame_shift(frame=frame)
+                    shifted = seq.reverse_complement().frame_shift(frame=frame)
 
-                orfs_frame = shifted.find_fragments(self, frame, order, min_orf_len=min_orf_len)
+                orfs_frame = shifted.find_fragments(seq, frame, order, min_orf_len=min_orf_len)
                 for orf in orfs_frame:
                     orfs.append(orf)
 

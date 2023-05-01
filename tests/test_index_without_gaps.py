@@ -1,5 +1,4 @@
 from sequence_analysis.sequence import sequence
-import pdb
 
 class TestIndexWithoutGaps:
     def test_with_gaps(self):
