@@ -20,3 +20,20 @@ class TestGenBankEntry:
         assert entry.protein_name is not None
         assert isinstance(entry.protein_sequence, sequence)
         assert len(entry.protein_sequence) > 0
+
+    def test_fetch_2(self):
+        accession_code = "AY557479.1"
+
+        entry = GenBankEntry(accession_code=accession_code)
+        entry.fetch(e_mail="irem.altan@yale.edu")
+
+        assert entry.text is not None
+        assert accession_code[:-2] in entry.locus
+        assert isinstance(entry.definition, str)
+        assert "Doryteuthis pealeii" in entry.organism
+
+        assert isinstance(entry.dna_sequence, sequence)
+        assert len(entry.dna_sequence) > 0
+
+        assert entry.protein_name is None
+        assert entry.protein_sequence is None
