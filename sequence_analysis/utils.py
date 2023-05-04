@@ -8,10 +8,9 @@ from statistics import mean
 import Bio.Align.substitution_matrices
 import numpy as np
 
-import pdb
-
 # the BLOSUM50 matrix
 blosum_50 = Bio.Align.substitution_matrices.load(name="BLOSUM50")
+blosum_62 = Bio.Align.substitution_matrices.load(name="BLOSUM62")
 
 # one-letter alphabet for amino acids
 aa_alphabet = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H',

@@ -9,7 +9,7 @@ Smith-Waterman are also in this module for educational purposes.
 from Bio import Align
 from sequence_analysis.utils import query_blosum50
 from sequence_analysis.sequence import sequence
-from sequence_analysis.utils import blosum_50
+from sequence_analysis.utils import blosum_50, blosum_62
 
 
 class pairwise_alignment:
@@ -20,7 +20,8 @@ class pairwise_alignment:
     """
 
     def __init__(self, sequence1, sequence2, match=1, unmatch=0, gap=-8,
-                 gap_open=-9, use_blosum_50=True, algorithm="needleman-wunsch"):
+                 gap_open=-9, use_blosum_50=True, algorithm="needleman-wunsch",
+                 use_blosum_62=True):
         if isinstance(sequence1, str):
             sequence1 = sequence(sequence1)
         if isinstance(sequence2, str):
@@ -31,6 +32,7 @@ class pairwise_alignment:
         # what parameters to use.
         # if use_blosum_50 is True, the match and unmatch params are ignored
         self.use_blosum_50 = use_blosum_50
+        self.use_blosum_62 = use_blosum_62
         self.match = match
         self.unmatch = unmatch
         # gap is -8 by default, which is chosen to play nicely with blosum50.
@@ -55,6 +57,8 @@ class pairwise_alignment:
             self.smith_waterman(verbose=verbose)
         elif self.algorithm == "biopython-global":
             self.biopython_global()
+        elif self.algorithm == "biopython-local":
+            self.biopython_local()
         else:
             print(
                 f"ERROR: algorithm {self.algorithm} is not recognized. Not aligning.")
@@ -85,6 +89,31 @@ class pairwise_alignment:
             self.score = alignments.score
             self.sequence1_aligned = sequence(alignments[0][1])
             self.sequence2_aligned = sequence(alignments[0][0])
+
+    def biopython_local(self):
+        """Function that sets up a local alignment using biopython's PairwiseAligner."""
+        seq1 = self.sequence1.seq
+        seq2 = self.sequence2.seq
+
+        # setup
+        aligner = Align.PairwiseAligner()
+        aligner.mode = 'local'
+
+        if self.use_blosum_50:
+            aligner.substitution_matrix = blosum_50
+        elif self.use_blosum_62:
+            aligner.substitution_matrix = blosum_62
+        else:
+            aligner.match_score = self.match
+            aligner.mismatch_score = self.unmatch
+            aligner.open_gap_score = self.gap_open
+            aligner.extend_gap_score = self.gap
+
+        alignments = aligner.align(seq1, seq2)
+
+        self.score = alignments.score
+        self.sequence1_aligned = sequence(alignments[0][1])
+        self.sequence2_aligned = sequence(alignments[0][0])
 
     def needleman_wunsch(self, verbose=False):
         """

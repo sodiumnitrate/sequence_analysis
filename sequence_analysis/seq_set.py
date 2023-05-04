@@ -4,6 +4,7 @@ Includes I/O of .fasta files, and various filtering methods.
 """
 
 import time
+from tkinter import E
 from sklearn.cluster import SpectralClustering
 import numpy as np
 import networkx as nx

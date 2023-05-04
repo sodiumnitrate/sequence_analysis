@@ -11,3 +11,4 @@ dist/
 .*swp
 .vscode
 .vscode/
+.DS_Store
