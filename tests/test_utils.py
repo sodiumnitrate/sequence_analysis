@@ -50,3 +50,19 @@ class TestUtils:
         coords = sa_utils.gen_non_overlapping_points(10, 0.5, 10)
         assert (coords is not None)
         assert (len(coords) == 10)
+
+    def test_sort_array_by_column(self):
+        test = [['a',0,5,'aa'],['b',1,0,'bb'],['c',2,1,'cc'],['d',3,5,'dd']]
+
+        sorted_test = sa_utils.sort_array_by_column(test, 1)
+        assert len(sorted_test) == len(test)
+
+        sorted_test = sa_utils.sort_array_by_column(test, 0)
+        assert sorted_test[0][0] == 'a'
+
+        sorted_test = sa_utils.sort_array_by_column(test, 5)
+        assert sorted_test is None
+
+        test = [['a',0], ['b',1,2]]
+        sorted_test = sa_utils.sort_array_by_column(test, 0)
+        assert sorted_test is None

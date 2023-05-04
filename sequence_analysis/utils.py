@@ -8,6 +8,8 @@ from statistics import mean
 import Bio.Align.substitution_matrices
 import numpy as np
 
+import pdb
+
 # the BLOSUM50 matrix
 blosum_50 = Bio.Align.substitution_matrices.load(name="BLOSUM50")
 
@@ -186,3 +188,58 @@ def generate_random_color(n_colors):
         colors.append(hexadecimal[0])
 
     return colors
+
+def read_blast_output_outfmt7(file_name):
+    """
+    Function to read the output of BLASTN with -outfmt 7.
+    """
+    f = open(file_name,'r')
+    lines = f.readlines()
+    n_query = 0
+    queries = {}
+    for ind_line, line in enumerate(lines):
+        if "hits found" in line:
+            start_ind = ind_line + 1
+            n_query += 1
+        if "BLASTN" in line and n_query > 0:
+            end_ind = ind_line 
+
+            matches = lines[start_ind:end_ind]
+            query_name = lines[start_ind].split()[0]
+            queries[query_name] = []
+            for match in matches:
+                m = match.split()
+                queries[query_name].append([m[0],m[1],float(m[2]), float(m[10])])
+    return queries
+
+def sort_array_by_column(to_be_sorted, ind_col):
+    """
+    Function to sort a given 2d array by a given column index.
+    """
+    # check that the array is 2d
+    if len(to_be_sorted) <= 1:
+        print("ERROR: can't sort a 1d array.")
+        return None
+
+    if not isinstance(to_be_sorted[0], list):
+        print("ERROR: can't sort a 1d array.")
+        return None
+
+    n_cols = len(to_be_sorted[0])
+    if ind_col >= n_cols:
+        print("ERROR: ind_col out of range.")
+        return None
+
+    relevant_column = []
+    for row in to_be_sorted:
+        if len(row) != n_cols:
+            print("ERROR: row sizes are different.")
+            return None
+        element = row[ind_col]
+        relevant_column.append(row[ind_col])
+
+    relevant_column = np.array(relevant_column)
+    indices = np.argsort(relevant_column)
+    sorted_list = [to_be_sorted[i] for i in indices]
+
+    return sorted_list

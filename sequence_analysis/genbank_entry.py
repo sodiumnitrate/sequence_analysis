@@ -4,8 +4,6 @@ This file contains the GenBankEntry class.
 from Bio import Entrez
 from sequence_analysis.sequence import sequence
 
-import pdb
-
 class GenBankEntry:
     """
     Class that holds info about a genbank entry.
@@ -13,7 +11,8 @@ class GenBankEntry:
     def __init__(self,
                  accession_code,
                  percent_identity=None,
-                 e_value=None):
+                 e_value=None,
+                 query=None):
         """
         Function to initialize GenBankEntry object.
         """
@@ -21,6 +20,7 @@ class GenBankEntry:
         # these can be obtained from blast alignments
         self.percent_identity = percent_identity
         self.e_value = e_value
+        self.query = query
 
         # attributes to get from genbank
         self.text = None
@@ -32,7 +32,7 @@ class GenBankEntry:
         self.protein_name = None
         
 
-    def fetch(self, e_mail):
+    def fetch(self, e_mail, skip_origin=True):
         """
         Function to fetch info from genbank.
         """
@@ -48,7 +48,8 @@ class GenBankEntry:
         self.get_locus()
         self.get_definition()
         self.get_organism()
-        self.get_origin()
+        if not skip_origin:
+            self.get_origin()
         self.get_protein()
 
     def extract_main_keyword(self, keyword):
