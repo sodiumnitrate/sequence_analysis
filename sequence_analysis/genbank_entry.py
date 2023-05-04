@@ -93,7 +93,7 @@ class GenBankEntry:
 
     def get_protein(self):
         """Function to get protein sequence if it exists."""
-        exists = "translation" in self.text
+        exists = "/translation=" in self.text
         if not exists:
             return
 
