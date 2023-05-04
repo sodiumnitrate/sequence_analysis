@@ -71,7 +71,7 @@ class GenBankEntry:
         self.locus = self.extract_main_keyword("LOCUS")
 
     def get_definition(self):
-        """Function to get DEFINTION info."""
+        """Function to get DEFINITION info."""
         self.definition = self.extract_main_keyword("DEFINITION")
 
     def get_organism(self):
@@ -85,6 +85,7 @@ class GenBankEntry:
     def get_origin(self):
         """Function to get ORIGIN info."""
         exists = "ORIGIN" in self.text
+
         if exists:
             string = self.text.split("ORIGIN")[1].split("//")[0].replace("\n","").replace(" ","")
             str2 = "".join(x for x in string if x.isalpha())
@@ -93,8 +94,15 @@ class GenBankEntry:
     def get_protein(self):
         """Function to get protein sequence if it exists."""
         exists = "translation" in self.text
-        if exists:
-            string = self.text.split("product=")[1].split("\n")[0].strip('"')
-            self.protein_name = string
-            string = self.text.split("translation=")[1].split('"')[1].replace("\n","").replace(" ","")
-            self.protein_sequence = sequence(string)
+        if not exists:
+            return
+
+        # make sure that there are not multiple proteins
+        n_split = len(self.text.split("/translation="))
+        if n_split > 2:
+            return
+
+        string = self.text.split("product=")[1].split("\n")[0].strip('"')
+        self.protein_name = string
+        string = self.text.split("translation=")[1].split('"')[1].replace("\n","").replace(" ","")
+        self.protein_sequence = sequence(string)
