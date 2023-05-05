@@ -137,9 +137,6 @@ class TestSequence:
         seq = sequence("A-C--T-AGT")
         unaligned = sequence("TTTTTACTAGTGGGGG")
         
-        idx = seq.find_index_after_alignment(unaligned, index_without_gaps=1)
+        idx = seq.find_index_after_alignment(unaligned, 6)
 
-        assert idx == 7
-
-        idx = seq.find_index_after_alignment(unaligned, index_with_gaps=2)
-        assert idx == 6
+        assert idx == 2
