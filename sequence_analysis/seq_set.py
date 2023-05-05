@@ -202,6 +202,8 @@ class seq_set:
         """Function to detect and set the type of sequences in seq_set."""
         # TODO: do further testing of type detection
         all_letters = self.get_letters()
+        if 'N' in all_letters:
+            all_letters.remove('N')
 
         if seq_type is not None:
             self.type = seq_type
@@ -228,6 +230,7 @@ class seq_set:
         """Function to read sequences into seq_set from a .fasta file."""
         if len(self.records) > 0:
             print("Warning: overwriting existing data")
+            self.records = []
         for record in SeqIO.parse(file_name, "fasta"):
             seq = sequence(str(record.seq), record.name)
             self.records.append(seq)
