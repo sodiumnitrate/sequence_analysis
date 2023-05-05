@@ -130,4 +130,3 @@ class TestSequence:
         seq = sequence("ALKALI")
         ind = seq.find_codon("AUG")
         assert ind is None
-

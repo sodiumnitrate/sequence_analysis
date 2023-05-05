@@ -1,5 +1,5 @@
-from matplotlib import use
 from sequence_analysis.pairwise_alignment import pairwise_alignment
+from sequence_analysis.sequence import sequence
 
 class TestPairwiseAlignment:
     def test_needleman_wunsch_1(self):
@@ -116,8 +116,8 @@ class TestPairwiseAlignment:
 
     def test_biopython_local(self):
         # TODO: check robustness w.r.t. biopython version
-        seq1 = "TACCG"
-        seq2 = "ACG"
+        seq1 = sequence("TACCG", seq_type='dna')
+        seq2 = sequence("ACG", seq_type='dna')
 
         alignment = pairwise_alignment(
             seq1,
@@ -131,3 +131,47 @@ class TestPairwiseAlignment:
 
         assert alignment.target_aligned.seq == "ACCG"
         assert alignment.query_aligned.seq == "AC-G"
+
+    def test_seq_type_name(self):
+        seq1 = sequence("TACCG", name="target")
+        seq2 = sequence("ACG", name="query", seq_type="dna")
+
+        alignment = pairwise_alignment(seq1, seq2)
+
+        alignment.align()
+
+        assert seq1.type == 'dna'
+        assert seq2.type == 'dna'
+
+        assert seq1.name == 'target'
+        assert seq2.name == 'query'
+
+    def test_seq_type_name_2(self):
+        seq1 = sequence("TACCG", name="target")
+        seq2 = sequence("ACG", name="query", seq_type="dna")
+
+        alignment = pairwise_alignment(seq1, seq2,
+                                       algorithm='biopython-global')
+
+        alignment.align()
+
+        assert seq1.type == 'dna'
+        assert seq2.type == 'dna'
+
+        assert seq1.name == 'target'
+        assert seq2.name == 'query'
+
+    def test_seq_type_name_3(self):
+        seq1 = sequence("TACCG", name="target")
+        seq2 = sequence("ACG", name="query", seq_type="dna")
+
+        alignment = pairwise_alignment(seq1, seq2,
+                                       algorithm='biopython-local')
+
+        alignment.align()
+
+        assert seq1.type == 'dna'
+        assert seq2.type == 'dna'
+
+        assert seq1.name == 'target'
+        assert seq2.name == 'query'

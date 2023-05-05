@@ -6,6 +6,7 @@ setting uses biopython's pairwise alignment methods under the hood.
 Note that my own (purely python) implementations of Needleman-Wunsch and
 Smith-Waterman are also in this module for educational purposes.
 """
+from unicodedata import name
 from Bio import Align
 from sequence_analysis.utils import query_blosum50
 from sequence_analysis.sequence import sequence
@@ -61,7 +62,7 @@ class pairwise_alignment:
         """
         # make sure both sequences have the same type
         type_target = self.target.type
-        type_query = self.target.type
+        type_query = self.query.type
 
         if type_target is None or type_query is None:
             raise TypeError
@@ -118,8 +119,12 @@ class pairwise_alignment:
 
         alignments = aligner.align(target, query)
         self.score = alignments.score
-        self.target_aligned = sequence(alignments[0][0])
-        self.query_aligned = sequence(alignments[0][1])
+        self.target_aligned = sequence(alignments[0][0],
+                                       seq_type=self.target.type,
+                                       name=self.target.name)
+        self.query_aligned = sequence(alignments[0][1],
+                                      seq_type=self.query.type,
+                                      name=self.target.name)
 
     def biopython_local(self):
         """Function that sets up a local alignment using biopython's PairwiseAligner."""
@@ -143,8 +148,12 @@ class pairwise_alignment:
         alignments = aligner.align(seq1, seq2)
 
         self.score = alignments.score
-        self.target_aligned = sequence(alignments[0][0])
-        self.query_aligned = sequence(alignments[0][1])
+        self.target_aligned = sequence(alignments[0][0],
+                                       seq_type=self.target.type,
+                                       name=self.target.name)
+        self.query_aligned = sequence(alignments[0][1],
+                                      seq_type=self.query.type,
+                                      name=self.target.name)
 
     def needleman_wunsch(self, verbose=False):
         """
@@ -279,8 +288,12 @@ class pairwise_alignment:
                 i -= 1
                 j -= 1
 
-        self.target_aligned = sequence(x_str)
-        self.query_aligned = sequence(y_str)
+        self.target_aligned = sequence(x_str,
+                                       seq_type=self.target.type,
+                                       name=self.target.name)
+        self.query_aligned = sequence(y_str,
+                                      seq_type=self.query.type,
+                                      name=self.query.name)
 
     def print_matrix(self, info_type="score"):
         """Function that prints either the score or pointer matrix."""
@@ -396,5 +409,9 @@ class pairwise_alignment:
 
             curr_score = self.F[i_start][j_start]
 
-        self.target_aligned = sequence(x_str)
-        self.query_aligned = sequence(y_str)
+        self.target_aligned = sequence(x_str,
+                                       seq_type=self.target.type,
+                                       name=self.target.name)
+        self.query_aligned = sequence(y_str,
+                                      seq_type=self.query.type,
+                                      name=self.query.name)
