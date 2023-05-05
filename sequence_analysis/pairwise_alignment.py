@@ -19,15 +19,20 @@ class pairwise_alignment:
     can be run to compute pairwise alignments.
     """
 
-    def __init__(self, sequence1, sequence2, match=1, unmatch=0, gap=-8,
-                 gap_open=-9, use_blosum_50=True, algorithm="needleman-wunsch",
-                 use_blosum_62=True):
-        if isinstance(sequence1, str):
-            sequence1 = sequence(sequence1)
-        if isinstance(sequence2, str):
-            sequence2 = sequence(sequence2)
-        self.sequence1 = sequence1
-        self.sequence2 = sequence2
+    def __init__(self, target, query, match=1, unmatch=0, gap=-8,
+                 gap_open=-9, use_blosum_50=False, algorithm="needleman-wunsch",
+                 use_blosum_62=False):
+        if isinstance(target, str):
+            target = sequence(target)
+        elif not isinstance(target, sequence):
+            raise TypeError
+        if isinstance(query, str):
+            query = sequence(query)
+        elif not isinstance(query, sequence):
+            raise TypeError
+        
+        self.target = target
+        self.query = query
 
         # what parameters to use.
         # if use_blosum_50 is True, the match and unmatch params are ignored
@@ -43,14 +48,43 @@ class pairwise_alignment:
 
         self.algorithm = algorithm
 
-        self.sequence1_aligned = None
-        self.sequence2_aligned = None
+        self.target_aligned = None
+        self.query_aligned = None
         self.score = None
         self.F = None
         self.pointers = None
 
+    def check_input_params(self):
+        """
+        This function makes sure that the user-input parameters
+        are reasonable.
+        """
+        # make sure both sequences have the same type
+        type_target = self.target.type
+        type_query = self.target.type
+
+        if type_target is None or type_query is None:
+            raise TypeError
+
+        if type_target != type_query:
+            raise TypeError
+
+        # make sure blosum is requested for protein only
+        protein = type_target == 'protein'
+        if not protein and (self.use_blosum_50 or self.use_blosum_62):
+            raise TypeError
+
+        # make sure both blosum matrices aren't requested
+        if self.use_blosum_50 and self.use_blosum_62:
+            print("WARNING: BLOSUM50 and BLOSUM62 are both requested. Using the latter.")
+            self.use_blosum_50 = False
+
     def align(self, verbose=False):
         """Function that aligns the two sequences held in pairwise_alignment."""
+
+        # first, check that the input params make sense
+        self.check_input_params()
+
         if self.algorithm == "needleman-wunsch":
             self.needleman_wunsch(verbose=verbose)
         elif self.algorithm == "smith-waterman":
@@ -65,35 +99,32 @@ class pairwise_alignment:
 
     def biopython_global(self):
         """Function that sets up a global alignment usin biopython's PairwiseAligner."""
-        seq1 = self.sequence1.seq
-        seq2 = self.sequence2.seq
+        target = self.target.seq
+        query = self.query.seq
+
+        # setup aligner
+        aligner = Align.PairwiseAligner()
+        aligner.mode = 'global'
 
         if self.use_blosum_50:
-            aligner = Align.PairwiseAligner()
-            aligner.mode = 'global'
             aligner.substitution_matrix = blosum_50
-            alignments = aligner.align(seq1, seq2)
-
-            self.score = alignments.score
-            self.sequence1_aligned = sequence(alignments[0][1])
-            self.sequence1_aligned = sequence(alignments[0][0])
+        elif self.use_blosum_50:
+            aligner.substitution_matrix = blosum_62
         else:
-            aligner = Align.PairwiseAligner()
-            aligner.mode = 'global'
             aligner.match_score = self.match
             aligner.mismatch_score = self.unmatch
             aligner.open_gap_score = self.gap_open
             aligner.extend_gap_score = self.gap
-            alignments = aligner.align(seq1, seq2)
 
-            self.score = alignments.score
-            self.sequence1_aligned = sequence(alignments[0][1])
-            self.sequence2_aligned = sequence(alignments[0][0])
+        alignments = aligner.align(target, query)
+        self.score = alignments.score
+        self.target_aligned = sequence(alignments[0][0])
+        self.query_aligned = sequence(alignments[0][1])
 
     def biopython_local(self):
         """Function that sets up a local alignment using biopython's PairwiseAligner."""
-        seq1 = self.sequence1.seq
-        seq2 = self.sequence2.seq
+        seq1 = self.target.seq
+        seq2 = self.query.seq
 
         # setup
         aligner = Align.PairwiseAligner()
@@ -112,8 +143,8 @@ class pairwise_alignment:
         alignments = aligner.align(seq1, seq2)
 
         self.score = alignments.score
-        self.sequence1_aligned = sequence(alignments[0][1])
-        self.sequence2_aligned = sequence(alignments[0][0])
+        self.target_aligned = sequence(alignments[0][0])
+        self.query_aligned = sequence(alignments[0][1])
 
     def needleman_wunsch(self, verbose=False):
         """
@@ -123,8 +154,8 @@ class pairwise_alignment:
         than biopython-global.
         """
         # get lengths of sequences
-        n = len(self.sequence1.seq)
-        m = len(self.sequence2.seq)
+        n = len(self.target.seq)
+        m = len(self.query.seq)
 
         # initialize matrix
         F = [[0 for _ in range(n + 1)] for _ in range(m + 1)]
@@ -150,8 +181,8 @@ class pairwise_alignment:
                     possible_values = []
 
                     # x_j and y_i are aligned
-                    aa1 = self.sequence1.seq[j - 1]
-                    aa2 = self.sequence2.seq[i - 1]
+                    aa1 = self.target.seq[j - 1]
+                    aa2 = self.query.seq[i - 1]
                     possible_values.append(
                         F[i - 1][j - 1] + query_blosum50(aa1, aa2))
 
@@ -178,8 +209,8 @@ class pairwise_alignment:
                     possible_values = []
 
                     # x_j and y_i are aligned
-                    aa1 = self.sequence1.seq[j - 1]
-                    aa2 = self.sequence2.seq[i - 1]
+                    aa1 = self.target.seq[j - 1]
+                    aa2 = self.query.seq[i - 1]
                     if aa1 == aa2:
                         sc = self.match
                     else:
@@ -210,7 +241,7 @@ class pairwise_alignment:
 
         if verbose:
             self.print_matrix()
-            self.print_matrix(type="pointers")
+            self.print_matrix(info_type="pointers")
 
         self.traceback_nw()
 
@@ -219,8 +250,8 @@ class pairwise_alignment:
         Function that performs traceback on the score matrix of Needleman-Wunsch to
         obtain the final alignment strings.
         """
-        n = len(self.sequence1.seq)
-        m = len(self.sequence2.seq)
+        n = len(self.target.seq)
+        m = len(self.query.seq)
 
         x_str = ""
         y_str = ""
@@ -234,30 +265,30 @@ class pairwise_alignment:
             if direction == "u":
                 # y_j is aligned with a gap
                 x_str = "-" + x_str
-                y_str = self.sequence2.seq[i - 1] + y_str
+                y_str = self.query.seq[i - 1] + y_str
                 i -= 1
             elif direction == "l":
                 # x_i is aligned with a gap
-                x_str = self.sequence1.seq[j - 1] + x_str
+                x_str = self.target.seq[j - 1] + x_str
                 y_str = "-" + y_str
                 j -= 1
             elif direction == "ul":
                 # x_i is aligned with y_j
-                x_str = self.sequence1.seq[j - 1] + x_str
-                y_str = self.sequence2.seq[i - 1] + y_str
+                x_str = self.target.seq[j - 1] + x_str
+                y_str = self.query.seq[i - 1] + y_str
                 i -= 1
                 j -= 1
 
-        self.sequence1_aligned = sequence(x_str)
-        self.sequence2_aligned = sequence(y_str)
+        self.target_aligned = sequence(x_str)
+        self.query_aligned = sequence(y_str)
 
-    def print_matrix(self, type="score"):
+    def print_matrix(self, info_type="score"):
         """Function that prints either the score or pointer matrix."""
         # method to print either the score or pointer matrix for
         # debugging/visualization purposes
-        if type == "score":
+        if info_type == "score":
             matrix = self.F
-        elif type == "pointers":
+        elif info_type == "pointers":
             matrix = self.pointers
         else:
             print("ERROR: please specify 'score' or 'pointers'")
@@ -274,8 +305,8 @@ class pairwise_alignment:
         """Function that calculates the score matrix for local alignment with Smith-Waterman."""
         # TODO: get rid of this properly
         print("WARNING: this function is not tested for custom alignment scoring.")
-        n = len(self.sequence1.seq)
-        m = len(self.sequence2.seq)
+        n = len(self.target.seq)
+        m = len(self.query.seq)
 
         # initialize matrix
         F = [[0 for _ in range(n + 1)] for _ in range(m + 1)]
@@ -285,8 +316,8 @@ class pairwise_alignment:
         for i in range(1, m + 1):
             for j in range(1, n + 1):
                 possible_values = []
-                aa1 = self.sequence1.seq[j - 1]
-                aa2 = self.sequence2.seq[i - 1]
+                aa1 = self.target.seq[j - 1]
+                aa2 = self.query.seq[i - 1]
 
                 # start a new alignment
                 possible_values.append(0)
@@ -321,7 +352,7 @@ class pairwise_alignment:
 
         if verbose:
             self.print_matrix()
-            self.print_matrix(type="pointers")
+            self.print_matrix(info_type="pointers")
         self.traceback_sw()
 
     def traceback_sw(self):
@@ -351,19 +382,19 @@ class pairwise_alignment:
             direction = self.pointers[i_start][j_start]
             if direction == "u":
                 x_str = "-" + x_str
-                y_str = self.sequence2.seq[i_start - 1] + y_str
+                y_str = self.query.seq[i_start - 1] + y_str
                 i_start -= 1
             elif direction == "l":
-                x_str = self.sequence1.seq[j_start - 1] + x_str
+                x_str = self.target.seq[j_start - 1] + x_str
                 y_str = "-" + y_str
                 j_start -= 1
             elif direction == "ul":
-                x_str = self.sequence1.seq[j_start - 1] + x_str
-                y_str = self.sequence2.seq[i_start - 1] + y_str
+                x_str = self.target.seq[j_start - 1] + x_str
+                y_str = self.query.seq[i_start - 1] + y_str
                 i_start -= 1
                 j_start -= 1
 
             curr_score = self.F[i_start][j_start]
 
-        self.sequence1_aligned = sequence(x_str)
-        self.sequence2_aligned = sequence(y_str)
+        self.target_aligned = sequence(x_str)
+        self.query_aligned = sequence(y_str)
