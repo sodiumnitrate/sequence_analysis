@@ -449,6 +449,42 @@ class sequence:
 
         return orfs
 
+    def find_index_after_alignment(self,
+                                   unaligned_seq,
+                                   index_with_gaps=None,
+                                   index_without_gaps=None):
+        """
+        Function to find the index after alignment.
+        """
+        if not isinstance(unaligned_seq, sequence):
+            raise TypeError
+        if '-' in unaligned_seq.seq:
+            print("ERROR: the unaligned sequence shouldn't have gaps.")
+            return None
+        
+        seq_no_gaps = self.seq.replace('-','')
+        seq_str = self.seq
+        n_subseq = len(seq_no_gaps)
+        start_idx = unaligned_seq.seq.find(seq_no_gaps)
+        if start_idx == -1:
+            print("ERROR: aligned and unaligned sequences do not match.")
+            return None
+        
+        end_idx = start_idx + n_subseq
+        n_add_end = len(unaligned_seq.seq[end_idx:])
+        seq_str = "N" * (start_idx) + seq_str + "N" * (n_add_end)
+
+        new_seq = sequence(seq_str)
+
+        if index_with_gaps is not None:
+            index_with_gaps += start_idx
+        elif index_without_gaps is not None:
+            index_without_gaps += start_idx
+        
+        return new_seq.find_index_with_gaps(index_with_gaps=index_with_gaps,
+                                            index_without_gaps=index_without_gaps)
+        
+
     def find_index_with_gaps(self,
                              index_with_gaps=None,
                              index_without_gaps=None):

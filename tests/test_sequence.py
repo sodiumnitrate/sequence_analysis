@@ -1,6 +1,8 @@
 from sequence_analysis.sequence import sequence
 from sequence_analysis.seq_set import seq_set
 
+import pdb
+
 class TestSequence:
     def test_translate(self):
         seq = sequence("ATGGATCGGTTCGGTAGGGCTCGATCACATCGCTAG")
@@ -130,3 +132,14 @@ class TestSequence:
         seq = sequence("ALKALI")
         ind = seq.find_codon("AUG")
         assert ind is None
+
+    def test_find_index_after_alignment(self):
+        seq = sequence("A-C--T-AGT")
+        unaligned = sequence("TTTTTACTAGTGGGGG")
+        
+        idx = seq.find_index_after_alignment(unaligned, index_without_gaps=1)
+
+        assert idx == 7
+
+        idx = seq.find_index_after_alignment(unaligned, index_with_gaps=2)
+        assert idx == 6
