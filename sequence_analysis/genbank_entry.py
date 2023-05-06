@@ -102,7 +102,12 @@ class GenBankEntry:
         if n_split > 2:
             return
 
-        string = self.text.split("product=")[1].split("\n")[0].strip('"')
-        self.protein_name = string
+        # handle the case were we have an unnamed protein product
+        try:
+            string = self.text.split("product=")[1].split("\n")[0].strip('"')
+            self.protein_name = string
+        except IndexError:
+            self.protein_name = None
+
         string = self.text.split("translation=")[1].split('"')[1].replace("\n","").replace(" ","")
         self.protein_sequence = sequence(string)
