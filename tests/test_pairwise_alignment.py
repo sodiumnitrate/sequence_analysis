@@ -175,3 +175,21 @@ class TestPairwiseAlignment:
 
         assert seq1.name == 'target'
         assert seq2.name == 'query'
+
+    def test_alignment_indices(self):
+        seq1 = sequence("TACCG", name="target")
+        seq2 = sequence("ACG", name="query", seq_type="dna")
+
+        alignment = pairwise_alignment(seq1, seq2,
+                                       algorithm='biopython-local')
+
+        alignment.align()
+
+        assert alignment.alignment_indices is not None
+
+        alignment = pairwise_alignment(seq1, seq2,
+                                       algorithm='needleman-wunsch')
+
+        alignment.align()
+
+        assert alignment.alignment_indices is None

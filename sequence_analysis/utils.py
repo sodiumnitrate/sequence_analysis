@@ -7,6 +7,8 @@ import random
 from statistics import mean
 import Bio.Align.substitution_matrices
 import numpy as np
+from colorama import Fore, Back, Style
+
 
 # the BLOSUM50 matrix
 blosum_50 = Bio.Align.substitution_matrices.load(name="BLOSUM50")
@@ -242,3 +244,65 @@ def sort_array_by_column(to_be_sorted, ind_col):
     sorted_list = [to_be_sorted[i] for i in indices]
 
     return sorted_list
+
+def split_string_into_list(original_string, n_char):
+    result = [original_string[idx:idx+n_char] for idx in range(len(original_string)) if idx % n_char == 0]
+    return result
+
+def check_range(range_idx):
+    """
+    Function to check whether a given variable is a range.
+    """
+    # TODO: also make sure the contents are ints?
+    valid_types = (tuple, list, np.ndarray)
+    if not isinstance(range_idx, valid_types):
+        print("ERROR: range type is not valid.")
+        return False
+
+    if len(range_idx) != 2:
+        print("ERROR: range must have two elements.")
+        return False
+
+    return True
+
+def is_idx_in_range(idx, range_idx):
+    """
+    Given an index, and a tuple/list/array of two elements that define a range,
+    check if index is within range.
+    range_idx is treated like a python range/slice:
+    (0,5) -> 0, 1, 2, 3, 4
+    """
+    if not check_range(range_idx):
+        raise TypeError
+
+    if range_idx[0] > range_idx[1]:
+        range_idx[0], range_idx[1] = range_idx[1], range_idx[0]        
+    
+    if idx >= range_idx[0] and idx < range_idx[1]:
+        return True
+    return False
+        
+
+def color_substring(input_string, range_idx):
+    """
+    Function to return string with part of it colored using colorama.
+    """
+    if not isinstance(input_string, str):
+        raise TypeError
+
+    # TODO: make an "interval" class instead of having to deal with all these functions?
+    if not check_range(range_idx):
+        raise TypeError
+
+    string_range_idx = (0, len(input_string))
+    valid_start = is_idx_in_range(range_idx[0], string_range_idx)
+    valid_end = is_idx_in_range(range_idx[1]-1, string_range_idx)
+
+    if not (valid_end and valid_start):
+        print("ERROR: the range requested isn't consistent with string length.")
+        raise IndexError
+
+    if range_idx[0] > range_idx[1]:
+        range_idx[1], range_idx[0] = range_idx[0], range_idx[1]
+
+    return f"{input_string[:range_idx[0]]}{Fore.RED}{input_string[range_idx[0]:range_idx[1]]}{Style.RESET_ALL}{input_string[range_idx[1]:]}"

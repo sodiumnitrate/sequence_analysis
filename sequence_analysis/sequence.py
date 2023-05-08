@@ -1,7 +1,6 @@
 """
 This file holds the sequence class and related methods.
 """
-import enum
 from Bio.Seq import Seq
 import sequence_analysis.utils as utils
 import re
@@ -80,6 +79,13 @@ class sequence:
     def __len__(self):
         """Overwrites __len__ to return the number of chars in seq.seq"""
         return len(self.seq)
+
+    def __getitem__(self, key):
+        """Overwrites __getitem__ so that a part of the sequence can be returned."""
+        if isinstance(key, slice) or isinstance(key, int):
+            return self.seq[key]
+        else:
+            raise TypeError
 
     def set_type(self, seq_type=None):
         """Function that sets the type of sequence based on the letters it contains."""

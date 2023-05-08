@@ -140,3 +140,9 @@ class TestSequence:
         idx = seq.find_index_after_alignment(unaligned, 6)
 
         assert idx == 2
+
+    def test_slice(self):
+        seq = sequence("AAAAGGGGTTTTAAAA")
+        
+        sub_seq = seq[4:8]
+        assert sub_seq == 'GGGG'

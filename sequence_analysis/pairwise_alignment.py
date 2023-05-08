@@ -6,11 +6,11 @@ setting uses biopython's pairwise alignment methods under the hood.
 Note that my own (purely python) implementations of Needleman-Wunsch and
 Smith-Waterman are also in this module for educational purposes.
 """
-from unicodedata import name
 from Bio import Align
-from sequence_analysis.utils import query_blosum50
+from sequence_analysis.utils import query_blosum50, split_string_into_list
 from sequence_analysis.sequence import sequence
 from sequence_analysis.utils import blosum_50, blosum_62
+from colorama import Fore, Back, Style
 
 
 class pairwise_alignment:
@@ -55,6 +55,8 @@ class pairwise_alignment:
         self.F = None
         self.pointers = None
 
+        self.alignment_indices = None
+
     def check_input_params(self):
         """
         This function makes sure that the user-input parameters
@@ -94,6 +96,8 @@ class pairwise_alignment:
             self.biopython_global()
         elif self.algorithm == "biopython-local":
             self.biopython_local()
+        elif self.algorithm == "blastn":
+            self.biopython_local(blastn=True)
         else:
             print(
                 f"ERROR: algorithm {self.algorithm} is not recognized. Not aligning.")
@@ -126,24 +130,30 @@ class pairwise_alignment:
                                       seq_type=self.query.type,
                                       name=self.target.name)
 
-    def biopython_local(self):
+        self.alignment_indices = alignments[0].aligned
+
+    def biopython_local(self, blastn=False):
         """Function that sets up a local alignment using biopython's PairwiseAligner."""
         seq1 = self.target.seq
         seq2 = self.query.seq
 
-        # setup
-        aligner = Align.PairwiseAligner()
-        aligner.mode = 'local'
-
-        if self.use_blosum_50:
-            aligner.substitution_matrix = blosum_50
-        elif self.use_blosum_62:
-            aligner.substitution_matrix = blosum_62
+        if blastn:
+            aligner = Align.PairwiseAligner(scoring='blastn')
+            aligner.mode = 'local'
         else:
-            aligner.match_score = self.match
-            aligner.mismatch_score = self.unmatch
-            aligner.open_gap_score = self.gap_open
-            aligner.extend_gap_score = self.gap
+            # setup
+            aligner = Align.PairwiseAligner()
+            aligner.mode = 'local'
+
+            if self.use_blosum_50:
+                aligner.substitution_matrix = blosum_50
+            elif self.use_blosum_62:
+                aligner.substitution_matrix = blosum_62
+            else:
+                aligner.match_score = self.match
+                aligner.mismatch_score = self.unmatch
+                aligner.open_gap_score = self.gap_open
+                aligner.extend_gap_score = self.gap
 
         alignments = aligner.align(seq1, seq2)
 
@@ -154,6 +164,8 @@ class pairwise_alignment:
         self.query_aligned = sequence(alignments[0][1],
                                       seq_type=self.query.type,
                                       name=self.target.name)
+
+        self.alignment_indices = alignments[0].aligned
 
     def needleman_wunsch(self, verbose=False):
         """
@@ -415,3 +427,84 @@ class pairwise_alignment:
         self.query_aligned = sequence(y_str,
                                       seq_type=self.query.type,
                                       name=self.query.name)
+
+    def gen_match_string(self):
+        """
+        Function that creates a string that would show the matches between the aligned sequences.
+        """
+        if self.target_aligned is None:
+            print("ERROR: can't print alignment, run align() first.")
+            return None
+
+        match_string = ""
+        for i in range(len(self.target_aligned)):
+            char_target = self.target_aligned.seq[i]
+            char_query = self.query_aligned.seq[i]
+            if char_target == '-' or char_query == '-':
+                match_string += '-'
+            elif char_query == char_target:
+                match_string += '|'
+            else:
+                match_string += " "
+
+        return match_string
+
+    def print_alignment(self,
+                        highlight_range=None,
+                        n_col=80):
+        """
+        Function to print out the alignment as text to the terminal.
+        """
+        # FIXME: fails at multi-line highlighting.
+
+        # check that an alignment even exists
+        if self.target_aligned is None:
+            print("ERROR: can't print alignment, run align() first.")
+            return
+
+        # if a highlight range is given, make sure that it makes sense
+        if highlight_range is not None:
+            if len(highlight_range) != 2:
+                print("ERROR: highlight range needs two elements.")
+                return
+            if highlight_range[0] > highlight_range[1]:
+                # switcheroo
+                highlight_range[0], highlight_range[1] = highlight_range[1], highlight_range[0]
+
+            start = highlight_range[0]
+            end = highlight_range[1]
+
+        match_string = self.gen_match_string()
+
+        target_cols = split_string_into_list(self.target_aligned.seq, n_col)
+        query_cols = split_string_into_list(self.query_aligned.seq, n_col)
+        match_cols = split_string_into_list(match_string, n_col)
+
+        for i, target_col in enumerate(target_cols):
+            match_col = match_cols[i]
+            query_col = query_cols[i]
+            idx_range = (i * n_col, (i+1) * n_col)
+            if highlight_range is not None:
+                # TODO: simplify
+                if start >= idx_range[0] and start < idx_range[1]:
+                    # start in range
+                    if end < idx_range[0] or end > idx_range[1]:
+                        # end is not in range
+                        print(f"{target_col[:start]}{Fore.RED}{target_col[start:]}")
+                        print(f"{match_col[:start]}{Fore.RED}{match_col[start:]}")
+                        print(f"{query_col[:start]}{Fore.RED}{query_col[start:]}")
+                    else:
+                        # end is also in range
+                        print(f"{target_col[:start]}{Fore.RED}{target_col[start:end]}{Style.RESET_ALL}{target_col[end:]}")
+                        print(f"{match_col[:start]}{Fore.RED}{match_col[start:end]}{Style.RESET_ALL}{match_col[end:]}")
+                        print(f"{query_col[:start]}{Fore.RED}{query_col[start:end]}{Style.RESET_ALL}{query_col[end:]}")
+                else:
+                    # start not in range but end in range
+                    print(f"{target_col[:end]}{Style.RESET_ALL}{target_col[end:]}")
+                    print(f"{match_col[:end]}{Style.RESET_ALL}{match_col[end:]}")
+                    print(f"{query_col[:end]}{Style.RESET_ALL}{query_col[end:]}")
+            else:
+                print(target_col)
+                print(match_col)
+                print(query_col)
+            print("")

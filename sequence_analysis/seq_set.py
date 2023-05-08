@@ -4,6 +4,7 @@ Includes I/O of .fasta files, and various filtering methods.
 """
 
 import time
+import copy
 from sklearn.cluster import SpectralClustering
 import numpy as np
 import networkx as nx
@@ -46,6 +47,17 @@ class seq_set:
     def __len__(self):
         """Overwrites __len__ to return number of sequences within set."""
         return len(self.records)
+
+    def __getitem__(self, key):
+        """Function to slice into the seq_set object."""
+        if isinstance(key, slice):
+            new_set = copy.copy(self)
+            new_set.records = new_set.records[key]
+            return new_set
+        elif isinstance(key, int):
+            return copy.copy(self.records[key])
+        else:
+            raise TypeError
 
     def get_len(self):
         """Function that returns the number of sequences within seq_set."""

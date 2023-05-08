@@ -1,7 +1,9 @@
 import sequence_analysis.utils as sa_utils
 from sequence_analysis.sequence import sequence
 from Bio.Seq import Seq
+import numpy as np
 
+import pdb
 
 class TestUtils:
     def test_blosum_query(self):
@@ -66,3 +68,48 @@ class TestUtils:
         test = [['a',0], ['b',1,2]]
         sorted_test = sa_utils.sort_array_by_column(test, 0)
         assert sorted_test is None
+    
+    def test_split_string_into_list(self):
+        seq = "A" * 1000
+        result = sa_utils.split_string_into_list(seq, 80)
+
+        assert len(result) == 1000 // 80 + 1
+        assert len(result[0]) == 80
+
+    def test_check_range(self):
+        range_idx = (0,10)
+        assert sa_utils.check_range(range_idx)
+
+        range_idx = [0,50]
+        assert sa_utils.check_range(range_idx)
+
+        range_idx = np.array([0,50])
+        assert sa_utils.check_range(range_idx)
+
+        range_idx = [5]
+        assert not sa_utils.check_range(range_idx)
+
+    def test_is_idx_in_range(self):
+        idx = 5
+        range_idx = (0,10)
+        assert sa_utils.is_idx_in_range(idx, range_idx)
+
+        idx = 10
+        range_idx = (0,10)
+        assert not sa_utils.is_idx_in_range(idx, range_idx)
+
+        idx = 50
+        range_idx = (1,10)
+        assert not sa_utils.is_idx_in_range(idx, range_idx)
+
+        idx = 0
+        range_idx = (2,10)
+        assert not sa_utils.is_idx_in_range(idx, range_idx)
+
+    def test_color_substring(self):
+        test_string = "LOREM IPSUM DOLOR"
+        new_string = sa_utils.color_substring(test_string, (6,11))
+
+        # TODO: is this robust?
+        assert new_string[6] == '\x1b'
+        assert new_string[16] == "\x1b"
