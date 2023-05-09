@@ -408,7 +408,7 @@ class sequence:
                 recording = True
             if recording:
                 curr_fragment += curr_codon
-            if curr_codon in stop_codon:
+            if curr_codon in stop_codon or ptr == 3*(len_str-1):
                 if recording:
                     end_ind = ptr + 3
                     if len(curr_fragment) >= min_orf_len:
