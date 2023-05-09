@@ -306,3 +306,26 @@ def color_substring(input_string, range_idx):
         range_idx[1], range_idx[0] = range_idx[0], range_idx[1]
 
     return f"{input_string[:range_idx[0]]}{Fore.RED}{input_string[range_idx[0]:range_idx[1]]}{Style.RESET_ALL}{input_string[range_idx[1]:]}"
+
+def select_substring_with_gaps(input_string,
+                               idx,
+                               len_roi=3,
+                               n_left=10,
+                               n_right=10):
+    """
+    Given an input string, a substring of interest that starts at idx
+    and is of length len_roi, return a string that has n_left chars to
+    the left and n_right chars to the right of the substring of interest.
+    If the substring is not long enough, gaps (-) will be added.
+    """
+    n = len(input_string)
+    add_left = ""
+    add_right = ""
+    if idx < n_left:
+        add_left = '-' * (n_left - idx)
+    if idx + len_roi < n_right:
+        add_right = '-' * (n_right - (n - (idx + len_roi)))
+
+    b = add_left + input_string + add_right
+    new_idx = idx + len(add_left)
+    return b[new_idx - n_left: new_idx + len_roi + n_right]

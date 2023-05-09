@@ -475,7 +475,10 @@ class sequence:
             print("ERROR: aligned and unaligned sequences do not match.")
             return None
 
-
+        if index_without_gaps < start_idx:
+            print("ERROR: the alignment doesn't contain the region of interest.")
+            return None
+        
         index_without_gaps -= start_idx
         
         return self.find_index_with_gaps(index_with_gaps=None,

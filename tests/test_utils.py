@@ -3,8 +3,6 @@ from sequence_analysis.sequence import sequence
 from Bio.Seq import Seq
 import numpy as np
 
-import pdb
-
 class TestUtils:
     def test_blosum_query(self):
         assert (sa_utils.query_blosum50('A', 'A') == 5)
@@ -113,3 +111,11 @@ class TestUtils:
         # TODO: is this robust?
         assert new_string[6] == '\x1b'
         assert new_string[16] == "\x1b"
+
+    def test_select_substring_with_gaps(self):
+        a = "AAAABBBAAAAAA"
+        b = sa_utils.select_substring_with_gaps(a, 4)
+        assert b == '------AAAABBBAAAAAA----'
+
+        b = sa_utils.select_substring_with_gaps(a, 4, n_left=2, n_right=2)
+        assert b == 'AABBBAA'

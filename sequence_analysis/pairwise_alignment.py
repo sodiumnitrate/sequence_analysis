@@ -98,6 +98,8 @@ class pairwise_alignment:
             self.biopython_local()
         elif self.algorithm == "blastn":
             self.biopython_local(blastn=True)
+        elif self.algorithm == "blastp":
+            self.biopython_local(blastp=True)
         else:
             print(
                 f"ERROR: algorithm {self.algorithm} is not recognized. Not aligning.")
@@ -132,13 +134,16 @@ class pairwise_alignment:
 
         self.alignment_indices = alignments[0].aligned
 
-    def biopython_local(self, blastn=False):
+    def biopython_local(self, blastn=False, blastp=False):
         """Function that sets up a local alignment using biopython's PairwiseAligner."""
         seq1 = self.target.seq
         seq2 = self.query.seq
 
         if blastn:
             aligner = Align.PairwiseAligner(scoring='blastn')
+            aligner.mode = 'local'
+        elif blastp:
+            aligner = Align.PairwiseAligner(scoring='blastp')
             aligner.mode = 'local'
         else:
             # setup
