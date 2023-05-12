@@ -210,7 +210,7 @@ def read_blast_output_outfmt7(file_name):
             queries[query_name] = []
             for match in matches:
                 m = match.split()
-                queries[query_name].append([m[0],m[1],float(m[2]), float(m[10])])
+                queries[query_name].append([m[0],m[1],float(m[2]), int(m[3]), float(m[10])])
     return queries
 
 def sort_array_by_column(to_be_sorted, ind_col):
