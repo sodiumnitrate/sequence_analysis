@@ -207,6 +207,8 @@ def read_blast_output_outfmt7(file_name):
 
             matches = lines[start_ind:end_ind]
             query_name = lines[start_ind].split()[0]
+            if query_name == '#':
+                continue
             queries[query_name] = []
             for match in matches:
                 m = match.split()

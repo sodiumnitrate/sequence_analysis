@@ -3,6 +3,7 @@ This file holds the open reading frame class.
 """
 import sequence_analysis.sequence as seq
 
+
 class OpenReadingFrame:
     """
     This class holds the open reading frame information for a given dna or 
@@ -38,5 +39,3 @@ class OpenReadingFrame:
         assert isinstance(self.frame, int)
         assert self.frame == 0 or self.frame == 1 or self.frame == 2
         assert isinstance(self.protein_sequence, seq.sequence) or self.protein_sequence is None
-
-    

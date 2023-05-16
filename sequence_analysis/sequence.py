@@ -16,6 +16,8 @@ from sequence_analysis.utils import stop_codon
 from sequence_analysis.utils import stop_codon_re
 from sequence_analysis.open_reading_frame import OpenReadingFrame
 
+import pdb
+
 class sequence:
     """This class corresponds to a single biological sequence (protein, rna, or dna)"""
     # TODO: implement slicing
@@ -518,3 +520,108 @@ class sequence:
                     result += 1
                 if result == index_without_gaps:
                     return i
+
+    def find_start_codons(self):
+        """
+        Function that finds the start codons, assuming we are in the correct reading frame.
+        """
+        seq_str = self.seq
+        indices = []
+        n = len(seq_str)
+        if self.type == 'protein':
+            for ptr in range(n):
+                if seq_str[ptr] == "M":
+                    indices.append(ptr)
+        elif self.type == 'dna' or self.type == 'rna':
+            for ptr in range(0, n, 3):
+                curr_codon = seq_str[ptr:ptr+3]
+                if curr_codon in start_codon:
+                    indices.append(ptr)
+        else:
+            print("ERROR: unknown sequence type.")
+            return None
+
+        return indices
+
+    def get_letter_frequencies(self):
+        """
+        Function that determines the frequencies of each letter (non-position-specific)
+        and returns a dictionary.
+        """
+        if self.type == "protein":
+            letters = {char:0 for char in aa_alphabet}
+        elif self.type == "dna":
+            letters = {char:0 for char in dna_alphabet}
+        elif self.type == "rna":
+            letters = {char:0 for char in rna_alphabet}
+        else:
+            print("WARNING: sequence type not recognized.")
+            return None
+
+        for char in self.seq:
+            letters[char] += 1
+
+        return letters
+
+    def get_start_codon_nucleotide_frequencies(self, n_upstream=15, n_downstream=15):
+        """
+        Function that determines start codons, and calculates frequencies of nucleotides
+        at positions relative to the start codon.
+        """
+        if self.type != "rna" and self.type != "dna":
+            print("ERROR: type has to be nucleotide")
+            return None
+        frequencies = {}
+
+        #TODO: decide whether to include the other DNA strand as well
+        for frame in range(3):
+            shifted = self.frame_shift(frame=frame)
+
+            for ptr in range(0, len(shifted)+3, 3):
+                curr_codon = shifted[ptr:ptr+3]
+                if curr_codon in start_codon:
+                    start_idx = ptr - n_upstream
+                    end_idx = ptr + n_downstream + 3
+                    if start_idx >= 0 and end_idx < len(shifted):
+                        selected = shifted[start_idx:end_idx]
+                        for i, char in enumerate(selected):
+                            pos = i - n_upstream
+                            key = (char, pos)
+                            if key in frequencies.keys():
+                                frequencies[key] += 1
+                            else:
+                                frequencies[key] = 1
+        return frequencies
+
+    def get_start_codon_nucleotide_frequencies_re(self, n_upstream=15, n_downstream=15):
+        """
+        The same as above, but with regex.
+        """
+
+        # compile re
+        if self.type == 'rna':
+            p = re.compile('AUG')
+            possible_chars = ['A','U','C','G','N']
+        else:
+            p = re.compile('ATG')
+            possible_chars = ['A','T','C','G','N']
+        seq_str = self.seq
+
+        # initialize dict
+        frequencies = {}
+        positions = list(range(-1*n_upstream,0,1)) + list(range(0,n_downstream+4))
+        for char in possible_chars:
+            for pos in positions:
+                frequencies[(char, pos)] = 0
+
+        for match in p.finditer(seq_str):
+            start_idx = match.start() - n_upstream
+            end_idx = match.end() + n_downstream 
+            if start_idx >= 0 and end_idx < len(seq_str):
+                selected = seq_str[start_idx:end_idx]
+                for i, char in enumerate(selected):
+                    pos = i - n_upstream
+                    key = (char, pos)
+                    frequencies[key] += 1
+
+        return frequencies

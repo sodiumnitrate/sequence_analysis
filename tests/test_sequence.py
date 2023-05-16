@@ -146,3 +146,40 @@ class TestSequence:
         
         sub_seq = seq[4:8]
         assert sub_seq == 'GGGG'
+
+    def test_find_start_codon_dna(self):
+        seq = sequence("ATGAATGCCATGCCA")
+        idx = seq.find_start_codons()
+
+        assert len(idx) == 2
+        assert idx[0] == 0
+        assert idx[1] == 9
+
+    def test_find_start_codon_prot(self):
+        seq = sequence("MTTMGYM")
+        idx = seq.find_start_codons()
+
+        assert len(idx) == 3
+        assert idx[0] == 0
+        assert idx[1] == 3
+        assert idx[2] == 6
+
+    def test_letter_freqs_prot(self):
+        seq = sequence("MDMALKALI")
+        letters = seq.get_letter_frequencies()
+        assert letters['M'] == 2
+        assert letters['G'] == 0
+
+    def test_letter_freqs_dna(self):
+        seq = sequence("ATGATGGGC")
+        letters = seq.get_letter_frequencies()
+
+        assert letters['G'] == 4
+        assert letters['T'] == 2
+
+    def test_letter_freqs_rna(self):
+        seq = sequence("AUGAUGAAC")
+        letters = seq.get_letter_frequencies()
+
+        assert letters['A'] == 4
+        assert letters['U'] == 2
