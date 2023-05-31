@@ -119,3 +119,26 @@ class TestUtils:
 
         b = sa_utils.select_substring_with_gaps(a, 4, n_left=2, n_right=2)
         assert b == 'AABBBAA'
+
+    def test_write_in_columns(self):
+        a = "A" * 500
+        f = open('aux_files/write_in_cols.dat','w')
+        sa_utils.write_in_columns(f, a, ncols=10)
+        f.close()
+
+        with open('aux_files/write_in_cols.dat', 'r') as f:
+            lines = f.readlines()
+
+        assert len(lines) == 50
+
+    def test_write_in_columns_2(self):
+        a = "A" * 500
+        f = open('aux_files/write_in_cols.dat','w')
+        sa_utils.write_in_columns(f, a, ncols=79)
+        f.close()
+
+        with open('aux_files/write_in_cols.dat', 'r') as f:
+            lines = f.readlines()
+
+        assert len(lines) == 7
+        assert len(lines[-1].strip()) == 26

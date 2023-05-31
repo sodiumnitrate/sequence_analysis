@@ -12,12 +12,12 @@ from Bio import SeqIO
 from sequence_analysis.utils import add_dicts
 from sequence_analysis.sequence import sequence
 from sequence_analysis.utils import dna_alphabet, gen_non_overlapping_points, generate_random_color
-from sequence_analysis.utils import rna_alphabet, diff_letters
+from sequence_analysis.utils import rna_alphabet, diff_letters, write_in_columns, aa_alphabet
 from sequence_analysis.pairwise_alignment import pairwise_alignment
+import re
 
 class seq_set:
     """This class holds a list of sequence objects of a given type."""
-    # TODO: implement slicing
     def __init__(self, list_of_sequences=None, file_name=None, seq_type=None):
         if list_of_sequences is None:
             list_of_sequences = []
@@ -75,11 +75,7 @@ class seq_set:
                 name = f"> {i}"
             file.write(name)
             file.write('\n')
-            for count, char in enumerate(seq_string):
-                if count % 79 == 0 and count != 0:
-                    file.write('\n')
-                file.write(char)
-            file.write('\n')
+            write_in_columns(file, seq_string, ncols=79)
         file.close()
 
     def write_fasta_in_parts(self, file_name, n_seq=1000):
@@ -158,6 +154,8 @@ class seq_set:
                 else:
                     if record != self.records[i - 1]:
                         unique_records.append(self.records[i])
+                    else:
+                        unique_records[-1].name += f"_{record.name}"
 
             self.records = unique_records
 
@@ -522,3 +520,88 @@ class seq_set:
         for seq in self.records:
             n_cut = min(len(seq), N)
             seq.seq = seq.seq[:n_cut]
+
+    def add_gaps_to_align_pattern(self, pattern):
+        """
+        Given a pattern, add gaps to the beginning of the sequence so that the patterns
+        align for all the sequences.
+
+        Takes into account only the first occurence of the pattern.
+        """
+
+        pattern = re.compile(pattern)
+        indices = []
+        for seq in self:
+            try:
+                idx = pattern.search(seq.seq).start()
+            except AttributeError:
+                idx = -1
+            indices.append(idx)
+
+        max_idx = max(indices)
+        for i, seq in enumerate(self.records):
+            idx = indices[i]
+            if idx != -1:
+                n_chars = max_idx - idx
+                seq.seq = '-' * n_chars + seq.seq
+
+        return
+
+    def create_sequence_logo(self, char_range):
+        """
+        Function to generate the information necessary for a sequence logo.
+        """
+        if self.type == 'dna':
+            alphabet = dna_alphabet
+            s = 4
+        elif self.type == 'rna':
+            alphabet = rna_alphabet
+            s = 4
+        elif self.type == 'protein':
+            alphabet = aa_alphabet
+            s = 20
+        else:
+            print("ERROR: sequence set type not detected.")
+            raise TypeError
+
+        # create frequency matrix
+        start = char_range[0]
+        end = char_range[1]
+        frequencies = [[0 for _ in range(start, end)] for _ in alphabet]
+
+        # create matrix that will hold the number of characters at that position
+        counts = [0 for _ in range(start, end)]
+
+        for seq in self:
+            for i, char in enumerate(seq):
+                if i >= start and i < end:
+                    idx = i - start
+                    counts[idx] += 1
+                    char_idx = alphabet.index(char)
+                    frequencies[char_idx][idx] += 1
+
+        # normalize freqs
+        for l, ff in enumerate(frequencies):
+            for i, _ in enumerate(ff):
+                frequencies[l][i] /= counts[i]
+
+        # TODO: cleanup
+        # calculating the information content
+        e_n = [1./np.log(2) * (s-1.)/(2*c) for c in counts]
+        R_i = [0 for _ in range(start, end)]
+        H_i = [0 for _ in range(start, end)]
+        height = [[0 for _ in range(start, end)] for _ in alphabet]
+        for i in range(len(alphabet)):
+            for j in range(len(counts)):
+                freq = frequencies[i][j]
+                if freq != 0:
+                    H_i[j] += -1 * freq * np.log2(freq)
+
+        for i in range(len(counts)):
+            R_i[i] = np.log2(s) - (H_i[i] + e_n[i])
+
+        for i in range(len(alphabet)):
+            for j in range(len(counts)):
+                height[i][j] = frequencies[i][j] * R_i[j]
+
+        return alphabet, height

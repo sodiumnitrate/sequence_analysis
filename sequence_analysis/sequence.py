@@ -12,9 +12,11 @@ from colorama import Fore, Back, Style
 from sequence_analysis.utils import ww
 from sequence_analysis.utils import mw_aa
 from sequence_analysis.utils import start_codon
-from sequence_analysis.utils import stop_codon
-from sequence_analysis.utils import stop_codon_re
+from sequence_analysis.utils import stop_codon, movmean
+from sequence_analysis.utils import stop_codon_re, write_in_columns
 from sequence_analysis.open_reading_frame import OpenReadingFrame
+from scipy.signal import periodogram
+import numpy as np
 
 import pdb
 
@@ -127,7 +129,7 @@ class sequence:
         s = str(s.translate())
         s = s.strip("X")
 
-        return sequence(s)
+        return sequence(s,name=self.name,seq_type='protein')
 
     def find_codon(self, codon):
         """
@@ -348,23 +350,40 @@ class sequence:
 
     def calculate_interface_affinity(self, span=None, kcal_per_mol=True):
         """Function to calculate interface affinity of the sequence using the Wimley-White scale."""
+        if self.type != 'protein':
+            print("ERROR: must be a protein sequence")
+            raise TypeError
         if span is None:
             span = (0, len(self.seq))
         else:
             assert (len(span) == 2)
             span = (min(span), max(span))
 
-        assert (self.type == 'protein')
 
-        seq = []
         int_affinity = []
-
         for i in range(span[0], span[1]):
             aa = self.seq[i]
+            if aa == "*":
+                continue
             int_affinity.append(ww[aa] * -1)
-            seq.append(aa)
 
-        return int_affinity, seq
+        return int_affinity
+
+    def find_interface_affinity_period(self, window=5):
+        """
+        Function to find the periodicity in the protein interface affinity.
+        """
+        if self.type != 'protein':
+            print("ERROR: must be a protein sequence")
+            raise TypeError
+        # since we calculate a moving average, any frequency above a certain freq will be meaningless
+        int_affinity = self.calculate_interface_affinity()
+        f, p = periodogram(movmean(int_affinity,window), 1)
+        # exclude f=0
+        f_res = f[np.argmax(p[1:])+1]
+        return 1./f_res
+
+
 
     def calculate_weight(self):
         """Function to calculate the weight in Da of the given sequence."""
@@ -470,8 +489,6 @@ class sequence:
             return None
         
         seq_no_gaps = self.seq.replace('-','')
-        seq_str = self.seq
-        n_subseq = len(seq_no_gaps)
         start_idx = unaligned_seq.seq.find(seq_no_gaps)
         if start_idx == -1:
             print("ERROR: aligned and unaligned sequences do not match.")
@@ -543,6 +560,28 @@ class sequence:
 
         return indices
 
+    def find_stop_codons(self):
+        """
+        Function that finds the stop codons, assuming we are in the correct reading frame.
+        """
+        seq_str = self.seq
+        indices = []
+        n = len(seq_str)
+        if self.type == 'protein':
+            for ptr in range(n):
+                if seq_str[ptr] == "M":
+                    indices.append(ptr)
+        elif self.type == 'dna' or self.type == 'rna':
+            for ptr in range(0, n, 3):
+                curr_codon = seq_str[ptr:ptr+3]
+                if curr_codon in stop_codon:
+                    indices.append(ptr)
+        else:
+            print("ERROR: unknown sequence type.")
+            return None
+
+        return indices
+
     def get_letter_frequencies(self):
         """
         Function that determines the frequencies of each letter (non-position-specific)
@@ -563,7 +602,7 @@ class sequence:
 
         return letters
 
-    def get_start_codon_nucleotide_frequencies(self, n_upstream=15, n_downstream=15):
+    def get_start_codon_nucleotide_frequencies(self, n_upstream=15, n_downstream=15, frames=None):
         """
         Function that determines start codons, and calculates frequencies of nucleotides
         at positions relative to the start codon.
@@ -571,10 +610,33 @@ class sequence:
         if self.type != "rna" and self.type != "dna":
             print("ERROR: type has to be nucleotide")
             return None
+
+        # init the frequencies dict
         frequencies = {}
 
-        #TODO: decide whether to include the other DNA strand as well
-        for frame in range(3):
+        # make sure that the frames input is meaningful
+        if frames is None:
+            frames = range(3)
+        elif isinstance(frames, list):
+            # check that all we have is 0, 1, and 2
+            if len(frames) > 3:
+                print("ERROR: frames have to be a subset of [0, 1, 2].")
+                raise ValueError
+            for f in frames:
+                if f not in [0, 1, 2]:
+                    print("ERROR: the chosen frame has to be 0, 1, or 2.")
+                    raise ValueError
+        elif isinstance(frames, int):
+            if frames not in [0, 1, 2]:
+                print("ERROR: the chosen frame has to be 0, 1, or 2.")
+                raise ValueError
+            frames = [frames]
+        else:
+            print("ERROR: frames input not understood.")
+            raise TypeError
+
+        # process all requested frames
+        for frame in frames:
             shifted = self.frame_shift(frame=frame)
 
             for ptr in range(0, len(shifted)+3, 3):
@@ -625,3 +687,26 @@ class sequence:
                     frequencies[key] += 1
 
         return frequencies
+
+    def write_fasta(self, file_name, append=True):
+        """
+        Function that writes sequence to a .fasta file. If append
+        is True, the .fasta file is appended by the sequence.
+
+        Bypasses the creation of seq_set to write sequences to file.
+        Useful for pyspark and other large set manipulations.
+        """
+        if append:
+            file = open(file_name, 'a', encoding='utf-8')
+        else:
+            file = open(file_name, 'w', encoding='utf-8')
+
+        if self.name is not None:
+            name = ">" + self.name
+        else:
+            name = ">"
+
+        file.write(name)
+        file.write('\n')
+        write_in_columns(file, self.seq, ncols=79)
+        file.close()

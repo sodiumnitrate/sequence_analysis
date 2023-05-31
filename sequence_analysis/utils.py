@@ -116,6 +116,25 @@ def add_dicts(dict1, dict2):
 
     return dict1
 
+def merge_dicts(dict1, dict2):
+    """
+    Function that merges two dicts such that:
+    - if a key exists in both, the corresponding values are added
+    - if a key does not exist in both, it gets added to the final dict
+      without any manip of the value
+    """
+    new_dict = {}
+    for key, val in dict1.items():
+        new_dict[key] = val
+
+    for key, val in dict2.items():
+        if key in new_dict.keys():
+            new_dict[key] += val
+        else:
+            new_dict[key] = val
+
+    return new_dict
+
 
 def movmean(nums, window=5):
     """Function that calculates the moving mean of a list of numbers."""
@@ -331,3 +350,16 @@ def select_substring_with_gaps(input_string,
     b = add_left + input_string + add_right
     new_idx = idx + len(add_left)
     return b[new_idx - n_left: new_idx + len_roi + n_right]
+
+def write_in_columns(file_handle, string_to_write, ncols=79):
+    """
+    Given a string, write it into a file by splitting larger lines
+    such that the number of characters in a line is ncols + \n.
+
+    Useful for writing fasta files.
+    """
+    for count, char in enumerate(string_to_write):
+        if count % (ncols) == 0 and count != 0:
+            file_handle.write('\n')
+        file_handle.write(char)
+    file_handle.write('\n')
