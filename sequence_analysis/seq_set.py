@@ -574,6 +574,8 @@ class seq_set:
 
         for seq in self:
             for i, char in enumerate(seq):
+                if char == '-':
+                    continue
                 if i >= start and i < end:
                     idx = i - start
                     counts[idx] += 1
@@ -583,7 +585,8 @@ class seq_set:
         # normalize freqs
         for l, ff in enumerate(frequencies):
             for i, _ in enumerate(ff):
-                frequencies[l][i] /= counts[i]
+                if counts[i] != 0:
+                    frequencies[l][i] /= counts[i]
 
         # TODO: cleanup
         # calculating the information content

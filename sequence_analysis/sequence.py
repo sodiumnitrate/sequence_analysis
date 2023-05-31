@@ -365,7 +365,10 @@ class sequence:
             aa = self.seq[i]
             if aa == "*":
                 continue
-            int_affinity.append(ww[aa] * -1)
+            if aa == '-':
+                int_affinity.append(0)
+            else:
+                int_affinity.append(ww[aa] * -1)
 
         return int_affinity
 

@@ -87,7 +87,7 @@ class TestSeqSet:
         seq1 = sequence("MDMALKALI")
         seq2 = sequence("ALKALIMDM")
         seq3 = sequence("MALKALIDM")
-        seq4 = sequence("ALMDMKALI")
+        seq4 = sequence("AL-DMKALI")
 
         seqs = seq_set(list_of_sequences=[seq1, seq2, seq3, seq4])
 
