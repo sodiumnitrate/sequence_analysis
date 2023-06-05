@@ -1,7 +1,6 @@
 from sequence_analysis.genbank_entry import GenBankEntry
 from sequence_analysis.sequence import sequence
 
-
 class TestGenBankEntry:
     def test_fetch(self):
         accession_code = "HE687196.1"
@@ -65,6 +64,14 @@ class TestGenBankEntry:
     def test_fetch_protein_2(self):
         code = "BAH14572.1"
         entry = GenBankEntry(accession_code=code, db='protein')
+        entry.fetch(e_mail="irem.altan@yale.edu", skip_origin=False)
+
+        assert entry.protein_name is not None
+
+    def test_fetch_protein_3(self):
+        code = "5OF9_A"
+        entry = GenBankEntry(accession_code=code, db='protein')
+
         entry.fetch(e_mail="irem.altan@yale.edu", skip_origin=False)
 
         assert entry.protein_name is not None

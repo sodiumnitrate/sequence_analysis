@@ -125,6 +125,11 @@ class GenBankEntry:
         """Function to get protein name if db=protein."""
         exists = "Protein" in self.text
         if not exists:
+            self.protein_name = self.definition
+            return
+
+        if "product=" not in self.text and "/name=" not in self.text:
+            self.protein_name = self.definition
             return
 
         try:
