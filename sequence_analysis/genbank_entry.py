@@ -12,7 +12,8 @@ class GenBankEntry:
                  accession_code,
                  percent_identity=None,
                  e_value=None,
-                 query=None):
+                 query=None,
+                 db='nucleotide'):
         """
         Function to initialize GenBankEntry object.
         """
@@ -21,6 +22,8 @@ class GenBankEntry:
         self.percent_identity = percent_identity
         self.e_value = e_value
         self.query = query
+
+        self.db = db
 
         # attributes to get from genbank
         self.text = None
@@ -32,12 +35,12 @@ class GenBankEntry:
         self.protein_name = None
         
 
-    def fetch(self, e_mail, db='nucleotide', skip_origin=True):
+    def fetch(self, e_mail, skip_origin=True):
         """
         Function to fetch info from genbank.
         """
         Entrez.email = e_mail
-        handle = Entrez.efetch(db=db,
+        handle = Entrez.efetch(db=self.db,
                                id=self.accession_code,
                                rettype='gb')
 
@@ -89,7 +92,10 @@ class GenBankEntry:
         if exists:
             string = self.text.split("ORIGIN")[1].split("//")[0].replace("\n","").replace(" ","")
             str2 = "".join(x for x in string if x.isalpha())
-            self.dna_sequence = sequence(str2)
+            if self.db == "nucleotide":
+                self.dna_sequence = sequence(str2)
+            elif self.db == "protein":
+                self.protein_sequence = sequence(str2)
 
     def get_protein(self):
         """Function to get protein sequence if it exists."""
