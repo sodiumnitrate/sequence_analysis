@@ -60,3 +60,4 @@ class TestGenBankEntry:
 
         assert isinstance(entry.protein_sequence, sequence)
         assert entry.dna_sequence is None
+        assert entry.protein_name is not None

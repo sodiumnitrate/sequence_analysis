@@ -53,7 +53,10 @@ class GenBankEntry:
         self.get_organism()
         if not skip_origin:
             self.get_origin()
-        self.get_protein()
+        if self.db == "nucleotide":
+            self.get_protein_nucleotide()
+        elif self.db == "protein":
+            self.get_protein_name_protein()
 
     def extract_main_keyword(self, keyword):
         """
@@ -97,8 +100,8 @@ class GenBankEntry:
             elif self.db == "protein":
                 self.protein_sequence = sequence(str2)
 
-    def get_protein(self):
-        """Function to get protein sequence if it exists."""
+    def get_protein_nucleotide(self):
+        """For a query in the nucleotide db, get protein sequence if it exists."""
         exists = "/translation=" in self.text
         if not exists:
             return
@@ -117,3 +120,12 @@ class GenBankEntry:
 
         string = self.text.split("translation=")[1].split('"')[1].replace("\n","").replace(" ","")
         self.protein_sequence = sequence(string)
+
+    def get_protein_name_protein(self):
+        """Function to get protein name if db=protein."""
+        exists = "Protein" in self.text
+        if not exists:
+            return
+
+        string = self.text.split("product=")[1].split("\n")[0].strip('"')
+        self.protein_name = string
