@@ -32,12 +32,12 @@ class GenBankEntry:
         self.protein_name = None
         
 
-    def fetch(self, e_mail, skip_origin=True):
+    def fetch(self, e_mail, db='nucleotide', skip_origin=True):
         """
         Function to fetch info from genbank.
         """
         Entrez.email = e_mail
-        handle = Entrez.efetch(db='nucleotide',
+        handle = Entrez.efetch(db=db,
                                id=self.accession_code,
                                rettype='gb')
 
