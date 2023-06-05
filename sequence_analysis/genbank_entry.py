@@ -127,5 +127,8 @@ class GenBankEntry:
         if not exists:
             return
 
-        string = self.text.split("product=")[1].split("\n")[0].strip('"')
+        try:
+            string = self.text.split("product=")[1].split("\n")[0].strip('"')
+        except IndexError:
+            string = self.text.split("/name=")[1].split("\n")[0].strip('"')
         self.protein_name = string

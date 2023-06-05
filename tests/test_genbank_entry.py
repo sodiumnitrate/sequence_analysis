@@ -61,3 +61,10 @@ class TestGenBankEntry:
         assert isinstance(entry.protein_sequence, sequence)
         assert entry.dna_sequence is None
         assert entry.protein_name is not None
+
+    def test_fetch_protein_2(self):
+        code = "BAH14572.1"
+        entry = GenBankEntry(accession_code=code, db='protein')
+        entry.fetch(e_mail="irem.altan@yale.edu", skip_origin=False)
+
+        assert entry.protein_name is not None
