@@ -713,3 +713,16 @@ class sequence:
         file.write('\n')
         write_in_columns(file, self.seq, ncols=79)
         file.close()
+
+    def find_indices_of_match(self, regex):
+        """
+        Given a regular expression, find all indices of match and return.
+        (index of the beginning of the match)
+        """
+
+        pattern = re.compile(regex)
+        indices = []
+        for x in pattern.finditer(self.seq):
+            indices.append(x.span()[0])
+
+        return indices

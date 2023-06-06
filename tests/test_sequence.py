@@ -183,3 +183,15 @@ class TestSequence:
 
         assert letters['A'] == 4
         assert letters['U'] == 2
+
+    def test_find_indices_match(self):
+        seq = sequence("ALKALIALRALILK")
+        regex = "L[KR]"
+
+        indices = seq.find_indices_of_match(regex)
+
+        assert len(indices) == 3
+
+        assert indices[0] == 1
+        assert indices[1] == 7
+        assert indices[2] == 12
