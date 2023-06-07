@@ -1,7 +1,6 @@
 from sequence_analysis.sequence import sequence
 from sequence_analysis.seq_set import seq_set
-
-import pdb
+import re
 
 class TestSequence:
     def test_translate(self):
@@ -195,3 +194,22 @@ class TestSequence:
         assert indices[0] == 1
         assert indices[1] == 7
         assert indices[2] == 12
+
+    def test_find_indices_match_2(self):
+        seq = sequence("ALKALIALRALILK")
+        regex = re.compile("L[KR]")
+
+        indices = seq.find_indices_of_match(regex)
+
+        assert len(indices) == 3
+
+        assert indices[0] == 1
+        assert indices[1] == 7
+        assert indices[2] == 12
+
+    def test_find_kmers(self):
+        seq = sequence("ALKALI")
+        two_mers = seq.find_kmers(2)
+        assert len(list(two_mers.keys())) == 4
+        assert two_mers['AL'] == 2
+        assert two_mers['LK'] == 1

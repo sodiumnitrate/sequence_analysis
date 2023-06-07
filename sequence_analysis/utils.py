@@ -363,3 +363,20 @@ def write_in_columns(file_handle, string_to_write, ncols=79):
             file_handle.write('\n')
         file_handle.write(char)
     file_handle.write('\n')
+
+def find_kmers_in_string(input_string, k):
+    """
+    Given a string, find all kmers of length k, with their frequency.
+    """
+    n = len(input_string)
+    all_kmers = []
+    for i in range(n-k+1):
+        substr = input_string[i:i+k]
+        all_kmers.append(substr)
+
+    uniq_kmers = list(set(all_kmers))
+    kmers_with_count = {}
+    for kmer in uniq_kmers:
+        kmers_with_count[kmer] = all_kmers.count(kmer)
+
+    return kmers_with_count

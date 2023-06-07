@@ -14,6 +14,7 @@ from sequence_analysis.sequence import sequence
 from sequence_analysis.utils import dna_alphabet, gen_non_overlapping_points, generate_random_color
 from sequence_analysis.utils import rna_alphabet, diff_letters, write_in_columns, aa_alphabet
 from sequence_analysis.pairwise_alignment import pairwise_alignment
+from sequence_analysis.utils import merge_dicts
 import re
 
 class seq_set:
@@ -608,3 +609,16 @@ class seq_set:
                 height[i][j] = frequencies[i][j] * R_i[j]
 
         return alphabet, height
+
+    def find_kmers(self, k):
+        """
+        Function to find kmerrs of length k in all the sequences in the set, with
+        their frequencies.
+        """
+
+        kmers = {}
+        for seq in self:
+            curr_kmer = seq.find_kmers(k)
+            kmers = merge_dicts(kmers, curr_kmer)
+
+        return kmers

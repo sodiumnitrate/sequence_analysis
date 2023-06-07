@@ -142,3 +142,27 @@ class TestUtils:
 
         assert len(lines) == 7
         assert len(lines[-1].strip()) == 26
+
+    def test_find_kmers(self):
+        test_string = "ACACACA"
+        two_mers = sa_utils.find_kmers_in_string(test_string, 2)
+        three_mers = sa_utils.find_kmers_in_string(test_string, 3)
+
+        assert len(two_mers) == 2
+        assert len(three_mers) == 2
+        assert len(list(three_mers.keys())[0]) == 3
+        assert len(list(three_mers.keys())[1]) == 3
+
+    def test_find_kmers_2(self):
+        test_string = "ALKALI"
+        five_mers = sa_utils.find_kmers_in_string(test_string, 5)
+        assert len(list(five_mers.keys())) == 2
+        assert five_mers['ALKAL'] == 1
+        assert five_mers['LKALI'] == 1
+
+        six_mers = sa_utils.find_kmers_in_string(test_string, 6)
+        assert len(list(six_mers.keys())) == 1
+        assert six_mers['ALKALI'] == 1
+
+        seven = sa_utils.find_kmers_in_string(test_string, 7)
+        assert not seven

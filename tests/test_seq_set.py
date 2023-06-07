@@ -103,3 +103,14 @@ class TestSeqSet:
 
         # I expect the same information content in position 0 and position 7
         assert height_sums[0] == height_sums[-1]
+
+    def test_kmer(self):
+        seq1 = sequence("ALKALI")
+        seq2 = sequence("ACACACA")
+        sequences = seq_set(list_of_sequences=[seq1, seq2])
+
+        two_mers = sequences.find_kmers(2)
+
+        assert len(list(two_mers.keys())) == 6
+        assert two_mers['AC'] == 3
+        assert two_mers['AL'] == 2

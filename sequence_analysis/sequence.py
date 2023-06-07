@@ -11,7 +11,7 @@ from sequence_analysis.utils import diff_letters
 from colorama import Fore, Back, Style
 from sequence_analysis.utils import ww
 from sequence_analysis.utils import mw_aa
-from sequence_analysis.utils import start_codon
+from sequence_analysis.utils import start_codon,find_kmers_in_string
 from sequence_analysis.utils import stop_codon, movmean
 from sequence_analysis.utils import stop_codon_re, write_in_columns
 from sequence_analysis.open_reading_frame import OpenReadingFrame
@@ -348,8 +348,11 @@ class sequence:
         substring = self.seq[span[0]:span[1] + 1]
         return substring
 
-    def calculate_interface_affinity(self, span=None, kcal_per_mol=True):
-        """Function to calculate interface affinity of the sequence using the Wimley-White scale."""
+    def calculate_interface_affinity(self, span=None):
+        """
+        Function to calculate interface affinity of the sequence using the Wimley-White scale.
+        Calculates delta_G of transfer from bulk water to POPC-water interface in kcal/mol.
+        """
         if self.type != 'protein':
             print("ERROR: must be a protein sequence")
             raise TypeError
@@ -360,15 +363,8 @@ class sequence:
             span = (min(span), max(span))
 
 
-        int_affinity = []
-        for i in range(span[0], span[1]):
-            aa = self.seq[i]
-            if aa == "*":
-                continue
-            if aa == '-':
-                int_affinity.append(0)
-            else:
-                int_affinity.append(ww[aa] * -1)
+        aff = self.get_value_array_based_on_rule(ww)
+        int_affinity = [val * -1 for i, val in enumerate(aff) if i>=span[0] and i<=span[1]]
 
         return int_affinity
 
@@ -719,10 +715,76 @@ class sequence:
         Given a regular expression, find all indices of match and return.
         (index of the beginning of the match)
         """
-
-        pattern = re.compile(regex)
+        if isinstance(regex, str):
+            pattern = re.compile(regex)
+        elif isinstance(regex, re.Pattern):
+            pattern = regex
+        else:
+            print(f"ERROR: input regex of {type(regex)} not supported.")
+            raise TypeError
         indices = []
         for x in pattern.finditer(self.seq):
             indices.append(x.span()[0])
 
         return indices
+
+    def get_value_array_based_on_rule(self, rule_dict):
+        """
+        Given a dictionary of rules that assigns values to letters,
+        return an array of values that correspond to the sequence.
+        """
+        keys = set(list(rule_dict.keys()))
+        wrong = False
+        if self.type == 'protein':
+            if keys != set(aa_alphabet):
+                wrong = True
+        elif self.type == 'dna':
+            if keys != set(dna_alphabet):
+                wrong = True
+        elif self.type == 'rna':
+            if keys != set(rna_alphabet):
+                wrong = True
+        else:
+            print(f"ERROR: wrong sequence type ({self.type}).")
+            raise TypeError
+        if wrong:
+            print(f"ERROR: rule dictionary doesn't have keys consistent with sequence type {self.type}.")
+            raise KeyError
+
+        vals = []
+        for char in self.seq:
+            vals.append(rule_dict[char])
+
+        return vals
+
+
+    def find_period_based_on_rule(self, rule_dict, period_range=(5,200), window=5):
+        """
+        Given a rule dictionary that assigns values to letters, return
+        the most dominant period from periodogram.
+
+        Peaks in periodogram within the given period range are considered.
+        """
+        if not isinstance(rule_dict, dict):
+            print("ERROR: rule_dict should be of type dict.")
+            raise TypeError
+        vec = self.get_value_array_based_on_rule(rule_dict=rule_dict)
+
+        freq_range = [1./max(period_range), 1./min(period_range)]
+
+        f, p = periodogram(movmean(vec, window), 1)
+        p_max = 0
+        f_max = 0
+        for i, f_val in enumerate(f):
+            if f_val >= freq_range[0] and f_val <= freq_range[1]:
+                if p[i] > p_max:
+                    p_max = p[i]
+                    f_max = f_val
+
+        return 1./f_max
+
+    def find_kmers(self, k):
+        """
+        Function to find kmers in the sequence with their frequencies.
+        """
+        return find_kmers_in_string(self.seq, k)
