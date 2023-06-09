@@ -3,6 +3,8 @@ from sequence_analysis.sequence import sequence
 from Bio.Seq import Seq
 import numpy as np
 
+import pdb
+
 class TestUtils:
     def test_blosum_query(self):
         assert (sa_utils.query_blosum50('A', 'A') == 5)
@@ -166,3 +168,13 @@ class TestUtils:
 
         seven = sa_utils.find_kmers_in_string(test_string, 7)
         assert not seven
+
+    def test_find_kmers_in_list(self):
+        seq = list("AAACAAACALKAA")
+        twomers = sa_utils.find_kmers_in_list(seq, 2)
+        assert len(twomers) == 6
+        assert twomers[('A','A')] == 5
+
+        threemers = sa_utils.find_kmers_in_list(seq, 3)
+        assert len(threemers) == 8
+        assert threemers[('A','A','A')] == 2

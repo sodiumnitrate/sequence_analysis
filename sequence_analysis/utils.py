@@ -368,6 +368,7 @@ def find_kmers_in_string(input_string, k):
     """
     Given a string, find all kmers of length k, with their frequency.
     """
+    # TODO: simplify using the one below
     n = len(input_string)
     all_kmers = []
     for i in range(n-k+1):
@@ -380,3 +381,20 @@ def find_kmers_in_string(input_string, k):
         kmers_with_count[kmer] = all_kmers.count(kmer)
 
     return kmers_with_count
+
+def find_kmers_in_list(input_list, k):
+    """
+    Given a list of strings, find all kmers of a given length k, along with
+    their frequency.
+    """
+    # TODO: merge with the above function?
+    n = len(input_list)
+    all_kmers = {}
+    for i in range(n-k+1):
+        sublist = tuple(input_list[i:i+k])
+        if sublist in all_kmers:
+            all_kmers[sublist] += 1
+        else:
+            all_kmers[sublist] = 1
+
+    return all_kmers
