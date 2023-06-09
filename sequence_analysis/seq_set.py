@@ -612,7 +612,7 @@ class seq_set:
 
     def find_kmers(self, k):
         """
-        Function to find kmerrs of length k in all the sequences in the set, with
+        Function to find kmers of length k in all the sequences in the set, with
         their frequencies.
         """
 
