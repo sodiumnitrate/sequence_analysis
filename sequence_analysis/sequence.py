@@ -18,11 +18,9 @@ from sequence_analysis.open_reading_frame import OpenReadingFrame
 from scipy.signal import periodogram
 import numpy as np
 
-import pdb
 
 class sequence:
     """This class corresponds to a single biological sequence (protein, rna, or dna)"""
-    # TODO: implement slicing
 
     def __init__(self, seq, name=None, seq_type=None):
         """This function initializes the sequence object."""
@@ -172,7 +170,7 @@ class sequence:
 
         # reverse
         seq = seq[::-1]
-        return sequence(seq, seq_type=self.type)
+        return sequence(seq, seq_type=self.type, name=self.name)
 
     def frame_shift(self, frame=0):
         """Function to frame shift a dna or rna sequence."""
@@ -788,3 +786,40 @@ class sequence:
         Function to find kmers in the sequence with their frequencies.
         """
         return find_kmers_in_string(self.seq, k)
+
+def read_single_seq_from_file(file_name, seq_name=None, seq_idx=None):
+    """
+    Given a large .fasta file with many sequences, read and return a single
+    sequence only.
+    """
+    if seq_name is None and seq_idx is None:
+        print("ERROR: you need to provide either a sequence name or an index.")
+        raise ValueError
+
+    if seq_name is not None and seq_idx is not None:
+        print("WARNING: both a sequence name and index has been provided. I will use the name and ignore the index.")
+        seq_idx = None
+
+    count = 0
+    seq_str = ""
+    started = False
+    with open(file_name, 'r') as f:
+        for line in f:
+            if line.startswith(">"):
+                # we have the beginning of a sequence
+                if started:
+                    break
+                if (seq_name is not None and seq_name in line) or count == seq_idx:
+                    name = line.strip()[1:]
+                    started = True
+                count += 1
+            else:
+                if started:
+                    seq_str += line.strip()
+
+    if not started or seq_str == "":
+        print("WARNING: no match found.")
+        return None
+
+    seq = sequence(seq_str, name=name)
+    return seq

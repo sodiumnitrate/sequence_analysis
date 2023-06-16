@@ -18,10 +18,14 @@ as sequences and doing operations on the fly.
 """
 
 import copy
+import numpy as np
+
+from sklearn.cluster import SpectralClustering
 
 from sequence_analysis.seq_set import seq_set
 from sequence_analysis.utils import find_kmers_in_list, merge_dicts
 from sequence_analysis.sequence import sequence
+
 
 class PPE:
     def __init__(self, sequences):
@@ -38,9 +42,13 @@ class PPE:
         self.n_iter = 0
         self.motifs = None
         self.converged = None
+        self.sim_matrix = None
 
         self.process_sequences()
         self.generate_alphabet()
+
+        self.vectors = None
+        self.adjacency = None
 
     def process_sequences(self):
         """
@@ -132,7 +140,7 @@ class PPE:
         for seq in self.sequences:
             curr_twomers = find_kmers_in_list(seq, 2)
             all_twomers = merge_dicts(all_twomers, curr_twomers)
-        most_freq = sorted(all_twomers.items(), key=lambda x:x[1], reverse=True)[0]
+        most_freq = max(all_twomers.items(), key=lambda x:x[1])
         self.merge_operations.append(most_freq[0])
         self.frequency_of_most_common_motif = most_freq[1]
 
@@ -169,3 +177,65 @@ class PPE:
             for a in seq:
                 alpha_counts[a] += 1
         self.motifs = sorted(alpha_counts.items(), key=lambda x:x[1], reverse=True)
+
+    def generate_vectors(self):
+        """
+        Once the motifs have been determined, assing a vector to each sequence that
+        corresponds to the number of occurences of each letter in the alphabet.
+        """
+        if self.converged is None:
+            print("ERROR: run iterate() first.")
+            return
+
+        self.vectors = [[0 for _ in self.alphabet] for _ in self.sequences]
+        for j, seq in enumerate(self.sequences):
+            for i, a in enumerate(self.alphabet):
+                ct = seq.count(a)
+                self.vectors[j][i] = ct
+
+    def find_distance_between_seqs(self, i, j):
+        """
+        Once the motifs are found and bag-of-words vectors are calculated,
+        calculate the Euclidean distance between two sequences.
+        """
+        if self.vectors is None:
+            print("ERROR: vectors are not calculated!")
+            return
+
+        vec1 = np.array(self.vectors[i])
+        vec2 = np.array(self.vectors[j])
+
+        # TODO: operate by dist^2 instead?
+        return np.linalg.norm(vec1-vec2)
+
+    def adjacency_list(self):
+        """
+        Once the motifs are found and vectors calculated, get an adjacency
+        list between all pairs of sequences.
+        """
+        self.adjacency = {}
+
+        for i in range(self.n_sequences):
+            for j in range(i+1, self.n_sequences):
+                self.adjacency[(i,j)] = self.find_distance_between_seqs(i,j)
+
+    def cluster(self, n_clusters):
+        """
+        Function to cluster using spectral clustering, using the adjacency list.
+        """
+        sim = self.adjacency
+        sim_matrix = np.zeros((self.n_sequences, self.n_sequences))
+        for el, val in sim.items():
+            sim_matrix[el[0], el[1]] = val
+            sim_matrix[el[1], el[0]] = val
+
+        # sim_matrix contains distances. Normalize by max dist, and subtract from 1 to get similarity
+        sim_matrix = np.array(sim_matrix) / np.amax(sim_matrix)
+        sim_matrix = 1 - sim_matrix
+
+        self.sim_matrix = sim_matrix
+
+        clustering = SpectralClustering(n_clusters=n_clusters,
+                                        affinity="precomputed").fit(sim_matrix)
+
+        return clustering

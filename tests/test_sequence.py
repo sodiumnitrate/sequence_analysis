@@ -1,5 +1,6 @@
 from sequence_analysis.sequence import sequence
 from sequence_analysis.seq_set import seq_set
+from sequence_analysis.sequence import read_single_seq_from_file
 import re
 
 class TestSequence:
@@ -213,3 +214,15 @@ class TestSequence:
         assert len(list(two_mers.keys())) == 4
         assert two_mers['AL'] == 2
         assert two_mers['LK'] == 1
+
+    def test_read_single_seq_from_file(self):
+        file_name = "aux_files/cluster_test_2.fasta"
+        seq = read_single_seq_from_file(file_name, seq_name="seq10")
+        assert seq is not None
+        assert seq.name == "seq10"
+        assert seq.seq == "ALKALIMDMALKAWWLI"
+
+        seq = read_single_seq_from_file(file_name, seq_idx=8)
+        assert seq is not None
+        assert seq.name == "seq8"
+        assert seq.seq == "MMFQTWEEFSRAAEKLYLADPMWWVRVVLKYRHVDGNLCIKVTDDLVCLVYRTDQAQDVKKIEKF"

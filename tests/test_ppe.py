@@ -85,3 +85,14 @@ class TestPPE:
 
         assert motif_finder.motifs[0][0] == 'LKAAAAC'
         assert motif_finder.motifs[0][1] == 2
+
+    def test_gen_vec(self):
+        sequences = ['AAACAAACALKAA','LKAAAACLKAAAAC']
+        motif_finder = PPE(sequences)
+
+        motif_finder.iterate()
+
+        motif_finder.generate_vectors()
+
+        assert len(motif_finder.vectors) == len(sequences)
+        assert len(motif_finder.vectors[0]) == len(motif_finder.alphabet)

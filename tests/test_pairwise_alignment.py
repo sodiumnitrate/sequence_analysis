@@ -193,3 +193,13 @@ class TestPairwiseAlignment:
         alignment.align()
 
         assert alignment.alignment_indices is None
+
+    def test_pairwise_blastn_order_test(self):
+        target = sequence("CCCGGGTTAA")
+        query = sequence("CCCGGGGTTAA")
+
+        aligner = pairwise_alignment(target, query, algorithm='blastn')
+        aligner.align()
+
+        assert aligner.query.seq == query.seq
+        assert aligner.target.seq == target.seq

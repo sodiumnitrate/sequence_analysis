@@ -398,3 +398,33 @@ def find_kmers_in_list(input_list, k):
             all_kmers[sublist] = 1
 
     return all_kmers
+
+def check_range_overlap(range_1, range_2):
+    """
+    Given two ranges (a,b) and (c,d), return True if they overlap.
+    """
+
+    if isinstance(range_1, tuple) or isinstance(range_1, list):
+        n = len(range_1)
+        if n != 2:
+            print("ERROR: range_1 contains {n} elements.")
+            return
+    else:
+        print("ERROR: range_1 must be a tuple or a list of two elements.")
+        return
+
+    if isinstance(range_2, tuple) or isinstance(range_2, list):
+        n = len(range_2)
+        if n != 2:
+            print("ERROR: range_1 contains {n} elements.")
+            return
+    else:
+        print("ERROR: range_1 must be a tuple or a list of two elements.")
+        return
+
+    a, b = range_1[0], range_1[1]
+    c, d = range_2[0], range_2[1]
+
+    if d < a or c > b:
+        return False
+    return True

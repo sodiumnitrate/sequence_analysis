@@ -178,3 +178,24 @@ class TestUtils:
         threemers = sa_utils.find_kmers_in_list(seq, 3)
         assert len(threemers) == 8
         assert threemers[('A','A','A')] == 2
+
+    def test_check_range_overlap(self):
+        range_1 = (0, 10)
+        range_2 = (5, 500)
+
+        assert sa_utils.check_range_overlap(range_1, range_2)
+
+        range_1 = (0, 10)
+        range_2 = (0, 10)
+
+        assert sa_utils.check_range_overlap(range_1, range_2)
+
+        range_1 = (5, 50)
+        range_2 = (55, 100)
+
+        assert not sa_utils.check_range_overlap(range_1, range_2)
+
+        range_1 = 55, 100
+        range_2 = 5, 50
+
+        assert not sa_utils.check_range_overlap(range_1, range_2)
