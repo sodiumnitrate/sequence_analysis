@@ -60,6 +60,21 @@ class seq_set:
         else:
             raise TypeError
 
+    def __add__(self, other):
+        """Overwrites __add__ so that two seq_sets can be merged."""
+        if not isinstance(other, seq_set):
+            print("ERROR: both inputs must be of type seq_set.")
+            raise TypeError
+
+        if self.type != other.type:
+            print(f"ERROR: can't add a set with type {self.type} and {other.type}.")
+            raise TypeError
+
+        new_set = seq_set(list_of_sequences=self.records+other.records)
+        new_set.type = self.type
+        return new_set
+
+
     def get_len(self):
         """Function that returns the number of sequences within seq_set."""
         # TODO: switch to len() in all instances and get rid of this function.
@@ -156,7 +171,8 @@ class seq_set:
                     if record != self.records[i - 1]:
                         unique_records.append(self.records[i])
                     else:
-                        unique_records[-1].name += f"_{record.name}"
+                        if record.name not in unique_records[-1].name:
+                            unique_records[-1].name += f"_{record.name}"
 
             self.records = unique_records
 
@@ -622,3 +638,26 @@ class seq_set:
             kmers = merge_dicts(kmers, curr_kmer)
 
         return kmers
+    
+    def find_subset_with_names(self, names):
+        """
+        Given a list of names, return a seq_set with sequences that have
+        matching names.
+        """
+        # make sure we have a unique list of names
+        names = list(set(names))
+
+        # get names of seqs in the sequence set
+        self_names = [s.name for s in self]
+        if len(list(set(self_names))) != len(self_names):
+            print("WARNING: there are sequences with the same name. I will take the last one.")
+
+        set_names = {s.name:i for i, s in enumerate(self)}
+
+        subset = []
+        for name in names:
+            idx = set_names[name]
+            seq = self.records[idx]
+            subset.append(seq)
+
+        return seq_set(subset)

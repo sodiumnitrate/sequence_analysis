@@ -67,14 +67,17 @@ class pairwise_alignment:
         type_query = self.query.type
 
         if type_target is None or type_query is None:
+            print("ERROR: query or target seq types are None.")
             raise TypeError
 
         if type_target != type_query:
+            print("ERROR: query and target seq types are not the same.")
             raise TypeError
 
         # make sure blosum is requested for protein only
         protein = type_target == 'protein'
         if not protein and (self.use_blosum_50 or self.use_blosum_62):
+            print(f"ERROR: can't use Blosum matrices with {type_target}.")
             raise TypeError
 
         # make sure both blosum matrices aren't requested
@@ -115,7 +118,7 @@ class pairwise_alignment:
 
         if self.use_blosum_50:
             aligner.substitution_matrix = blosum_50
-        elif self.use_blosum_50:
+        elif self.use_blosum_62:
             aligner.substitution_matrix = blosum_62
         else:
             aligner.match_score = self.match

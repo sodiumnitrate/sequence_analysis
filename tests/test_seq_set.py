@@ -114,3 +114,29 @@ class TestSeqSet:
         assert len(list(two_mers.keys())) == 6
         assert two_mers['AC'] == 3
         assert two_mers['AL'] == 2
+
+    def test_find_subset_with_names(self):
+        sset = seq_set(file_name="aux_files/cluster_test_2.fasta")
+        names = ['seq1', 'seq11', 'seq17']
+        subset = sset.find_subset_with_names(names)
+
+        assert len(subset) == len(names)
+        assert subset[0].name in names
+
+    def test_add(self):
+        sset = seq_set(file_name="aux_files/cluster_test_2.fasta")
+        sset2 = seq_set(file_name="aux_files/cluster_test.fasta")
+
+        new = sset + sset2
+
+        assert len(sset) + len(sset2) == len(new)
+
+    def test_remove_duplicates_naming(self):
+        sset = seq_set(file_name="aux_files/cluster_test_2.fasta")
+        sset2 = seq_set(file_name="aux_files/cluster_test.fasta")
+
+        new = sset + sset2
+        new.remove_duplicates()
+        for seq in new:
+            names = seq.name.split('_')
+            assert len(set(names)) == len(names)

@@ -1,6 +1,8 @@
 """
 This file holds the GibbsSampler class, that, given a seq_set,
 sets up a Gibbs sampler to find motifs.
+
+Implemented from Lawrence et al. Science 1993
 """
 import random
 import copy
