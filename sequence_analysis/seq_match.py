@@ -7,6 +7,8 @@ File that defines a class for organizing the result of mmseqs search or blast.
 See pg. 54 for the keywords in https://mmseqs.com/latest/userguide.pdf
 """
 
+import copy
+
 from sequence_analysis.seq_set import seq_set
 from sequence_analysis.sequence import sequence
 from sequence_analysis.pairwise_alignment import pairwise_alignment
@@ -74,6 +76,8 @@ class SeqMatch:
 
         self.query_sequences = None
         self.target_sequences = None
+
+        self.target_truncated = None
 
     def check_input_values(self):
         """
@@ -192,7 +196,7 @@ class SeqMatch:
             self.query_index[q_name].append(i)
             self.target_index[t_name].append(i)
 
-    def load_sequences(self, t_file_name, q_file_name):
+    def load_sequences(self, t_file_name, q_file_name, truncate_target=True):
         """
         Given a list of target and query names, load sequences.
 
@@ -215,6 +219,17 @@ class SeqMatch:
             print("ERROR: missing names. Did you read the data first?")
             raise ValueError
 
+        if truncate_target:
+            if "tstart" not in self.keywords or "tend" not in self.keywords:
+                print("WARNING: no tstart/tend. Will not truncate.")
+                truncate_target=False
+            else:
+                ranges = {}
+                for t_name in self.target_names:
+                    tstart = min([match.properties["tstart"] for match in self.matches if match.target == t_name])
+                    tend = max([match.properties["tend"] for match in self.matches if match.target == t_name])
+                    ranges[t_name] = (tstart, tend)
+
         self.query_sequences = {name:None for name in self.query_names}
         self.target_sequences = {name:None for name in self.target_names}
 
@@ -225,6 +240,8 @@ class SeqMatch:
                 if seq is None:
                     continue
                 seq = sset[0]
+                if truncate_target:
+                    seq = seq[ranges[t_name][0]:ranges[t_name][1]]
                 self.target_sequences[t_name] = seq
 
         for q_file in q_file_name:
@@ -243,3 +260,50 @@ class SeqMatch:
         for key, val in self.target_sequences.items():
             if val is None:
                 print(f"ERROR: the sequence for target:{key} not found. Please check file names.")
+
+
+    def pairwise_align_matches(self, truncate_target=True):
+        """
+        Given matches, and their sequences, (locally) pairwise align using default blast scoring.
+
+        If truncate_target is true, the target sequence will be truncated to tstart:tend.
+        """
+        if truncate_target:
+            if "tstart" not in self.keywords or "tend" not in self.keywords:
+                print("WARNING: tstart and/or tend not in keywoards. Target will not be truncated.")
+                truncate_target = False
+
+        for i, match in enumerate(self.matches):
+            q_seq = self.query_sequences[match.query]
+            t_seq = self.query_sequences[match.target]
+            if truncate_target:
+                tstart = match.properties['tstart']
+                tend = match.properties['tend']
+                t_seq = t_seq[tstart:tend]
+
+            if q_seq.type != t_seq.type:
+                print("ERROR: sequence types do not match.")
+                raise TypeError
+
+            if q_seq.type == 'dna' or q_seq.type == 'rna':
+                algorithm = 'blastn'
+            elif q_seq.type == 'protein':
+                algorithm = 'blastp'
+            else:
+                print("ERROR: unknown sequence type.")
+                raise TypeError
+
+            #TODO: if frame is in keywords, then skip this?
+            aligner = pairwise_alignment(t_seq, q_seq, algorithm=algorithm)
+            aligner.align()
+            aligner_rev = pairwise_alignment(t_seq.reverse_complement(), q_seq, algorithm=algorithm)
+            aligner_rev.align()
+            if aligner.score > aligner_rev.score:
+                self.matches[i].alignment = copy.copy(aligner)
+            else:
+                self.matches[i].alignment = copy.copy(aligner)
+
+            self.matches[i].properties[f"{algorithm}_score"] = self.matches[i].alignment.score
+
+        #TODO: how to avoid failing the inital check, should it be run again
+        self.keywords.append(f"{algorithm}_score")
