@@ -641,7 +641,7 @@ class seq_set:
 
         return kmers
     
-    def find_subset_with_names(self, names):
+    def find_subset_with_names(self, names, suppress_warning=False):
         """
         Given a list of names, return a seq_set with sequences that have
         matching names.
@@ -663,7 +663,8 @@ class seq_set:
             try:
                 idx = self.name_dict[name]
             except KeyError:
-                print(f"WARNING: no sequence with name {name} found.")
+                if not suppress_warning:
+                    print(f"WARNING: no sequence with name {name} found.")
                 continue
             seq = self.records[idx]
             subset.append(seq)

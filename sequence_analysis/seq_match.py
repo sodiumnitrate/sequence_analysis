@@ -221,7 +221,7 @@ class SeqMatch:
         for t_file in t_file_name:
             sset = seq_set(file_name=t_file)
             for t_name in self.target_names:
-                seq = sset.find_subset_with_names([t_name])
+                seq = sset.find_subset_with_names([t_name], suppress_warning=True)
                 if seq is None:
                     continue
                 seq = sset[0]
@@ -230,7 +230,7 @@ class SeqMatch:
         for q_file in q_file_name:
             sset = seq_set(file_name=q_file)
             for q_name in self.query_names:
-                seq = sset.find_subset_with_names([q_name])
+                seq = sset.find_subset_with_names([q_name], suppress_warning=True)
                 if seq is None:
                     continue
                 seq = sset[0]
