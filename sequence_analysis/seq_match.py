@@ -236,6 +236,7 @@ class SeqMatch:
         self.target_sequences = {name:None for name in self.target_names}
 
         for t_file in t_file_name:
+            print(t_file)
             sset = seq_set(file_name=t_file)
             for t_name in self.target_names:
                 seq = sset.find_subset_with_names([t_name], suppress_warning=True)
