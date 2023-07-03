@@ -428,3 +428,15 @@ def check_range_overlap(range_1, range_2):
     if d < a or c > b:
         return False
     return True
+
+def file_name_check(file_name):
+    """
+    Checks that file_name is either a string, or a list of strings.
+    """
+    if isinstance(file_name, str):
+        return True
+    if not isinstance(file_name, list):
+        return False
+    if not all([isinstance(f, str) for f in file_name]):
+        return False
+    return True

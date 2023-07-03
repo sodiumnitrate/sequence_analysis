@@ -28,6 +28,8 @@ class seq_set:
         self.sim_matrix = None
         self.cluster_labels = None
 
+        self.name_dict = None
+
         if len(list_of_sequences) == 0 and file_name is None:
             print("WARNING: sequence set initialized without sequences or file name to read from. Please use read_fasta() to read in sequences or use add_sequence() to add sequences.")
 
@@ -648,16 +650,25 @@ class seq_set:
         names = list(set(names))
 
         # get names of seqs in the sequence set
-        self_names = [s.name for s in self]
-        if len(list(set(self_names))) != len(self_names):
-            print("WARNING: there are sequences with the same name. I will take the last one.")
+        if self.name_dict is None:
+            # makes subsequent searches faster
+            self_names = [s.name for s in self]
+            if len(list(set(self_names))) != len(self_names):
+                print("WARNING: there are multiple sequences with the same name. I will take the last one.")
 
-        set_names = {s.name:i for i, s in enumerate(self)}
+            self.name_dict = {s.name:i for i, s in enumerate(self)}
 
         subset = []
         for name in names:
-            idx = set_names[name]
+            try:
+                idx = self.name_dict[name]
+            except KeyError:
+                print(f"WARNING: no sequence with name {name} found.")
+                continue
             seq = self.records[idx]
             subset.append(seq)
+
+        if len(subset) == 0:
+            return None
 
         return seq_set(subset)

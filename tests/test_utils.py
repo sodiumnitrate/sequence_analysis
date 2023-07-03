@@ -199,3 +199,9 @@ class TestUtils:
         range_2 = 5, 50
 
         assert not sa_utils.check_range_overlap(range_1, range_2)
+
+    def test_file_name_check(self):
+        files = ["lorem", "ipsum"]
+        assert sa_utils.file_name_check(files)
+
+        assert not sa_utils.file_name_check([5,3,4])
