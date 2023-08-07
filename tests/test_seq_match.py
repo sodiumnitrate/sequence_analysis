@@ -2,8 +2,6 @@
 Unit tests for the seq_match object.
 """
 
-import pdb
-
 from sequence_analysis.seq_match import SeqMatch, Match
 
 class TestSeqMatch:

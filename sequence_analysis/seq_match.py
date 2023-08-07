@@ -230,8 +230,6 @@ class SeqMatch:
                     tend = max([match.properties["tend"] for match in self.matches if match.target == t_name])
                     ranges[t_name] = (tstart, tend)
 
-        print(ranges)
-
         self.query_sequences = {name:None for name in self.query_names}
         self.target_sequences = {name:None for name in self.target_names}
 
