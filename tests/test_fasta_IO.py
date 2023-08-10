@@ -26,7 +26,7 @@ class TestIO:
         prot_test.add_sequence([new_sequence, new_sequence2])
         assert (new_sequence.type == "protein")
         assert (new_sequence2.type == "protein")
-        assert (prot_test.get_len() == 2)
+        assert (len(prot_test) == 2)
 
     def test_read_dna_fasta(self):
         dna_test = seq_set(file_name="aux_files/dna_ex.fasta")
@@ -39,9 +39,9 @@ class TestIO:
         test_read = seq_set(file_name="aux_files/write_test.fasta")
 
         # make sure the two files are the same
-        assert (prot_test.get_len() == test_read.get_len())
+        assert (len(prot_test) == len(test_read))
 
-        for i in range(prot_test.get_len()):
+        for i in range(len(prot_test)):
             s1 = prot_test.records[i].seq
             s2 = test_read.records[i].seq
             assert (s1 == s2)

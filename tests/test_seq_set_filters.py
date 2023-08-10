@@ -16,17 +16,10 @@ class TestFilters:
         prots.remove_duplicates()
         assert (len(prots.records) == 3)
 
-    def test_add_test(self):
-        prots = seq_set(file_name="aux_files/dup_test.fasta")
-        dnas = seq_set(file_name="aux_files/dna_ex.fasta")
-        len_prots = prots.get_len()
-        prots.add_set(dnas)
-        assert (len_prots == prots.get_len())
-
     def test_filter_by_regex(self):
         prots = seq_set(file_name="aux_files/filter_test.fasta")
         prots.filter_by_pattern("MDM")
-        assert (prots.get_len() == 2)
+        assert (len(prots) == 2)
 
     def test_get_frequencies(self):
         prots = seq_set(file_name="aux_files/dup_test.fasta")
@@ -38,7 +31,7 @@ class TestFilters:
         assert (freqs[2] == 2)
 
         prots.remove_duplicates()
-        assert (len(unique_records) == prots.get_len())
+        assert (len(unique_records) == len(prots))
 
     def test_get_frequencies_2(self):
         prots = seq_set(file_name="aux_files/dup_test_2.fasta")
@@ -54,18 +47,10 @@ class TestFilters:
         prots.alphabetize()
         assert (prots.records[0] == prots.records[1])
 
-    def test_similarity_matrix(self):
-        prots = seq_set(file_name="aux_files/dup_test.fasta")
-        prots.get_similarity_matrix()
-        sim_matrix = prots.sim_matrix
-        n = prots.get_len()
-        m = (n - 1) * n / 2
-        assert (len(sim_matrix) == m)
-
     def test_filter_by_frequency(self):
         prots = seq_set(file_name="aux_files/dup_test_2.fasta")
         prots.filter_by_frequency(threshold=2)
-        assert (prots.get_len() == 2)
+        assert (len(prots) == 2)
 
     def test_calculate_composition_dna_collate(self):
         dnas = seq_set(file_name="aux_files/dna_ex.fasta")
@@ -83,7 +68,7 @@ class TestFilters:
         freqs = dnas.calculate_composition()
 
         assert (isinstance(freqs, type([])))
-        assert (len(freqs) == dnas.get_len())
+        assert (len(freqs) == len(dnas))
 
         assert (freqs[0]['A'] == 2)
 
@@ -97,7 +82,7 @@ class TestFilters:
         prots = seq_set(file_name="aux_files/test.fasta")
         prots.filter_by_weight(threshold=7000)
 
-        assert (prots.get_len() == 2)
+        assert (len(prots) == 2)
 
     def test_filter_by_six_frame(self):
         rnas = seq_set(file_name="aux_files/frame_shift.fasta")

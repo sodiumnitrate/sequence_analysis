@@ -5,6 +5,8 @@ in Newick format, manipulate them, and print them.
 import copy
 import pydot
 
+import pdb
+
 class Node:
     """
     Class to keep information about nodes.
@@ -153,8 +155,11 @@ class Tree:
 
     def get_node_with_name_bfs(self, target_name):
         """
-        Given a node name, use BFS to find the first node object that matches it
+        Given a node name, find the first node object that matches it
         using breadth-first search.
+        
+        NOTE: node names need not be unique. This function returns the first one it
+        encounters in a breadth-first search.
         """
         Q = [self.root]
         visited = []
@@ -162,6 +167,23 @@ class Tree:
         while Q:
             node = Q.pop(0)
             if node.name == target_name:
+                return node
+            visited.append(node.idx)
+            for child in node.children:
+                if child.idx not in visited:
+                    Q.append(child)
+
+        return None
+
+    def get_node_with_idx_bfs(self, idx):
+        """
+        Given a node index, use BFS to find the first node that matches it.
+        """
+        Q = [self.root]
+        visited = []
+        while Q:
+            node = Q.pop(0)
+            if node.idx == idx:
                 return node
             visited.append(node.idx)
             for child in node.children:
@@ -180,8 +202,12 @@ class Tree:
             if new_root is None:
                 print(f"ERROR: node with name {new_root.name} not found.")
                 raise ValueError
-        if self.get_node_with_name_bfs(new_root.name) is None:
-            print(f"ERROR: node with name {new_root.name} not found.")
+        elif isinstance(new_root, int):
+            new_root = self.get_node_with_idx_bfs(new_root)
+        elif not isinstance(new_root, Node):
+            raise TypeError
+        if new_root is None:
+            print("ERROR: node not found.")
             raise ValueError
 
         old_root = self.root
@@ -245,8 +271,12 @@ class Tree:
         """
         if isinstance(node, str):
             node = self.get_node_with_name_bfs(node)
-            if node is None:
-                raise ValueError
+        elif isinstance(node, int):
+            node = self.get_node_with_idx_bfs(node)
+        elif not isinstance(node, Node):
+            raise TypeError
+        if node is None:
+            raise ValueError
 
         visited = []
         leaves = []
@@ -279,8 +309,10 @@ class Tree:
 
         while Q:
             node = Q.pop(0)
+
             if node.idx in visited:
                 continue
+
             visited.append(node.idx)
             parent = node.parent
             if parent == self.root or parent is None or parent.name == '':
@@ -288,11 +320,13 @@ class Tree:
 
             support = min([float(s) for s in parent.name.split('/')])
             if support >= min_support:
+                Q.append(parent)
+                leaves.append(parent)
                 continue
 
             siblings = [n for n in parent.children if n != node]
             leaf_siblings = [n for n in siblings if n in leaves]
-            rem = [node.name] + [n.name for n in leaf_siblings]
+            rem = [node] + leaf_siblings
             visited += [n.idx for n in leaf_siblings]
 
             to_remove.append((len(siblings), rem))
@@ -301,3 +335,68 @@ class Tree:
                 leaves.append(parent)
 
         return to_remove
+
+    def get_leaves_to_remove(self, min_support=80, split_char='/'):
+        """
+        Function that determines what leaves to remove so that the present
+        tree has min_support.
+        """
+        to_remove = self.prune(min_support=min_support, split_char=split_char)
+
+        # expand branches
+        new_list = []
+        for el in to_remove:
+            new = []
+            for node in el[1]:
+                if len(node.children) != 0:
+                    new.append([n for n in self.get_leaves_in_subtree(node)])
+                else:
+                    new.append([node])
+
+            new_list.append((el[0], new))
+
+        # make passes to remove all you can, unambiguously
+        removed = []
+        added = True
+        while added:
+            added = False
+            new = []
+            for el in new_list:
+                if el[0] == len(el[1]):
+                    # remove them all
+                    r = [item for sublist in el[1] for item in sublist]
+                    for item in r:
+                        removed.append(item)
+                        added = True
+                else:
+                    # see if we have already removed some stuff here
+                    new_names = []
+                    for name in el[1]:
+                        nn = [n for n in name if n not in removed]
+                        if len(nn) > 0:
+                            new_names.append(nn)
+                    if len(new_names) > 0:
+                        change = len(new_names) - len(el[1])
+                        if el[0] + change > 0:
+                            new.append((el[0],new_names))
+            new_list = copy.copy(new)
+
+        return removed, new_list
+
+    def get_supports(self, split_char='/'):
+        """
+        Traverse the tree to get a list of all supports.
+        """
+        supports = []
+        Q = [self.root]
+        visited = []
+        while Q:
+            node = Q.pop(0)
+            if len(node.children) != 0 and node.name != '':
+                support = min([float(s) for s in node.name.split('/')])
+                supports.append(support)
+            visited.append(node.idx)
+            for child in node.children:
+                if child not in visited:
+                    Q.append(child)
+        return supports

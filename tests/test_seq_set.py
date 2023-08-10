@@ -140,3 +140,11 @@ class TestSeqSet:
         for seq in new:
             names = seq.name.split('_')
             assert len(set(names)) == len(names)
+
+    def test_unalign(self):
+        sset = seq_set(file_name="aux_files/unalign_test.fasta")
+
+        sset.unalign()
+
+        for seq in sset:
+            assert '-' not in seq.seq
