@@ -143,12 +143,6 @@ class TestTree:
         assert len(removed) == 0
         assert len(newlist) == 3
 
-    def test_leaves_to_remove_2(self):
-        tree = Tree("(ref10_m0:0.0107059334,((((ref00_m0:0.0000010214,ref03_m0:0.0116010782)85.5/89:0.0234689348,ref05_m0:0.0093238664)94.4/98:0.0495507686,ref13_m0:0.0000026163)91.1/90:0.1176653259,((ref16_m2:0.0097760630,ref17_m2:0.0000010214)90.5/95:0.3007620051,((((ref02_m1:0.0403785457,ref03_m1:0.0495078624)87.9/84:0.0584232271,ref14_m1:0.0457792986)90.8/84:0.1432352643,ref15_m1:0.0000028335)98.3/99:0.6101056409,(ref01_m2:0.0000010214,ref03_m2:0.0000010214)91.1/98:0.3456814969)82.8/77:0.2446626484)86.7/76:0.2038092310)85.8/88:0.0780401341,ref09_m0:0.0000010214);")
-
-        to_remove = tree.prune()
-        removed, newlist = tree.get_leaves_to_remove()
-
     def test_get_supports(self):
         tree = Tree(file_name="aux_files/tree_2.nw")
         supports = tree.get_supports()
@@ -156,3 +150,31 @@ class TestTree:
         assert len(supports) == 7
         assert 100 in supports
         assert 48 in supports
+
+    def test_write_newick(self):
+        tree = Tree("((C,(E,F)D)A,(G,H)B)R;")
+        result = tree.write_newick()
+        assert tree.newick_string == result
+
+    def test_write_newick_2(self):
+        tree = Tree("((C,(E,F)D)A,((G,H)B,Z)Y)R;")
+        result = tree.write_newick()
+        assert tree.newick_string == result
+
+    def test_write_newick_3(self):
+        tree = Tree("((C,(E,F)D)A,((G,H)B,Z)Y)R;")
+        result = tree.write_newick(no_names=True)
+        assert result == "((,(,)),((,),));"
+
+    def test_write_newick_4(self):
+        tree = Tree("((C:0.1,(E:0.5,F:0.3)D:0.2)A:0.1,((G:0.5,H:0.1)B:0.1,Z:0.8)Y:0.9)R;")
+        result = tree.write_newick(no_names=True)
+        assert result == "((:0.1,(:0.5,:0.3):0.2):0.1,((:0.5,:0.1):0.1,:0.8):0.9);"
+
+        result = tree.write_newick(no_supports=True)
+        assert result == "((C:0.1,(E:0.5,F:0.3):0.2):0.1,((G:0.5,H:0.1):0.1,Z:0.8):0.9);"
+
+    def test_write_newick_5(self):
+        tree = Tree(file_name="aux_files/tree_2.nw")
+        result = tree.write_newick(no_supports=True, no_lengths=True)
+        assert result == "(A,(B,C),(((((D,E),F),(G,H)),I),J));"

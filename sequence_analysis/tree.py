@@ -400,3 +400,60 @@ class Tree:
                 if child not in visited:
                     Q.append(child)
         return supports
+
+    def write_newick(self, no_supports=False, no_lengths=False, no_names=False):
+        """
+        Given the current tree, which may be modified from the original
+        Newick string, generate a new Newick string.
+        """
+        stack = [(0, self.root)]
+        prev_depth = -1
+        while stack:
+            depth, node = stack.pop(-1)
+            name = self.get_name_formatted(node, no_support=no_supports, no_length=no_lengths, no_name=no_names)
+            if depth == 0:
+                # root node
+                new_string = name + ";"
+            else:
+                if depth == prev_depth:
+                    new_string = name +  ',' + new_string
+                elif depth > prev_depth:
+                    new_string = name + ')' + new_string
+                else:
+                    new_string = name + ',' + '('*(prev_depth - depth) + new_string
+
+            for child in node.children[::-1]:
+                stack.append((depth+1, child))
+            prev_depth = depth
+
+        new_string = '(' * depth + new_string
+
+        return new_string
+
+    def get_name_formatted(self, node, no_support=False, no_length=False, no_name=False):
+        """
+        Given a node, produce a string that reads
+
+        A:0.3
+
+        where 0.3 is distance to parent, to be printed only when no_length==False,
+        A is the node name, which may or may not be printed depending on no_name and no_support.
+        """
+        if no_name:
+            name = ""
+        else:
+            if no_support:
+                if len(node.children) > 0:
+                    name = ""
+                else:
+                    name = node.name
+            else:
+                name = node.name
+            
+        if no_length or node.distance_to_parent is None:
+            return name
+
+        if node == self.root:
+            return name
+
+        return f"{name}:{node.distance_to_parent}"
