@@ -85,6 +85,45 @@ class seq_set:
             write_in_columns(file, seq_string, ncols=79)
         file.close()
 
+    def write_phylip(self, file_name, mode='sequential'):
+        """
+        Write sequences into a phylip file.
+
+        Currently only supporting sequential mode (which codeml can process).
+        """
+        file = open(file_name, 'w', encoding="utf-8")
+        n_seqs = len(self)
+        n_chars = list(set([len(seq) for seq in self.records]))
+        if len(n_chars) != 1:
+            print("ERROR: sequences must be of the same length.")
+            raise ValueError
+
+        n_chars = n_chars[0]
+
+        if mode == "sequential":
+            file.write(f"{n_seqs}\t{n_chars}\n")
+        elif mode == "interleaved":
+            file.write(f"{n_seqs}\t{n_chars}\tI\n")
+
+        if mode == "sequential":
+            for seq in self.records:
+                file.write(f"{seq.name}    {seq.seq}\n")
+        elif mode == "interleaved":
+            # write in 6 blocks of 10
+            n_name_chars = max([len(s.name) for s in self])
+            total_lines = int(np.ceil(n_chars / 60))
+            for i in range(total_lines):
+                for seq in self.records:
+                    if i == 0:
+                        file.write(f"{seq.name}{' ' * (n_name_chars - len(seq.name) + 2)}")
+                    else:
+                        file.write(" " * (n_name_chars + 2))
+                    seq_string = " ".join([seq[i*60+j*10:min(i*60+(j+1)*10, len(seq))] for j in range(6)])
+                    file.write(seq_string)
+                    file.write("\n")
+                file.write("\n")
+        file.close()
+
     def write_fasta_in_parts(self, file_name, n_seq=1000):
         """
         Function to write N fasta files 
