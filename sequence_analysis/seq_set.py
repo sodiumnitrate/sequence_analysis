@@ -10,7 +10,7 @@ from sequence_analysis.utils import add_dicts
 from sequence_analysis.sequence import sequence
 from sequence_analysis.utils import rna_alphabet, diff_letters
 from sequence_analysis.utils import write_in_columns, aa_alphabet, dna_alphabet
-from sequence_analysis.utils import merge_dicts
+from sequence_analysis.utils import merge_dicts, fasta_or_phylip
 
 class seq_set:
     """This class holds a list of sequence objects of a given type."""
@@ -29,7 +29,11 @@ class seq_set:
             print("WARNING: sequence set initialized without sequences or file name to read from. Please use read_fasta() to read in sequences or use add_sequence() to add sequences.")
 
         if file_name is not None:
-            self.read_fasta(file_name)
+            f_type = fasta_or_phylip(file_name)
+            if f_type == "fasta":
+                self.read_fasta(file_name)
+            else:
+                self.read_phylip(file_name)
 
         if seq_type is None and len(self.records) > 0:
             self.set_type()
@@ -294,6 +298,55 @@ class seq_set:
 
         self.set_type()
 
+        for seq in self.records:
+            seq.type = self.type
+
+    def read_phylip(self, file_name):
+        """
+        Function to read sequences from phylip files.
+        """
+        self.records = []
+        with open(file_name, 'r') as f:
+            header = f.readline()
+            n_seqs = int(header.split()[0])
+            n_chars = int(header.split()[1])
+            if 'I' in header:
+                # interleaved
+                seq_ct = 0
+                names = []
+                seqs = ["" for i in range(n_seqs)]
+                for line in f:
+                    if line.strip():
+                        ls = line.split()
+                        if seq_ct < n_seqs:
+                            names.append(ls[0])
+                            seq_portion = "".join(ls[1:])
+                            seqs[seq_ct] = seq_portion
+                        else:
+                            i = seq_ct % n_seqs
+                            seqs[i] = seqs[i] + "".join(ls)
+                    seq_ct += 1
+
+                for i in range(n_seqs):
+                    seq = sequence(seqs[i], names[i])
+                    self.records.append(seq)
+
+            else:
+                # sequential
+                for line in f:
+                    if line.strip():
+                        ls = line.split()
+                        if len(ls[1]) != n_chars:
+                            print("ERROR: sequence length does not match the first line of the file.")
+                            raise ValueError
+                        seq = sequence(ls[1], ls[0])
+                        self.records.append(seq)
+
+        if len(self.records) != n_seqs:
+            print("ERROR: number of sequences does not match the first line of the file.")
+            raise ValueError
+
+        self.set_type()
         for seq in self.records:
             seq.type = self.type
 

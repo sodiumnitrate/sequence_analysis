@@ -440,3 +440,17 @@ def file_name_check(file_name):
     if not all([isinstance(f, str) for f in file_name]):
         return False
     return True
+
+def fasta_or_phylip(file_name):
+    """
+    Given a file name, determine if it's fasta or phylip format.
+    (Don't rely on file extensions, as they are quite unstandardized in this field.)
+    """
+    # TODO: is this robust enough?
+    with open(file_name, 'r') as f:
+        lines = "".join(f.readlines())
+
+    if ">" in lines:
+        return "fasta"
+
+    return "phylip"

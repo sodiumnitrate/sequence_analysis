@@ -148,3 +148,22 @@ class TestSeqSet:
 
         for seq in sset:
             assert '-' not in seq.seq
+
+    def test_read_phylip_interleaved(self):
+        sset = seq_set(file_name="aux_files/unalign.phy")
+
+        assert len(sset) == 3
+        assert len(sset[0]) == 65
+
+    def test_read_write_phylip_sequential(self):
+        sset = seq_set(file_name="aux_files/unalign.phy")
+
+        sset.write_phylip("aux_files/unalign_sequential.phy")
+
+        sset_2 = seq_set(file_name="aux_files/unalign_sequential.phy")
+
+        assert len(sset) == len(sset_2)
+        assert sset.type == sset_2.type
+        for i in range(len(sset)):
+            assert len(sset[i]) == len(sset_2[i])
+            assert sset[i].seq == sset_2[i].seq
