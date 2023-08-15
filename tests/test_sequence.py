@@ -226,3 +226,12 @@ class TestSequence:
         assert seq is not None
         assert seq.name == "seq8"
         assert seq.seq == "MMFQTWEEFSRAAEKLYLADPMWWVRVVLKYRHVDGNLCIKVTDDLVCLVYRTDQAQDVKKIEKF"
+
+    def test_type_set_2(self):
+        seq = sequence("ATGGACTTCCAAGGAAGATACATGGACTCTCAANGTAGAATGGTCGACCCCAGATACTACGACTACGGTAGATGTCACGACTATGACCGTTACTACGGG")
+        
+        assert seq.type == 'dna'
+
+        seq = sequence("CAGTGTTGCCNATTGTGACGAAGATGAAGANAGNTAAGCCNCNTAAGTGNACCAGNGAAANGNGGAAATTCAAGGCCTATTACANTTTGGCTACTGCCCG")
+
+        assert seq.type == 'dna'

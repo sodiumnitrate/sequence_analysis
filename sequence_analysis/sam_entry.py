@@ -55,9 +55,8 @@ class SamEntry:
         """
         self.sequence = sequence(self.sequence_string)
         # check if we need to reverse complement
-        if len(bin(self.bitwise_flag)[2:]) > 5:
-            if bin(self.bitwise_flag)[2:][::-1][4] == '1':
-                self.sequence = self.sequence.reverse_complement()
+        if self.is_reverse_complemented():
+            self.sequence = self.sequence.reverse_complement()
 
         self.sequence.name = self.q_name
 
@@ -70,3 +69,40 @@ class SamEntry:
         """
         Q_values = [ord(c)-33 for c in self.quality_33]
         self.probability_of_incorrect_read = [10**(-1*q/10) for q in Q_values]
+
+    def is_reverse_complemented(self):
+        """
+        Check bitwise flags to decide if reverse complemented.
+        """
+        if len(bin(self.bitwise_flag)[2:]) >= 5:
+            if bin(self.bitwise_flag)[2:][::-1][4] == '1':
+                return True
+        return False
+
+    def get_alignment_score(self):
+        """
+        Check if AS exists as a tag. If it does, return the alignment score.
+        """
+        for flag in self.other_flags:
+            if 'AS' in flag:
+                return int(flag.split(':')[-1])
+
+        return None
+
+    def is_primary_alignment(self):
+        """
+        Check the bitwise flags to see if it's the primary alignment.
+        """
+        if len(bin(self.bitwise_flag)[2:]) >= 9:
+            if bin(self.bitwise_flag)[2:][::-1][8] == '1':
+                return False
+        return True
+
+    def get_NH(self):
+        """
+        NH: number of reported alignments that contain the query in the current record.
+        """
+        for flag in self.other_flags:
+            if 'NH' in flag:
+                return int(flag.split(':')[-1])
+        return None

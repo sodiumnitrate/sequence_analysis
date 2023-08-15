@@ -91,19 +91,30 @@ class sequence:
 
     def set_type(self, seq_type=None):
         """Function that sets the type of sequence based on the letters it contains."""
-        # TODO: add custom input option
         # TODO: add "N" to the rna and dna alphabet?
-        s = self.seq.upper()
+        if seq_type is not None:
+            self.type = seq_type
+            return
+
+        s = self.seq.upper().replace('-','')
         if len(s) == 0:
             print("WARNING: empty sequence. Can't set type.")
             self.type = None
             return
         all_letters = set([*s])
 
-        if seq_type is not None:
-            self.type = seq_type
-            return
+        nuc_freq = (s.count('A') + s.count('G') + s.count('T') + s.count('U') + s.count('C') + s.count('N')) / len(s)
+        if len(all_letters) < 10 and nuc_freq > 0.9:
+            # we have a nucleotide sequence
+            if 'U' in all_letters:
+                self.type = 'rna'
+            else:
+                self.type = 'dna'
+        else:
+            self.type = 'protein'
 
+
+        """
         if len(diff_letters.intersection(all_letters)):
             self.type = 'protein'
         elif set(dna_alphabet).issubset(all_letters) or set(rna_alphabet).issubset(all_letters):
@@ -115,6 +126,7 @@ class sequence:
                 self.type = 'dna'
         else:
             print("I can't assign a type, please specify manually.")
+        """
 
     def translate(self):
         """
