@@ -28,6 +28,8 @@ class sequence:
         self.name = name
         self.type = seq_type
 
+        self.quality = None
+
         if seq_type is None:
             self.set_type()
 

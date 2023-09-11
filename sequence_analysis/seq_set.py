@@ -300,6 +300,49 @@ class seq_set:
 
         for seq in self.records:
             seq.type = self.type
+    
+    def read_fastq(self, file_name):
+        """
+        Function to read sequences into seq_set from a .fastq file.
+        """
+        seq_str = ""
+        quality_str = ""
+        prev_char = None
+        with open(file_name, 'r') as f:
+            for line in f:
+                if line.startswith('@'):
+                    if prev_char is not None:
+                        seq = sequence(seq_str, seq_name)
+                        seq.quality = quality_str
+                        self.records.append(seq)
+                        seq_str = ""
+                        quality_str = ""
+                    seq_name = line.strip()[1:]
+                    prev_char = '@'
+                elif line.startswith('+'):
+                    prev_char = '+'
+                else:
+                    if prev_char == '@':
+                        seq_str = seq_str + line.strip()
+                    else:
+                        quality_str = quality_str + line.strip()
+        seq = sequence(seq_str, seq_name)
+        seq.quality = quality_str
+        self.records.append(seq)
+        return
+
+    def write_fastq(self, file_name):
+        """
+        Write sequences into fastq file.
+        """
+        f = open(file_name, 'w')
+        for seq in self.records:
+            f.write(f"@{seq.name}\n")
+            f.write(f"{seq.seq}\n")
+            f.write("+\n")
+            f.write(f"{seq.quality}\n")
+
+        f.close()
 
     def read_phylip(self, file_name):
         """

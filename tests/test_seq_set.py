@@ -4,6 +4,8 @@ Basic tests for the seq_seq class.
 from sequence_analysis.seq_set import seq_set
 from sequence_analysis.sequence import sequence
 
+import pdb
+
 class TestSeqSet:
     def test_set_type(self):
         sequences = seq_set(file_name='aux_files/dna_ex.fasta')
@@ -167,3 +169,14 @@ class TestSeqSet:
         for i in range(len(sset)):
             assert len(sset[i]) == len(sset_2[i])
             assert sset[i].seq == sset_2[i].seq
+
+    def test_read_fastq(self):
+        sset = seq_set()
+        sset.read_fastq("aux_files/test.fastq")
+
+        assert len(sset) == 2
+        assert len(sset[0]) == len(sset[0].quality)
+        assert len(sset[1]) == len(sset[1].quality)
+
+        assert sset[0].name == 'seq0'
+        assert sset[1].name == 'seq1'
