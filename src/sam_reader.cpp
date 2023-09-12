@@ -49,6 +49,8 @@ py::list sam_reader(std::string file_name,
     seq_start = std::numeric_limits<int>::max();
     seq_end = 0;
 
+    std::cout << "Mapped onto: " << mapped_onto << std::endl;
+
     while(std::getline(file, line))
     {
         // skip headers
