@@ -64,6 +64,7 @@ class SamReader:
                                                          self.min_score)
 
         r = self.sam_string_list.pop()
+        print(r)
         r = r.split('-')
         self.seq_start = int(r[0])
         self.seq_end = int(r[1])
