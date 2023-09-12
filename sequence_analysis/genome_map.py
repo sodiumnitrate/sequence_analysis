@@ -163,7 +163,7 @@ class GenomeMap:
             print("ERROR: no reads found.")
             raise ValueError
 
-        self.heatmap = self.Heatmap(self.ch_name, self.ch_num, self.start, self.end)
+        self.heatmap = self.Heatmap(self.ch_name, self.ch_num, self.read_range[0], self.read_range[1])
         for read in self.reads:
             entry = SamEntry(read)
             self.heatmap.add_read(entry.pos, entry.pos + len(entry.sequence))
