@@ -97,6 +97,7 @@ py::list sam_reader(std::string file_name,
         if (seq_end > 20053868)
         {
             std::cout << ref_name << "," << pos << "," << length << std::endl;
+            std::cout << start << "," << end << std::endl;
         }
     }
 
