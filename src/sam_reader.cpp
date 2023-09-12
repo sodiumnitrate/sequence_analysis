@@ -93,12 +93,6 @@ py::list sam_reader(std::string file_name,
         lines.push_back(line);
         seq_start = fmin(seq_start, pos);
         seq_end = fmax(seq_end, pos + length);
-
-        if (seq_end > 20053868)
-        {
-            std::cout << ref_name << "," << pos << "," << length << std::endl;
-            std::cout << start << "," << end << std::endl;
-        }
     }
 
     // add seq_start and seq_end 
