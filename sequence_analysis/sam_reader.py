@@ -39,6 +39,29 @@ class SamReader:
         else:
             self.header = [a for a in headers if self.mapped_onto in a]
 
+    def normalize_AS_and_filter(self, min_score):
+        """
+        Sometimes, AS is given as a raw score. We need to convert these to percentages.
+        """
+        if len(self.full_lengths) == 0:
+            print("ERROR: full sequence lengths are not set.")
+            raise ValueError
+
+        if len(self.sam_string_list) == 0:
+            print("ERROR: there are no Sam entries read.")
+            raise ValueError
+
+        new_reads = []
+        for read in self.sam_string_list:
+            AS = float(read.strip().split("AS:i:")[1].split()[0])
+            name = read.strip().split()[0]
+            seqlen = self.full_lengths[name]
+            norm_score = AS / (2 * seqlen) * 100 # percent
+            if norm_score >= min_score:
+                new_reads.append(read)
+
+        self.sam_string_list = new_reads
+
     def read_full_lengths(self, file_name):
         """
         Read from a .fasta file the full lengths of the sequences we will encounter in

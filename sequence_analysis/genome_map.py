@@ -109,8 +109,14 @@ class GenomeMap:
         self.reads = []
         headers = []
 
+        self.read_range = (self.read_range[0], -1)
+
+        end = self.end
+        if end == np.inf:
+            end = -1
+
         for file in self.file_names:
-            sr = SamReader(file, start=self.start, end=max(self.end, -1), mapped_onto=self.ch_name, min_score=float(self.min_AS))
+            sr = SamReader(file, start=self.start, end=max(end, -1), mapped_onto=self.ch_name, min_score=float(self.min_AS))
             sr.read()
 
             self.reads += sr.sam_string_list
@@ -121,46 +127,12 @@ class GenomeMap:
         self.end = max([int(a.split("LN:")[1]) for a in headers])
         self.ref_len = self.end
 
-    """
-    def get_reads(self):
-        if len(self.file_names) == 0:
-            print("ERROR: no input file name set.")
-            raise ValueError
-
-        for file in self.file_names:
-            samfile = pysam.AlignmentFile(file, mode='r', check_sq=False)
-            # update reference length
-            ref_len = samfile.get_reference_length(self.ch_name)
-            if self.ref_len is None:
-                self.ref_len = ref_len
-            if ref_len != self.ref_len:
-                raise ValueError
-            if self.end == np.inf:
-                self.end = ref_len
-                self.read_range = (self.read_range[0], self.end)
-
-            for read in samfile.fetch():
-                alignment_score = read.get_tag('AS')
-                ch_name = read.reference_name
-                start = read.reference_start
-                end = read.reference_end
-                if ch_name != self.ch_name:
-                    continue
-                if start > self.end or end < self.start:
-                    continue
-                if alignment_score < self.min_AS:
-                    continue
-                self.reads.append(read)
-                self.read_range = (min(self.read_range[0], read.reference_start), max(self.read_range[1], read.reference_end))
-
-        # make sure we don't have any duplicates
-        # TODO: this may be too slow if set is large
-        self.reads = list(set(self.reads))
-    """
-
     def get_heatmap(self):
         if len(self.reads) == 0:
             print("ERROR: no reads found.")
+            raise ValueError
+
+        if self.read_range[1] == np.inf:
             raise ValueError
 
         self.heatmap = self.Heatmap(self.ch_name, self.ch_num, self.read_range[0], self.read_range[1])

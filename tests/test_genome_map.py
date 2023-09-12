@@ -44,10 +44,12 @@ class TestGenomeMap:
         gm = GenomeMap('CM042140.1', 4)
         gm.set_alignment_score_filter(98)
         gm.file_names = ['aux_files/sam_test.sam']
+
         gm.get_reads()
+        print(gm.read_range)
 
         gm.get_heatmap()
-        assert len(gm.heatmap) == gm.ref_len
+        assert len(gm.heatmap) == gm.read_range[1] - gm.read_range[0]
         assert np.sum(gm.heatmap.freqs) > 0
 
     def test_get_heatmap_2(self):
@@ -57,5 +59,5 @@ class TestGenomeMap:
         gm.get_reads()
 
         gm.get_heatmap()
-        assert len(gm.heatmap) == gm.ref_len
+        assert len(gm.heatmap) == gm.read_range[1] - gm.read_range[0]
         assert np.sum(gm.heatmap.freqs) > 0

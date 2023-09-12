@@ -2,6 +2,8 @@
 Unit tests for sam_reader.
 """
 from sequence_analysis.sam_reader import SamReader
+import pdb
+
 
 class TestSamReader:
     def test_sam_reader_1(self):
@@ -27,4 +29,20 @@ class TestSamReader:
     def test_sam_reader_4(self):
         sr = SamReader("aux_files/out.sam")
         sr.read()
+        assert len(sr.sam_string_list) == 2
+
+    def test_normalize(self):
+        sr = SamReader("aux_files/out.sam")
+        sr.read()
+
+        sr.read_full_lengths("aux_files/ubiquitin.fasta")
+        assert len(sr.sam_string_list) == 2
+
+        assert len(sr.full_lengths) == 1
+
+        sr.normalize_AS_and_filter(min_score=50)
+        assert len(sr.sam_string_list) == 0
+        
+        sr.read()
+        sr.normalize_AS_and_filter(min_score=1)
         assert len(sr.sam_string_list) == 2
