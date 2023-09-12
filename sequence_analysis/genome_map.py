@@ -110,7 +110,7 @@ class GenomeMap:
         headers = []
 
         for file in self.file_names:
-            sr = SamReader(file, start=self.start, end=min(self.end, -1), mapped_onto=self.ch_name, min_score=float(self.min_AS))
+            sr = SamReader(file, start=self.start, end=max(self.end, -1), mapped_onto=self.ch_name, min_score=float(self.min_AS))
             sr.read()
 
             self.reads += sr.sam_string_list
