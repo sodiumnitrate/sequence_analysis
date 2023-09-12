@@ -46,6 +46,8 @@ py::list sam_reader(std::string file_name,
     std::string as_flag = "AS:i:";
 
     int seq_start, seq_end;
+    seq_start = std::numeric_limits<int>::max();
+    seq_end = 0;
 
     while(std::getline(file, line))
     {

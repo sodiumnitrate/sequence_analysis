@@ -23,3 +23,8 @@ class TestSamReader:
         sr.read()
 
         assert len(sr.sam_string_list) == 7
+
+    def test_sam_reader_4(self):
+        sr = SamReader("aux_files/out.sam")
+        sr.read()
+        assert len(sr.sam_string_list) == 2
