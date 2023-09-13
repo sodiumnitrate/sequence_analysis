@@ -39,6 +39,28 @@ class SamReader:
         else:
             self.header = [a for a in headers if self.mapped_onto in a]
 
+    def get_unique_reference_names(self):
+        """
+        Give a list of all the references the queries were mapped to.
+        Also return the minimum range that contains all mappings per reference.
+        """
+        if len(self.sam_string_list) == 0:
+            print("ERROR: there are no sam entries.")
+            raise ValueError
+
+        ref_names = {}
+        for read in self.sam_string_list:
+            name = read.split()[2]
+            pos = int(read.strip().split()[3])
+            length = len(read.strip().split()[9])
+            end = pos + length
+            if name not in ref_names:
+                ref_names[name] = (pos, end)
+            else:
+                ref_names[name] = (min(ref_names[name][0], pos), max(ref_names[name][1], end))
+
+        return ref_names
+
     def normalize_AS_and_filter(self, min_score):
         """
         Sometimes, AS is given as a raw score. We need to convert these to percentages.

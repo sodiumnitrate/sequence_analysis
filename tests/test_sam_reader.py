@@ -46,3 +46,11 @@ class TestSamReader:
         sr.read()
         sr.normalize_AS_and_filter(min_score=1)
         assert len(sr.sam_string_list) == 2
+
+    def test_get_unique(self):
+        sr = SamReader("aux_files/sam_test.sam")
+        sr.read()
+
+        ref_names = sr.get_unique_reference_names()
+        assert len(ref_names) == 2
+        

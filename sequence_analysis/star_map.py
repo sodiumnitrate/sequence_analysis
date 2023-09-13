@@ -18,7 +18,8 @@ import shutil
 # STAR --runMode genomeGenerate --genomeDir . --genomeFastaFiles ../../squid_genome/GCA_023376005.1_UCB_Dpea_1_genomic.fna --runThreadN 18
 
 class StarMap:
-    def __init__(self, n_threads=1):
+    def __init__(self, out_folder, n_threads=1):
+        self.out_folder = out_folder
         self.n_threads = n_threads
         self.genome_dir = None
         self.genome_indexed = False
@@ -65,7 +66,7 @@ class StarMap:
             print("ERROR: genomeDir not found. Please set it.")
             raise ValueError
 
-        exec_str = f"STAR --runMode alignReads --readMapNumber -1 --runThreadN {self.n_threads} --genomeDir {self.genome_dir} --readFilesIn {self.query_file}"
+        exec_str = f"STAR --runMode alignReads --readMapNumber -1 --runThreadN {self.n_threads} --genomeDir {self.genome_dir} --readFilesIn {self.query_file} --outFileNamePrefix {self.out_folder}/"
 
         result = subprocess.run([exec_str], shell=True, capture_output=True, text=True)
 
