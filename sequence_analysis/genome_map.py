@@ -23,6 +23,8 @@ class GenomeMap:
         self.ch_num = ch_num
         self.sample_name = sample_name
 
+        self.full_lengths = None
+
         self.ref_len = None
 
         self.heatmap = None
@@ -98,7 +100,7 @@ class GenomeMap:
         else:
             self.min_AS = min_AS
 
-    def get_reads(self):
+    def get_reads(self, fasta_file=None, length_dict=None):
         """
         Use the sam_reader module to filter and read.
         """
@@ -118,6 +120,15 @@ class GenomeMap:
         for file in self.file_names:
             sr = SamReader(file, start=self.start, end=max(end, -1), mapped_onto=self.ch_name, min_score=float(self.min_AS))
             sr.read()
+            if self.min_AS > 0 and fasta_file is not None:
+                sr.read_full_lengths(file_name=fasta_file)
+                sr.normalize_AS_and_filter(self.min_AS)
+                self.full_lengths = sr.full_lengths
+
+            if self.min_AS > 0 and length_dict is not None:
+                sr.full_lengths = length_dict
+                sr.normalize_AS_and_filter(self.min_AS)
+                self.full_lengths = sr.full_lengths
 
             self.reads += sr.sam_string_list
             self.read_range = (min(self.read_range[0], sr.seq_start), max(self.read_range[1], sr.seq_end))
