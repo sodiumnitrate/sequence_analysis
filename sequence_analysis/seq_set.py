@@ -11,14 +11,20 @@ from sequence_analysis.sequence import sequence
 from sequence_analysis.utils import rna_alphabet, diff_letters
 from sequence_analysis.utils import write_in_columns, aa_alphabet, dna_alphabet
 from sequence_analysis.utils import merge_dicts, fasta_or_phylip
+import fasta_reader_cpp
 
 class seq_set:
     """This class holds a list of sequence objects of a given type."""
-    def __init__(self, list_of_sequences=None, file_name=None, seq_type=None):
+    def __init__(self, list_of_sequences=None, file_name=None, seq_type=None, filter_by_names=None):
         if list_of_sequences is None:
             list_of_sequences = []
         self.records = list_of_sequences
         self.type = seq_type
+
+        if filter_by_names is None:
+            self.filter_by_names = []
+        else:
+            self.filter_by_names = filter_by_names
 
         self.sim_matrix = None
         self.cluster_labels = None
@@ -287,8 +293,9 @@ class seq_set:
         for i in range(len(self.records)):
             self.records[i].type = self.type
 
+    """
     def read_fasta(self, file_name):
-        """Function to read sequences into seq_set from a .fasta file."""
+        #Function to read sequences into seq_set from a .fasta file.
         if len(self.records) > 0:
             print("Warning: overwriting existing data")
             self.records = []
@@ -298,6 +305,24 @@ class seq_set:
 
         self.set_type()
 
+        for seq in self.records:
+            seq.type = self.type
+    """
+
+    def read_fasta(self, file_name):
+        """
+        Function to read sequences into seq_set from a .fasta file.
+        """
+        lines = fasta_reader_cpp.fasta_reader(file_name, self.filter_by_names)
+        
+        self.records = []
+        i = 0
+        while i < len(lines):
+            seq = sequence(lines[i + 1], lines[i])
+            self.records.append(seq)
+            i += 2
+
+        self.set_type()
         for seq in self.records:
             seq.type = self.type
     

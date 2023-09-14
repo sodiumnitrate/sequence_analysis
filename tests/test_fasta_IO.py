@@ -65,3 +65,16 @@ class TestIO:
         seqs = seq_set(file_name="aux_files/write_fasta_seq.fa")
         assert len(seqs) == 2
         assert seqs[0].name == 'seq_a'
+
+    def test_read_fasta_filter(self):
+        names = ['seq2', 'seq10']
+        seqs = seq_set(file_name="aux_files/test_2.fasta", filter_by_names=names)
+
+        assert len(seqs) == 2
+        assert seqs[0].name == 'seq2'
+        assert seqs[1].name == 'seq10'
+
+    def test_read_fasta_filter_2(self):
+        names = ['seq2', 'seq103']
+        seqs = seq_set(file_name="aux_files/test_2.fasta", filter_by_names=names)
+        assert len(seqs) == 1
