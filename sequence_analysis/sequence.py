@@ -1,37 +1,17 @@
 """
 This file holds the sequence class and related methods.
 """
-from Bio.Seq import Seq
-import sequence_analysis.utils as utils
-import re
-from sequence_analysis.utils import aa_alphabet
-from sequence_analysis.utils import dna_alphabet
-from sequence_analysis.utils import rna_alphabet
-from sequence_analysis.utils import diff_letters
-from colorama import Fore, Back, Style
-from sequence_analysis.utils import ww
-from sequence_analysis.utils import mw_aa
-from sequence_analysis.utils import start_codon,find_kmers_in_string
-from sequence_analysis.utils import stop_codon, movmean
-from sequence_analysis.utils import stop_codon_re, write_in_columns
-from sequence_analysis.open_reading_frame import OpenReadingFrame
-from scipy.signal import periodogram
-import numpy as np
+from sequence_module import PySequence
 
-
-class sequence:
+class Sequence:
     """This class corresponds to a single biological sequence (protein, rna, or dna)"""
-
     def __init__(self, seq, name=None, seq_type=None):
         """This function initializes the sequence object."""
-        self.seq = seq.upper()
-        self.name = name
-        self.type = seq_type
-
-        self.quality = None
-
+        self.py_seq = PySequence(seq, name)
         if seq_type is None:
-            self.set_type()
+            self.py_seq.set_type("")
+        else:
+            self.py_seq.set_type(seq_type)
 
     def __eq__(self, other):
         """
@@ -39,109 +19,56 @@ class sequence:
         same type and have the same exact string for sequence, they are deemed equal.
         """
         if isinstance(self, type(other)):
-            if self.type == other.type:
-                return self.seq == other.seq
+            if self.py_seq.type == other.py_seq.type:
+                return self.py_seq.get_sequence() == other.py_seq.get_sequence()
             else:
                 return False
-        else:
-            return False
-
-    def __gt__(self, other):
-        """This function overloads __gt__ to use the string __gt__ on the seq attribute."""
-        assert (isinstance(self, type(other)))
-
-        if self.type != other.type:
-            if not(self.type is None and other.type is None):
-                return False
-
-        if self.seq > other.seq:
-            return True
-        else:
-            return False
-
-    def __lt__(self, other):
-        """"This function overloads __lt__ to use the string __lt__ on the seq attribute."""
-        assert (isinstance(self, type(other)))
-
-        if self.type != other.type:
-            if not(self.type is None and other.type is None):
-                return False
-
-        if self.seq < other.seq:
-            return True
         else:
             return False
 
     def __str__(self):
         """Function that overloads __str__ for sequence object."""
-        return f"{self.seq}"
+        return f"{self.py_seq.get_sequence()}"
 
     def __repr__(self):
         """Function that overloas __repr__ for sequence object."""
-        return f"<Sequence object of type {self.type} with '{self.seq:.5}...' at {hex(id(self))}>"
+        return f"<Sequence object of type {self.py_seq.get_type()} with '{self.py_seq.get_sequence():.5}...' at {hex(id(self))}>"
 
     def __len__(self):
         """Overwrites __len__ to return the number of chars in seq.seq"""
-        return len(self.seq)
+        return self.py_seq.length()
 
     def __getitem__(self, key):
         """Overwrites __getitem__ so that a part of the sequence can be returned."""
         if isinstance(key, slice) or isinstance(key, int):
-            return self.seq[key]
+            return self.py_seq.get_sequence()[key]
         else:
             raise TypeError
 
     def set_type(self, seq_type=None):
         """Function that sets the type of sequence based on the letters it contains."""
-        # TODO: add "N" to the rna and dna alphabet?
-        if seq_type is not None:
-            self.type = seq_type
-            return
-
-        s = self.seq.upper().replace('-','')
-        if len(s) == 0:
-            print("WARNING: empty sequence. Can't set type.")
-            self.type = None
-            return
-        all_letters = set([*s])
-
-        nuc_freq = (s.count('A') + s.count('G') + s.count('T') + s.count('U') + s.count('C') + s.count('N')) / len(s)
-        if len(all_letters) < 10 and nuc_freq > 0.9:
-            # we have a nucleotide sequence
-            if 'U' in all_letters:
-                self.type = 'rna'
-            else:
-                self.type = 'dna'
+        if seq_type is None:
+            self.py_seq.set_type("")
         else:
-            self.type = 'protein'
-
-
-        """
-        if len(diff_letters.intersection(all_letters)):
-            self.type = 'protein'
-        elif set(dna_alphabet).issubset(all_letters) or set(rna_alphabet).issubset(all_letters):
-            if 'U' in all_letters:
-                self.type = 'rna'
-            else:
-                # this could fail if we have RNA sequences that happens to have
-                # no Us, but that's unlikely
-                self.type = 'dna'
-        else:
-            print("I can't assign a type, please specify manually.")
-        """
+            self.py_seq.set_type(seq_type)
 
     def translate(self):
         """
         Function that translates DNA or RNA sequence into protein.
         """
-        if self.type != 'rna' and self.type != 'dna':
-            print(f"WARNING: no translation for sequence type {self.type}.")
+        if self.py_seq.get_type() != 'rna' and self.py_seq.get_type() != 'dna':
+            print(f"WARNING: no translation for sequence type {self.py_seq.get_type()}.")
             return
+        '''
         s = Seq(self.seq.replace('-',""))
         s = str(s.translate())
         s = s.strip("X")
 
         return sequence(s,name=self.name,seq_type='protein')
+        '''
+        s_cpp = self.py_seq.translate()
+        s = Sequence(s_cpp.get_sequence(), s_cpp.get_name(), s_cpp.get_type())
+        return s
 
     def find_codon(self, codon):
         """
@@ -149,22 +76,11 @@ class sequence:
         Returns None if not rna or dna.
         Returns -1 if no match.
         """
-        if self.type != "rna" and self.type != "dna":
-            print("ERROR: cannot search for codons if the sequence isn't rna or dna.")
-            return None
-
-        seq_str = self.seq
-        codons = [seq_str[3*ptr:3*ptr+3] for ptr in range(len(seq_str) // 3)]
-        try:
-            ind = codons.index(codon)
-        except ValueError:
-            return -1
-
-        return ind * 3
+        return self.py_seq.find_codon(codon)
 
     def reverse_complement(self):
-        if self.type != "rna" and self.type != "dna":
-            print(f"ERROR: cannot reverse complement: the sequence is of type {self.type}.")
+        if self.py_seq.get_type() != "rna" and self.py_seq.get_type() != "dna":
+            print(f"ERROR: cannot reverse complement: the sequence is of type {self.py_seq.get_type()}.")
             return None
 
         seq = self.seq
@@ -220,6 +136,7 @@ class sequence:
 
         return seq
 
+    # TODO: DEPRECATE
     def six_frame_check(self, regex,
                               chop_before_first_M=True,
                               min_orf_len=90):
@@ -294,11 +211,13 @@ class sequence:
 
         return new_orfs
 
+    # TODO: DEPRECATE
     def check_for_pattern(self, regex):
         """Function that checks for a given regex pattern in the sequence."""
         # TODO: check if regex and seq from the same alphabet?
         return utils.check_for_pattern(self.seq, regex)
 
+    # TODO: DEPRECATE
     def choose_all_matching_patterns(
             self, regex, return_between_matching=False):
         """Function that chooses all matching regex patterns in the sequence."""
@@ -315,6 +234,7 @@ class sequence:
 
         return x, spans
 
+    # TODO: DEPRECATE
     def choose_all_matching_patterns_and_print(self, regex):
         """Function to print spans of matches in blue, and inverted spans in red."""
         matching, spans, inverted = self.choose_all_matching_patterns(
@@ -329,12 +249,13 @@ class sequence:
             to_print += f"{Fore.BLUE}" + \
                 seq[span[0]:span[1] + 1] + f"{Style.RESET_ALL}"
             if i < len(spans) - 1:
-                to_print += f"{Fore.RED}" + seq[inverted[i][0]                                                :inverted[i][1] + 1] + f"{Style.RESET_ALL}"
+                to_print += f"{Fore.RED}" + seq[inverted[i][0]:inverted[i][1] + 1] + f"{Style.RESET_ALL}"
         tail = seq[spans[-1][1] + 1:]
         to_print += tail
 
         print(to_print)
 
+    # TODO: DEPRECATE
     def remove_before_pattern(self, regex, verbose=True):
         """Function that removes the letters before the matching regex."""
         x, spans = self.choose_all_matching_patterns(regex)
@@ -393,8 +314,6 @@ class sequence:
         # exclude f=0
         f_res = f[np.argmax(p[1:])+1]
         return 1./f_res
-
-
 
     def calculate_weight(self):
         """Function to calculate the weight in Da of the given sequence."""

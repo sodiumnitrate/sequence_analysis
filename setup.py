@@ -5,11 +5,12 @@ from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup, find_packages
 import sequence_analysis
 
-cxx_std = int(os.environ.get("CMAKE_CXX_STANDARD", "14"))
+cxx_std = int(os.environ.get("CMAKE_CXX_STANDARD", "20"))
 
 ext_modules = [
     Pybind11Extension("sam_reader_cpp", ["src/sam_reader.cpp"], cxx_std=cxx_std),
     Pybind11Extension("fasta_reader_cpp", ["src/fasta_reader.cpp"], cxx_std=cxx_std),
+    Pybind11Extension("sequence_module", ["src/sequence.cpp"], cxx_std=cxx_std)
 ]
 
 setup(
