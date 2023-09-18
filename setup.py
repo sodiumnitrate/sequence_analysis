@@ -10,7 +10,7 @@ cxx_std = int(os.environ.get("CMAKE_CXX_STANDARD", "20"))
 ext_modules = [
     Pybind11Extension("sam_reader_cpp", ["src/sam_reader.cpp"], cxx_std=cxx_std),
     Pybind11Extension("fasta_reader_cpp", ["src/fasta_reader.cpp"], cxx_std=cxx_std),
-    Pybind11Extension("sequence_module", ["src/sequence.cpp"], cxx_std=cxx_std)
+    Pybind11Extension("sequence_analysis_cpp", ["src/sequence_analysis.cpp"], cxx_std=cxx_std)
 ]
 
 setup(
