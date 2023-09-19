@@ -1,5 +1,7 @@
 /*
 C++ module with pybind11 binding to do sequence analysis.
+
+NOTE: you will need this: https://stackoverflow.com/a/36056804/2112406
 */
 
 #include <pybind11/pybind11.h>
@@ -12,6 +14,7 @@ C++ module with pybind11 binding to do sequence analysis.
 #include <unordered_map>
 #include <algorithm>
 #include <fstream>
+#include <cstring>
 
 namespace py = pybind11;
 
@@ -88,12 +91,52 @@ char codon_to_aa(std::string codon){
     return codon_to_aa_map[codon];
 }
 
+// ORF class
+class OpenReadingFrame{
+    std::string rna_sequence;
+    std::string parent_sequence;
+    std::string protein_sequence;
+    int start;
+    int stop;
+    int strand;
+    int frame;
+public:
+    OpenReadingFrame() {};
+    void set_props(std::string rna_sequence_, std::string parent_sequence_, std::string protein_sequence_, int start_, int stop_, int strand_, int frame_){
+        rna_sequence = rna_sequence_;
+        parent_sequence = parent_sequence_;
+        protein_sequence = protein_sequence_;
+        start = start_;
+        stop = stop_;
+        strand = strand_;
+        frame = frame_;
+    }
+    void set_start(int start_) {start = start_;}
+    int get_start() { return start;}
+    void set_stop(int stop_) { stop = stop_;}
+    int get_stop() {return stop;}
+    void set_strand(int strand_) { strand = strand_;}
+    int get_strand() {return strand;}
+    void set_frame(int frame_) {frame = frame_;}
+    int get_frame() { return frame; }
+    std::string get_rna_sequence() { return rna_sequence;}
+    void set_rna_sequence(std::string rs) {rna_sequence = rs;}
+    std::string get_parent_sequence() {return parent_sequence;}
+    void set_parent_sequence(std::string ps) { parent_sequence = ps;}
+    std::string get_protein_sequence() { return protein_sequence;}
+    void set_protein_sequence(std::string ps) {protein_sequence = ps;}
+};
+
+
 class Sequence {
     std::string name;
     std::string seq_str;
     std::string type;
 public:
-    Sequence(std::string &seq_str) : seq_str(seq_str) {}
+    Sequence(std::string &seq_str_) {
+        std::transform(seq_str_.begin(), seq_str_.end(), seq_str_.begin(), ::toupper);
+        seq_str = seq_str_;
+    }
     void set_name(std::string &name_) { name = name_; }
     std::string get_name() { return name; }
     void set_seq(std::string &seq_str_) { seq_str = seq_str_; }
@@ -104,6 +147,18 @@ public:
     // return length
     int length() { return seq_str.length();}
 
+    // checking equality
+    bool const operator==(const Sequence& other) const{
+        if (seq_str.compare(other.seq_str) == 0) return true;
+        else return false;
+    }
+
+    // checking <
+    bool const operator<(const Sequence& other) const{
+        if (seq_str < other.seq_str) return true;
+        else return false;
+    }
+
     // function to set type
     void set_type(std::string seq_type=""){
         if (seq_str.length() == 0)
@@ -111,7 +166,7 @@ public:
             std::cout << "WARNING: empty sequence. Can't set type." << std::endl;
             return;
         }
-        if (seq_type != ""){
+        if (seq_type.compare("") != 0){
             type = seq_type;
         }
         else
@@ -120,7 +175,7 @@ public:
             std::string ch;
             std::unordered_set<std::string> uniq_chars;
             int nuc_ct = 0;
-            for (int i = 0; i < seq_str.length(); i++)
+            for (unsigned int i = 0; i < seq_str.length(); i++)
             {
                 ch = seq_str[i];
                 uniq_chars.insert(ch);
@@ -168,7 +223,7 @@ public:
             std::cout << "ERROR: codons must have 3 letters." << std::endl;
             return -1;
         }
-        int ptr = 0;
+        unsigned int ptr = 0;
         std::string curr_codon;
         while ( ptr < (seq_str.length() / 3) * 3){
             curr_codon = seq_str.substr(ptr, 3);
@@ -205,7 +260,7 @@ public:
         }
 
         std::string complemented;
-        for (int i = seq_str.length() - 1; i >= 0; i--){
+        for (unsigned int i = 0; i < seq_str.length(); i++){
             if (seq_str[i] == 'A'){
                 complemented.push_back(type.compare("rna") == 0 ? 'U' : 'T');
             }
@@ -216,7 +271,7 @@ public:
                 complemented.push_back('C');
             }
             else if (seq_str[i] == 'U' || seq_str[i] == 'T'){
-                complemented.push_back('T');
+                complemented.push_back('A');
             }
             else{
                 // if we have N, for instance
@@ -241,23 +296,16 @@ public:
     // frame shift
     Sequence frame_shift(int frame){
         // frame shift and return new obj
-        std::cout << frame << std::endl;
         std::string new_str;
-        std::cout << seq_str << std::endl;
         if (frame <= 0 || frame > 2){
             new_str = seq_str;
         }
         else if (frame == 1){
-            std::cout << "now im here" << std::endl;
-            std::cout << seq_str[0] << std::endl;
-            std::cout << seq_str[1] << std::endl;
-            new_str = seq_str.substr(1, seq_str.length() - 2);
+            new_str = seq_str.substr(1, seq_str.length() - 1);
         }
         else{
-            new_str = seq_str.substr(2, seq_str.length() - 3);
+            new_str = seq_str.substr(2, seq_str.length() - 2);
         }
-        std::cout << "now im there" << std::endl;
-        std::cout << new_str << std::endl;
         Sequence to_return(new_str);
         to_return.set_type(type);
         to_return.set_name(name);
@@ -272,7 +320,7 @@ public:
             return Sequence(empty);
         }
         std::string protein_sequence;
-        int ptr = 0;
+        unsigned int ptr = 0;
         std::string curr_codon;
         while (ptr < (seq_str.length() / 3) * 3){
             curr_codon = seq_str.substr(ptr, 3);
@@ -291,7 +339,7 @@ public:
         std::ofstream out_file;
         out_file.open(file_name);
         out_file << ">" << name << std::endl;
-        for (int i=0; i < seq_str.length(); i++){
+        for (unsigned int i=0; i < seq_str.length(); i++){
             if( i != 0 && i % 79 == 0){
                 out_file << std::endl;
             }
@@ -303,7 +351,7 @@ public:
     }
 
     // get orfs
-    std::vector<OpenReadingFrame> get_open_reading_frames(){
+    std::vector<OpenReadingFrame> get_open_reading_frames(unsigned int min_len=80){
         std::vector<OpenReadingFrame> result;
         if (type.compare("dna") != 0 && type.compare("rna") != 0){
             std::cout << "ERROR: open reading frames can be found for DNA or RNA sequences only." << std::endl;
@@ -312,11 +360,14 @@ public:
 
         // remove gaps
         std::string seq = seq_str;
-        std::ranges::replace(seq, '-', '');
+        seq.erase(remove(seq.begin(), seq.end(), '-'), seq.end());
         Sequence modded(seq);
         Sequence shifted(seq);
+        int order_vals[2] = {-1, 1};
         for (int frame = 0; frame < 3; frame++){
-            for (int [-1, 1] : order ){
+            for (int order : order_vals ){
+                // looping over 6 frames (3 frames * 2 order)
+
                 if (order == 1){
                     shifted = modded.frame_shift(frame);
                 }
@@ -328,25 +379,31 @@ public:
                 int start_ind = 0;
                 int stop_ind = 0;
                 std::string curr_fragment;
+                std::string curr_codon;
                 bool recording = false;
-                for (int ptr = 0; ptr < 3*len_str; ptr+=3)
+                for (int ptr = 0; ptr < 3 * len_str; ptr += 3)
                 {
                     curr_codon = shifted.get_seq().substr(ptr, 3);
-                    if (codon_to_aa[curr_codon] == 'M' && !recording){
+                    if (codon_to_aa(curr_codon) == 'M' && !recording){
                         start_ind = ptr;
                         recording = true;
                     }
                     if (recording){
                         curr_fragment += curr_codon;
                     }
-                    if (codon_to_aa[curr_codon] == '*' || ptr == 3*(len_str-1)){
+                    if (codon_to_aa(curr_codon) == '*' || ptr == 3*(len_str-1)){
                         if (recording){
+                            if (min_len > curr_fragment.length()){
+                                recording = false;
+                                curr_fragment = "";
+                                continue;
+                            }
                             stop_ind = ptr + 3;
                             start_ind += frame;
                             stop_ind += frame;
                             if (order == -1){
                                 start_ind = seq_str.length() - start_ind;
-                                stop_ind = seq_str.length() - end_ind;
+                                stop_ind = seq_str.length() - stop_ind;
                             }
                             if (start_ind > stop_ind){
                                 int dummy = stop_ind;
@@ -354,13 +411,14 @@ public:
                                 start_ind = dummy;
                             }
                             OpenReadingFrame orf;
-                            Sequence prot = shifted.translate();
-                            orf.set_props(shifted, modded, prot, start, stop, order, frame);
+                            Sequence fragment(curr_fragment);
+                            fragment.set_type();
+                            Sequence prot = fragment.translate();
+                            orf.set_props(shifted.get_seq(), modded.get_seq(), prot.get_seq(), start_ind, stop_ind, order, frame);
                             result.push_back(orf);
+                            recording = false;
+                            curr_fragment = "";
                         }
-
-                        recording = false;
-                        curr_fragment = "";
                     }
                 }
             }
@@ -394,21 +452,82 @@ public:
             std::cout << "WARNING: there are no sequences in the set to determine type." << std::endl;
             return;
         }
+        std::string prev;
         for (auto& t : records){
             t.set_type(seq_type);
+            if(prev.length() > 0 && t.get_type().compare(prev) != 0){
+                std::cout << "WARNING: set contains sequences of different types! The assigned type is probably wrong." << std::endl;
+                prev = t.get_type();
+            }
         }
         // set the type based on the first sequence
         // (Assumes all sequences have the same type -- TODO: add check.)
         type = records[0].get_type();
     }
     std::string get_type(){ return type; };
-    void set_records(std::vector<Sequence> &records_) {records = records_;}
+    void set_records(std::vector<Sequence> &records_) {records = records_;
+    this->set_type();}
     std::vector<Sequence> get_records() { return records;}
 
     // function to be able to add sequence to the set
     void add_sequence(Sequence seq){
+        // TODO: add check for type
         records.push_back(seq);
         return;
+    }
+
+    // dealign
+    void dealign(){
+        std::string seq;
+        for(auto& t : records){
+            seq = t.get_seq();
+            seq.erase(remove(seq.begin(), seq.end(), '-'), seq.end());
+            t.set_seq(seq);
+        }
+        return;
+    }
+
+    // alphabetize
+    void alphabetize(){
+        std::sort(records.begin(), records.end());
+    }
+
+    // remove duplicates
+    void remove_duplicates(){
+        if(records.size() < 2){
+            return;
+        }
+
+        // sort
+        this->alphabetize();
+
+        // flag
+        std::string flag = "**";
+
+        unsigned int idx=0;
+        std::string name = records[0].get_name();
+
+        // label duplicates, append their names to the first occurrence
+        for (unsigned int i=1; i < records.size(); i++){
+            if (records[i] == records[i-1]){
+                name += '_' + records[i].get_name();
+                records[i].set_name(flag);
+            }
+            else{
+                if(i - idx > 1){
+                    records[idx].set_name(name);
+                }
+                name = records[i].get_name();
+                idx=i;
+            }
+            std::cout << i << " " << name << std::endl;
+        }
+
+        // remove the labeled ones
+        records.erase(std::remove_if(
+            records.begin(), records.end(), 
+            [](auto t){return t.get_name().compare("**")==0;}),
+            records.end());
     }
 
     // add elements from another SeqSet instance
@@ -435,6 +554,7 @@ public:
         out_file.close();
     }
 
+    // read fasta
     void read_fasta(std::string file_name){
         std::ifstream in_file (file_name);
         std::string line;
@@ -447,13 +567,13 @@ public:
             return;
         }
 
-        int seq_st = 0;
-        while(std::getline(file, line)){
+        int seq_ct = 0;
+        while(std::getline(in_file, line)){
             if (line[0] == '>')
             {
                 if (seq_ct > 0){
                     Sequence new_seq(seq);
-                    new_seq.name = name;
+                    new_seq.set_name(name);
                     records.push_back(new_seq);
                     seq = "";
                 }
@@ -469,8 +589,82 @@ public:
 
         // add the final one
         Sequence new_seq(seq);
-        new_seq.name = name;
+        new_seq.set_name(name);
         records.push_back(new_seq);
+    }
+
+    // write phylip
+    void write_phylip(std::string file_name, std::string mode){
+        // in phylip format, all sequences must be of the same length
+        int n_seqs = records.size();
+        std::unordered_set<int> n_chars;
+        unsigned int max_name_chars = 0;
+
+        for (auto t : records){
+            n_chars.insert(t.length());
+            // get the longest name for later use
+            if(t.get_name().length() > max_name_chars) max_name_chars = t.get_name().length();
+        }
+        if (n_chars.size() != 1){
+            std::cout << "ERROR: sequences must be of the same length." << std::endl;
+            return;
+        }
+        std::ofstream out_file;
+        out_file.open(file_name);
+        auto num_chars = n_chars.begin();
+
+        // first lines differ depending on whether we want the sequential or interleaved versions
+        if (mode.compare("sequential") == 0){
+            out_file << n_seqs << "\t" << *num_chars << std::endl;
+        }
+        else if (mode.compare("interleaved") == 0){
+            out_file << n_seqs << "\t" << *num_chars << "\tI" <<std::endl; 
+        }
+        else{
+            std::cout << "ERROR: mode not understood." << std::endl;
+            return;
+        }
+
+        // sequential is pretty straightforward
+        if (mode.compare("sequential") == 0){
+            for (auto t : records){
+                out_file << t.get_name() << "    " << t.get_seq() << std::endl;
+            }
+        }
+        // interleaved -> write in 6 blocks of 10
+        else if (mode.compare("interleaved") == 0){
+            int total_lines = *num_chars / 60 + 1;
+            for (int i=0; i < total_lines; i++){
+                for (auto t : records){
+                    if (i == 0){
+                        out_file << t.get_name();
+                        // proper number of spaces
+                        for (unsigned int j = 0; j < (max_name_chars - t.get_name().length() + 2); j++) out_file << " ";
+                    }
+                    else
+                    {
+                        // proper number of spaces
+                        for (unsigned int j = 0; j < (max_name_chars + 2); j++) out_file << " ";
+                    }
+                    // write seq_str in chunks
+                    int start = i * 60;
+                    int len = fmin(60, t.length() - start);
+                    std::string relevant = t.get_seq().substr(start, len);
+                    int count = 0;
+                    for(auto c : relevant){
+                        if (count != 0 && count % 10 == 0){
+                            out_file << " ";
+                        }
+                        out_file << c;
+                        count++;
+                    }
+                    out_file << std::endl;
+                }
+                out_file << std::endl;
+            }
+        }
+
+        out_file.close();
     }
 
     /*
@@ -478,9 +672,6 @@ public:
     - filter support for read_fasta
     - __getitem__
     - __add__
-    - write_phylip
-    - alphabetize
-    - remove duplicates
     - get frequencies
     - read fastq
     - read phylip?
@@ -493,33 +684,7 @@ public:
 
 // TODO: sequence logo class by itself?
 
-class OpenReadingFrame{
-    Sequence rna_sequence;
-    Sequence parent_sequence;
-    Sequence protein_sequence;
-    int start;
-    int stop;
-    int strand;
-    int frame;
-public:
-    OpenReadingFrame() {}
-    void set_props(Sequence rna_sequence_, Sequence parent_sequence_, Sequence protein_sequence_, int start_, int stop_, int strand_, int frame_){
-        rna_sequence = rna_sequence_;
-        parent_sequence = parent_sequence_;
-        protein_sequence = protein_sequence_;
-        start = start_;
-        stop = stop_;
-        strand = strand_;
-        frame = frame_;
-    }
-    void set_start(int start_) {start = start_;}
-    int get_start() { return start;}
-    void set_stop(int stop_) { stop = stop_;}
-    int get_stop() {return stop;}
-    void set_strand(int strand_) { strand = strand_;}
-    int get_strand() {return strand;}
-    // TODO: finish rest
-};
+
 
 PYBIND11_MODULE(sequence_analysis_cpp, m){
     py::class_<Sequence>(m, "Sequence", py::dynamic_attr())
@@ -531,7 +696,7 @@ PYBIND11_MODULE(sequence_analysis_cpp, m){
         .def("get_seq", &Sequence::get_seq)
         .def_property("seq_str", &Sequence::get_seq, &Sequence::set_seq)
         .def("get_type", &Sequence::get_seq)
-        .def("set_type", &Sequence::set_type)
+        .def("set_type", &Sequence::set_type, py::arg("seq_type") = "")
         .def_property("type", &Sequence::get_type, &Sequence::set_type)
         .def("find_codon", &Sequence::find_codon)
         .def("reverse", &Sequence::reverse)
@@ -540,6 +705,7 @@ PYBIND11_MODULE(sequence_analysis_cpp, m){
         .def("frame_shift", &Sequence::frame_shift)
         .def("translate", &Sequence::translate)
         .def("write_fasta", &Sequence::write_fasta)
+        .def("get_open_reading_frames", &Sequence::get_open_reading_frames, py::arg("min_len")=80)
         .def("__repr__",
             [](Sequence &a){
                 return "<sequence_analysis.Sequence " + a.get_seq().substr(0,5) + "... >";
@@ -559,7 +725,7 @@ PYBIND11_MODULE(sequence_analysis_cpp, m){
         .def("set_name", &SeqSet::set_name)
         .def("get_name", &SeqSet::get_name)
         .def_property("name", &SeqSet::get_name, &SeqSet::set_name)
-        .def("set_type", &SeqSet::set_type)
+        .def("set_type", &SeqSet::set_type, py::arg("seq_type") = "")
         .def("get_type", &SeqSet::get_type)
         .def_property("type", &SeqSet::get_type, &SeqSet::set_type)
         .def("add_sequence", &SeqSet::add_sequence)
@@ -569,9 +735,14 @@ PYBIND11_MODULE(sequence_analysis_cpp, m){
         .def_property("records", &SeqSet::get_records, &SeqSet::set_records)
         .def("add_set", &SeqSet::add_set)
         .def("write_fasta", &SeqSet::write_fasta)
+        .def("read_fasta", &SeqSet::read_fasta)
+        .def("write_phylip", &SeqSet::write_phylip)
+        .def("alphabetize", &SeqSet::alphabetize)
+        .def("dealign", &SeqSet::dealign)
+        .def("remove_duplicates", &SeqSet::remove_duplicates)
         .def("__repr__",
              [](SeqSet &a){
-                 return "<sequence_analysis.SeqSet of size " + a.size() + '>';
+                 return "<sequence_analysis.SeqSet of size " + std::to_string(a.size()) + " >";
              })
         .def("__len__",
              [](SeqSet &a){
@@ -579,4 +750,33 @@ PYBIND11_MODULE(sequence_analysis_cpp, m){
              })
         ;
         //TODO: make it pickleable and add copy & deepcopy support (https://pybind11.readthedocs.io/en/stable/advanced/classes.html#deepcopy-support)
+
+    py::class_<OpenReadingFrame>(m, "OpenReadingFrame", py::dynamic_attr())
+        .def(py::init<>())
+        .def("set_start", &OpenReadingFrame::set_start)
+        .def("get_start", &OpenReadingFrame::get_start)
+        .def("set_stop", &OpenReadingFrame::set_stop)
+        .def("get_stop", &OpenReadingFrame::get_stop)
+        .def("set_strand", &OpenReadingFrame::set_strand)
+        .def("set_strand", &OpenReadingFrame::get_strand)
+        .def("set_frame", &OpenReadingFrame::set_frame)
+        .def("get_frame", &OpenReadingFrame::get_frame)
+        .def("set_rna_sequence", &OpenReadingFrame::set_rna_sequence)
+        .def("get_rna_sequence", &OpenReadingFrame::get_rna_sequence)
+        .def("set_parent_sequence", &OpenReadingFrame::set_parent_sequence)
+        .def("get_parent_sequence", &OpenReadingFrame::get_parent_sequence)
+        .def("set_protein_sequence", &OpenReadingFrame::set_protein_sequence)
+        .def("get_protein_sequence", &OpenReadingFrame::get_protein_sequence)
+        .def_property("start", &OpenReadingFrame::get_start, &OpenReadingFrame::set_start)
+        .def_property("stop", &OpenReadingFrame::get_stop, &OpenReadingFrame::set_stop)
+        .def_property("strand", &OpenReadingFrame::get_strand, &OpenReadingFrame::set_strand)
+        .def_property("frame", &OpenReadingFrame::get_frame, &OpenReadingFrame::set_frame)
+        .def_property("rna_sequence", &OpenReadingFrame::get_rna_sequence, &OpenReadingFrame::set_rna_sequence)
+        .def_property("parent_sequence", &OpenReadingFrame::get_parent_sequence, &OpenReadingFrame::set_parent_sequence)
+        .def_property("protein_sequence", &OpenReadingFrame::get_protein_sequence, &OpenReadingFrame::set_protein_sequence)
+        .def("__repr__",
+             [](OpenReadingFrame &a){
+                return "<sequence_analysis.OpenReadingFrame object>";
+             })
+        ;        
 }
