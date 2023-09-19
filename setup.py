@@ -8,7 +8,7 @@ import sequence_analysis
 cxx_std = int(os.environ.get("CMAKE_CXX_STANDARD", "20"))
 
 ext_modules = [
-    Pybind11Extension("sequence_analysis_cpp", ["src/sequence_analysis.cpp"], cxx_std=cxx_std)
+    Pybind11Extension("sequence_analysis_cpp", ["src/sequence_analysis.cpp", "src/sequence.cpp", "src/orf.cpp", "src/seq_set.cpp"], cxx_std=cxx_std)
 ]
 
 setup(
