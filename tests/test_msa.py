@@ -1,11 +1,12 @@
 from sequence_analysis.msa import MSA
-from sequence_analysis.seq_set import seq_set
+from sequence_analysis.seq_set import SeqSet
 
 import os
 
 class TestMSA:
     def test_msa_setup(self):
-        seqs = seq_set(file_name="aux_files/cluster_test_2.fasta")
+        seqs = SeqSet()
+        seqs.read_fasta("aux_files/cluster_test_2.fasta")
 
         msa = MSA(seqs)
         assert msa.sequences is not None
@@ -19,7 +20,8 @@ class TestMSA:
         assert msa.scratch_folder_name == "tmp"
 
     def test_msa_align(self):
-        seqs = seq_set(file_name="aux_files/cluster_test_2.fasta")
+        seqs = SeqSet()
+        seqs.read_fasta("aux_files/cluster_test_2.fasta")
 
         msa = MSA(seqs)
         msa.align(clean=True)

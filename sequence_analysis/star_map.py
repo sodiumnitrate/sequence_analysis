@@ -10,7 +10,6 @@ is sufficient.
 TODO: python bindings?
 """
 import subprocess
-import os
 import shutil
 
 # STAR --runMode alignReads --readMapNumber -1 -readNameSeparator _ --runThreadN 18 --genomeDir ../STAR --readFilesIn ../../squid_transcriptome_from_genome_paper/SRR18071790_1.fastq
