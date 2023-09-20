@@ -6,3 +6,5 @@ This python module puts together some tools to do very basic (protein/dna/rna) s
 
     git clone https://github.com/sodiumnitrate/sequence_analysis.git
     pip install ./sequence_analysis
+
+## Basic usage
