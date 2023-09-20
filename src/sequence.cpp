@@ -11,7 +11,6 @@
 #include <cstring>
 #include <sstream>
 #include "includes.hpp"
-#include "profiler.cpp"
 
 namespace py = pybind11;
 
@@ -97,8 +96,7 @@ bool is_start(std::string &codon){
     return true;
 }
 
-char codon_to_aa(std::string codon){
-    PROFILE_FUNCTION();
+char codon_to_aa(std::string &codon){
     // requires c++20
     std::ranges::replace(codon, 'T', 'U');
     return codon_to_aa_map[codon];
@@ -106,7 +104,6 @@ char codon_to_aa(std::string codon){
 
 
 Sequence::Sequence(std::string &seq_str_) {
-    PROFILE_FUNCTION();
     std::transform(seq_str_.begin(), seq_str_.end(), seq_str_.begin(), ::toupper);
     seq_str = seq_str_;
 }
@@ -134,7 +131,6 @@ bool const Sequence::operator<(const Sequence& other) const{
 
 // function to set type
 void Sequence::set_type(std::string seq_type=""){
-    PROFILE_FUNCTION();
     if (seq_str.length() == 0)
     {
         std::cout << "WARNING: empty sequence. Can't set type." << std::endl;
@@ -212,7 +208,6 @@ int Sequence::find_codon(std::string codon){
 
 // reverse
 Sequence Sequence::reverse(){
-    PROFILE_FUNCTION();
     // reverse sequence and return as new obj
     std::string reversed;
     for (int i = seq_str.length() - 1; i >= 0; i--){
@@ -226,7 +221,6 @@ Sequence Sequence::reverse(){
 
 // complement
 Sequence Sequence::complement(){
-    PROFILE_FUNCTION();
     // check type
     if (type.compare("rna") != 0 && type.compare("dna") != 0){
         std::cout << "ERROR: can't complement if type not rna or dna." << std::endl;
@@ -260,7 +254,6 @@ Sequence Sequence::complement(){
 
 // reverse complement
 Sequence Sequence::reverse_complement(){
-    PROFILE_FUNCTION();
     Sequence new_seq = Sequence(seq_str).reverse().complement();
     new_seq.set_name(name);
     new_seq.set_type(type);
@@ -268,7 +261,6 @@ Sequence Sequence::reverse_complement(){
 }
 // frame shift
 Sequence Sequence::frame_shift(int frame){
-    PROFILE_FUNCTION();
     // frame shift and return new obj
     std::string new_str;
     if (frame <= 0 || frame > 2){
@@ -288,7 +280,6 @@ Sequence Sequence::frame_shift(int frame){
 
 // translate
 Sequence Sequence::translate(){
-    PROFILE_FUNCTION();
     if (type.compare("rna") != 0 && type.compare("dna") != 0){
         std::cout << "ERROR: can't complement if type not rna or dna." << std::endl;
         std::string empty;
@@ -325,9 +316,6 @@ void Sequence::write_fasta(std::string file_name){
 
 // get orfs
 std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min_len=80){
-    PROFILE_FUNCTION();
-    Instrumentor::Get().LaunchSession("myprofiler", "profiler.json");
-    std::cout << "Entered the function" << std::endl;
     std::vector<OpenReadingFrame> result;
     if (type.compare("dna") != 0 && type.compare("rna") != 0){
         std::cout << "ERROR: open reading frames can be found for DNA or RNA sequences only." << std::endl;
@@ -348,7 +336,6 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
             // looping over 6 frames (3 frames * 2 order)
             if (order == 1){
                 shifted = modded.frame_shift(frame);
-
             }
             else{
                 shifted = modded.reverse_complement().frame_shift(frame);
@@ -403,7 +390,6 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
             
         }
     }
-    Instrumentor::Get().EndSession();
     return result;
 }
 
