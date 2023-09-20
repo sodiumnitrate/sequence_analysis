@@ -122,6 +122,25 @@ public:
 
 };
 
+// genome map, to be created and utilized by SamFile
+// TODO: functionality to get names of reads that map to each pos?
+class GenomeMap{
+    std::string chromosome_name;
+    std::string sample_name;
+
+    std::vector<unsigned int> heatmap;
+    int heatmap_start = 0;
+    int heatmap_end = -1;
+public:
+    GenomeMap();
+    std::vector<unsigned int> get_heatmap(int start, int end);
+    std::string get_chromosome_name();
+    void set_chromosome_name(std::string ch_name);
+    std::string get_sample_name();
+    void set_sample_name(std::string samp);
+    void set_heatmap(std::vector<unsigned int> heatmap_, int heatmap_start_, int heatmap_end_);
+};
+
 class SamFile{
     // path to the .sam file
     std::string file_name;
@@ -158,6 +177,7 @@ public:
     int get_seq_end();
     void get_lengths_from_fasta(std::string fasta_file_name);
     void read();
+    GenomeMap get_genome_map(std::string mapped_name, std::string sample_name);
 };
 
 class PairwiseAligner{
@@ -178,11 +198,3 @@ public:
     float get_score();
 };
 
-class GenomeMap{
-    std::string chromosome_name;
-    std::vector<unsigned int> heatmap;
-    int heatmap_start;
-    int heatmap_end;
-public:
-    GenomeMap();
-}

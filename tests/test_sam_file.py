@@ -1,6 +1,8 @@
 """
 Unit tests for the SamFile class.
 """
+import numpy as np
+
 from sequence_analysis.sam_file import SamFile
 
 class TestSamFile:
@@ -38,3 +40,23 @@ class TestSamFile:
 
         assert sf.get_seq_start() != 0
         assert sf.get_seq_end() == 128727393
+
+    def test_get_genome_map(self):
+        sf = SamFile()
+        sf.file_name = "aux_files/sam_test.sam"
+        sf.set_filter_options([0], [-1], ["CM042140.1"], 97)
+        sf.read()
+
+        gm = sf.get_genome_map("CM042140.1", "tissue")
+
+        assert gm.sample_name == "tissue"
+        assert gm.chromosome_name == "CM042140.1"
+
+        heatmap = gm.get_heatmap(sf.get_seq_start(), sf.get_seq_end())
+
+        assert isinstance(heatmap, list)
+        assert np.sum(heatmap) > 0
+
+        heatmap = gm.get_heatmap(sf.get_seq_start()+100, sf.get_seq_start()+200)
+
+        assert len(heatmap) == 101

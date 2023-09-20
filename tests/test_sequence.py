@@ -20,6 +20,11 @@ class TestSequence:
         seq = Sequence("MQIFYQWMDPP")
         assert seq.type == "protein"
 
+    def test_slice(self):
+        seq = Sequence("ACGTACGT")
+        sliced = seq[1:4]
+        assert sliced == "CGT"
+
     def test_set_type(self):
         seq = Sequence("ACGTCCGGAATT")
         seq.set_type()

@@ -9,3 +9,5 @@ class SeqSet(sequence_analysis_cpp.SeqSet):
     def __str__(self):
         """__str__ function for sequence set (seq_set) object."""
         return f"Sequence set object with {len(self)} sequences of type {self.type}"
+
+    # TODO: overload constructor to enable initialization with a list of sequences and automatic type setting.

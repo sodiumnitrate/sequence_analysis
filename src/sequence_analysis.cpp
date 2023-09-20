@@ -18,6 +18,8 @@ TODO: sequence logo class by itself?
 #include <fstream>
 #include <cstring>
 #include <sstream>
+#include <unistd.h>
+//#include "/usr/local/opt/libomp/include/omp.h"
 #include "includes.hpp"
 
 namespace py = pybind11;
@@ -27,6 +29,7 @@ void init_orf(py::module_ &);
 void init_seq_set(py::module_ &);
 void init_sam_file(py::module_ &);
 void init_pairwise_aligner(py::module_ &);
+void init_genome_map(py::module_ &);
 
 PYBIND11_MODULE(sequence_analysis_cpp, m){
     init_sequence(m);
@@ -34,4 +37,5 @@ PYBIND11_MODULE(sequence_analysis_cpp, m){
     init_seq_set(m);
     init_sam_file(m);
     init_pairwise_aligner(m);
+    init_genome_map(m);
 }

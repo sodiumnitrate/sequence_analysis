@@ -67,6 +67,17 @@ void SamFile::read(){
         skip = false;
         if (line[0] == '@'){
             // do stuff with headers
+            if(line[1] == 'S' && line[2] == 'Q'){
+                std::istringstream ss(line);
+                std::string target_name, dummy;
+                ss >> dummy >> target_name >> dummy;
+                target_name = target_name.substr(3, target_name.length());
+                for(unsigned int i = 0; i < mapped_onto.size(); i++){
+                    if (target_name.compare(mapped_onto[i]) == 0){
+                        headers.push_back(line);
+                    }
+                }
+            }
             continue;
         }
         std::istringstream ss(line);
@@ -105,6 +116,48 @@ void SamFile::read(){
     }
 }
 
+GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_name){
+    GenomeMap result;
+    result.set_chromosome_name(mapped_name);
+    result.set_sample_name(sample_name);
+    
+    // check entries exist
+    if(entries.size() == 0){
+        return result;
+    }
+    // check that mapped_name exists in mapped_onto
+    bool exists = false;
+    for(unsigned int i = 0; i < mapped_onto.size(); i++){
+        if(mapped_name.compare(mapped_onto[i]) == 0){
+            exists = true;
+            break;
+        }
+    }
+    if (!exists){ std::cout << "ERROR: requested name not found in reference names that were mapped.\n"; return result;}
+
+    // TODO: check values of seq_end and seq_start?
+    // we are ready to create our heatmap
+    int length = seq_end - seq_start + 1;
+    std::vector<unsigned int> heatmap;
+    heatmap.resize(length);
+    std::fill(heatmap.begin(), heatmap.end(), 0);
+
+    std::string dummy, seq, ref_name;
+    int pos;
+    for(auto t : entries){
+        std::istringstream ss(t);
+        ss >> dummy >> dummy >> ref_name >> pos >> dummy >> dummy >> dummy >> dummy >> dummy >> seq;
+        // skip if name doesn't match
+        if(ref_name.compare(mapped_name) != 0) continue;
+
+        for(unsigned int i = pos - seq_start; i < pos + seq.length() - seq_start; i++){
+            heatmap[i] += 1;
+        }
+    }
+    result.set_heatmap(heatmap, seq_start, seq_end);
+    return result;
+}
+
 void init_sam_file(py::module_ &m){
     py::class_<SamFile>(m, "SamFile", py::dynamic_attr())
         .def(py::init<>())
@@ -124,6 +177,7 @@ void init_sam_file(py::module_ &m){
         .def("get_normalized", &SamFile::get_normalized)
         .def("get_seq_start", &SamFile::get_seq_start)
         .def("get_seq_end", &SamFile::get_seq_end)
+        .def("get_genome_map", &SamFile::get_genome_map)
         .def("__repr__",
              [](SamFile &a){
                  if ( a.size() > 0){
