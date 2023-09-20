@@ -4,76 +4,93 @@ This python module puts together some tools to do very basic (protein/dna/rna) s
 
 ## Installation
 
+First, make sure your python version is `>=3.10`. Then, make sure `wheel` is installed: `pip install wheel`. Then:
+
     git clone https://github.com/sodiumnitrate/sequence_analysis.git
-    cd sequence_analysis
-    python setup.py install
+    pip install ./sequence_analysis
 
 ## Basic usage
 
-Loading module
+### Sequence manipulation
 
-    import sequence_analysis as sa
+Creating and manipulating Sequence objects:
 
-Reading in a `.fasta` file named `test.fasta`
+```python
+from sequence_analysis.sequence import Sequence
 
-    sequences = sa.seq_set.seq_set(file_name="test.fasta")
+# create seq
+seq = Sequence("ACGT")
 
-The type of the sequence should be automatically detected, and can be checked by:
+# change its name
+seq.name = "test"
 
-    sequences.type
+# the type (in this case 'dna') should be set automatically, and be printed with
+print(seq.type)
 
-Creating a sequence object from a string (e.g. `"ALKALI"`)
+# override type by (note that this can break future functionality, and should only be used if automatic detection doesn't work.)
+seq.type = "protein"
 
-    seq = sa.sequence.sequence("ALKALI")
+# find index to a specific codon (assumes the current reading frame is valid)
+idx = seq.find_codon("ACG")
 
-Writing a `seq_set` object to `output.fasta`
+# reverse complement (also assumes the current reading frame is valid)
+seq_rc = seq.reverse_complement()
 
-    sequences.write_fasta("output.fasta")
+# translate 
+prot = seq.translate()
 
-### Finding open reading frames
+# write single sequence to fasta file
+prot.write_fasta("test.fasta")
 
-I have created an `OpenReadingFrame` class find and store a valid open reading frame, storing information such as: `strand`, `frame`, as well as the starting and ending indices of the codons for a given frame, and the corresponding protein sequence. The `sequence` class contains a method, `detailed_orf_finder()` to find all open reading frames. The following example illustrates how to use it. We will fetch the nucleotide sequence of a human ubiquitin from GenBank, and find its open reading frames.
+# get open reading frames (assumes a minimum orf length of 87)
+dna_seq = Sequence("AGTGCC...")
+orfs = dna_seq.get_open_reading_frames()
+# print protein sequence of one of the orfs
+print(orfs[0].protein_sequence)
+```
+### Sequence sets
 
-First, import the necessary modules
+There is a SeqSet object that contains a vector of Sequence objects. More manipulations specific to more than one sequence can be done. (There are also future plans to allow for parallel manipulation of contained sequences through this object, such as tranlating all sequences in parallel.)
 
-    from sequence_analysis.sequence import sequence
-    from sequence_analysis.open_reading_frame import OpenReadingFrame
-    from sequence_analysis.genbank_entry import GenBankEntry
+Create sequence sets:
 
-Then, fetch the GenBank info
+```python
+from sequence_analysis.seq_set import SeqSet
+from sequence_analysis.sequence import Sequence
 
-    ubb = GenBankEntry('NM_001281716.2')
-    ubb.fetch("your.email@provider.com", skip_origin=False)
-    dna_seq = ubb.dna_sequence
+sset = SeqSet()
+s1 = Sequence("ACGT")
+s2 = Sequence("GGCCTT")
+# setting records also assigns type automatically
+sset.records = [s1, s2]
+```
+Note that setting records does so by copying the sequences in memory, so further manipulation of `s1` or `s2` won't affect `sset`. 
 
-Find open reading frames. Note that we are setting `min_orf_len=80` to reproduce the results of NCBI's ORFfinder:
+Reading from and writing to `.fasta` files is possible:
 
-    orfs = dna_seq.detailed_orf_finder(min_orf_len=80)
+```python
+sset = SeqSet()
+sset.read_fasta("example.fasta")
+sset.write_fasta("new_file.fasta")
+```
+Alphabetizing and/or removing duplicates:
 
-This results in 6 open reading frames:
+```python
+# sort sequences such that they are in alphabetical order
+sset.alphabetize()
+# remove duplicates (does not require prior alphabetization, but results in alphabetized sequences)
+sset.remove_duplicates()
+```
+Removing duplicates sorts the sequences in alphabetical order, and extends the name of each sequence such that the names of the removed, identical sequences are appended to the remaining sequence.
 
-    >>> len(orfs)
-    6
+## Features to implement
 
-This is consistent with the results of NCBI's server. Print results by doing
+This is still a work in progress. The goal is to implement the following features (in no particular order):
 
-    >>> for i, orf in enumerate(orfs):
-    ...     print(i, orf.protein_sequence)
-    ...
-    0 MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGGMQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGGMQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGGC*
-    1 MSLCWSGGMPSLSWILAFTFSMVSLGSTSRVMVLPVRVFTKICIPPLRRRTRCRVDSFWML*
-    2 MSLCWSGGMPSLSWILAFTFSMVSLGSTSRVMVLPVRVFTKICIPPLRRRTRCRVDSFWML*
-    3 MSLCWSGGMPSLSWILAFTFSMVSLGSTSRVMVLPVRVFTKICILTPHVDAVSVRR*
-    4 MAFAVPSDGITLHYSHLPQLKFRNYKFQ*
-    5 MPSLGTANAMTEELTATPQAQDQVQGRLFLDVVVRKSAAIFQLLACKDEPLLVGGDAFFILDLGLHIFDGVTGLHLQSDGLAGQGLHEDLHTTSQTQDQVQGRLLLDVVVRKSAAIFQLLACKDEPLLVGRDAFFILDLGLHIFDGVTGLHFQGDGLAGQGLHEDLHTTSQTQDQVQGRLLLDVVVRKSTAIFQLLACKDEPLLVGGNAFLILDLGLHIFDGVTGLHLKGDGLAGKGFHEDLHFDPSRRRRLRAPLKVVRRAQPPERQFRLFN*
-
-These are indeed what NCBI ORFfinder finds. You can also check and compare the strand, frame, start, and stop, for the first ORF we find, by
-
-    orfs[0].strand
-    orfs[0].frame
-    orfs[0].start
-    orfs[0].stop
-
-## Notes about performance
-
-I have implemented global (Needleman-Wunsch) and local (Smith-Waterman) pairwise alignment algorithms in *pure python*. Their performance isn't great, as there are two nested for loops in the python code. I hope to implement these in C++ for funsies in the near future. For now, I am running Biopython's `Align.PairwiseAligner()` under the hood, using the `algorithm="biopython-global"` parameter in the `alignment` class.
+- Move from `setuptools` to `CMake` to compile `C++` code
+- Implement unit tests on the `C++` side within `CMake`
+- Docs
+- `OpenMP` under the hood for some functions (to work both on macOS & linux -- the macOS requirement is hard.)
+- Parallelize some functionality on `python` side, with careful removal of GIL on `C++` side?
+- Finish `PairwiseAligner`
+- Clustering with pairwise distance calculation using `edlib`?

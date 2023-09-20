@@ -5,8 +5,6 @@ in Newick format, manipulate them, and print them.
 import copy
 import pydot
 
-import pdb
-
 class Node:
     """
     Class to keep information about nodes.

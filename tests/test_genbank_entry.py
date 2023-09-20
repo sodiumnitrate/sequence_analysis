@@ -1,5 +1,5 @@
 from sequence_analysis.genbank_entry import GenBankEntry
-from sequence_analysis.sequence import sequence
+from sequence_analysis.sequence import Sequence
 
 class TestGenBankEntry:
     def test_fetch(self):
@@ -13,11 +13,11 @@ class TestGenBankEntry:
         assert isinstance(entry.definition, str)
         assert "Sepia officinalis" in entry.organism
 
-        assert isinstance(entry.dna_sequence, sequence)
+        assert isinstance(entry.dna_sequence, Sequence)
         assert len(entry.dna_sequence) > 0
 
         assert entry.protein_name is not None
-        assert isinstance(entry.protein_sequence, sequence)
+        assert isinstance(entry.protein_sequence, Sequence)
         assert len(entry.protein_sequence) > 0
 
     def test_fetch_2(self):
@@ -32,7 +32,7 @@ class TestGenBankEntry:
         assert isinstance(entry.definition, str)
         assert "Doryteuthis pealeii" in entry.organism
 
-        assert isinstance(entry.dna_sequence, sequence)
+        assert isinstance(entry.dna_sequence, Sequence)
         assert len(entry.dna_sequence) > 0
 
         assert entry.protein_name is None
@@ -57,7 +57,7 @@ class TestGenBankEntry:
         entry = GenBankEntry(accession_code=code, db='protein')
         entry.fetch(e_mail="irem.altan@yale.edu", skip_origin=False)
 
-        assert isinstance(entry.protein_sequence, sequence)
+        assert isinstance(entry.protein_sequence, Sequence)
         assert entry.dna_sequence is None
         assert entry.protein_name is not None
 

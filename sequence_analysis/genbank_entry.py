@@ -2,7 +2,7 @@
 This file contains the GenBankEntry class.
 """
 from Bio import Entrez
-from sequence_analysis.sequence import sequence
+from sequence_analysis.sequence import Sequence
 
 class GenBankEntry:
     """
@@ -96,9 +96,9 @@ class GenBankEntry:
             string = self.text.split("ORIGIN")[1].split("//")[0].replace("\n","").replace(" ","")
             str2 = "".join(x for x in string if x.isalpha())
             if self.db == "nucleotide":
-                self.dna_sequence = sequence(str2)
+                self.dna_sequence = Sequence(str2)
             elif self.db == "protein":
-                self.protein_sequence = sequence(str2)
+                self.protein_sequence = Sequence(str2)
 
     def get_protein_nucleotide(self):
         """For a query in the nucleotide db, get protein sequence if it exists."""
@@ -119,7 +119,7 @@ class GenBankEntry:
             self.protein_name = None
 
         string = self.text.split("translation=")[1].split('"')[1].replace("\n","").replace(" ","")
-        self.protein_sequence = sequence(string)
+        self.protein_sequence = Sequence(string)
 
     def get_protein_name_protein(self):
         """Function to get protein name if db=protein."""

@@ -17,7 +17,7 @@ import subprocess
 import os
 import time
 
-from sequence_analysis.seq_set import seq_set
+from sequence_analysis.seq_set import SeqSet
 
 class MSA:
     """
@@ -47,11 +47,11 @@ class MSA:
 
     def check_input_data(self):
         """
-        Check that sequences are input as a seq_set object.
+        Check that sequences are input as a SeqSet object.
         TODO: make it possible for input to be a fasta filename as well?
         """
-        if not isinstance(self.sequences, seq_set):
-            print("ERROR: sequences must be a seq_set object.")
+        if not isinstance(self.sequences, SeqSet):
+            print("ERROR: sequences must be a SeqSet object.")
             raise TypeError
 
     def check_for_mafft(self):
@@ -120,7 +120,8 @@ class MSA:
 
         # not sure why mafft outputs to stderr instead of stdout, but here we are
         self.alignment_info = result.stderr
-        self.aligned_sequences = seq_set(file_name=self.scratch_folder_name + '/' + self.output_name)
+        self.aligned_sequences = SeqSet()
+        self.aligned_sequences.read_fasta(self.scratch_folder_name + '/' + self.output_name)
         
         if clean:
             os.remove(self.scratch_folder_name + '/' + self.output_name)
