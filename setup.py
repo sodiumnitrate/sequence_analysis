@@ -1,7 +1,7 @@
 import sys
 import os
 from glob import glob
-from pybind11 import get_cmake_dir
+#from pybind11 import get_cmake_dir
 from pybind11.setup_helpers import Pybind11Extension
 from setuptools import setup, find_packages
 import sequence_analysis
@@ -21,7 +21,7 @@ setup(
         author_email='irem.altan@yale.edu',
         license='',
         packages=find_packages(),
-        install_requires=['numpy','matplotlib','colorama','networkx', 'pybind11'],
-        python_requires='>=3.6',
+        install_requires=['numpy','matplotlib','colorama','networkx', 'pybind11', 'biopython'],
+        python_requires='>=3.10',
         ext_modules=ext_modules
     )
