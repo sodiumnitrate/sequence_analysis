@@ -26,11 +26,12 @@ void init_sequence(py::module_ &);
 void init_orf(py::module_ &);
 void init_seq_set(py::module_ &);
 void init_sam_file(py::module_ &);
-
+void init_pairwise_aligner(py::module_ &);
 
 PYBIND11_MODULE(sequence_analysis_cpp, m){
     init_sequence(m);
     init_orf(m);
     init_seq_set(m);
     init_sam_file(m);
+    init_pairwise_aligner(m);
 }

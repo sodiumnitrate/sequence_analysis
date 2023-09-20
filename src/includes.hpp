@@ -159,3 +159,30 @@ public:
     void get_lengths_from_fasta(std::string fasta_file_name);
     void read();
 };
+
+class PairwiseAligner{
+    std::string algorithm = "local"; //TODO: switch to enum
+    std::string query;
+    std::string target;
+
+    float score;
+public:
+    PairwiseAligner();
+    void set_algorithm(std::string alg);
+    std::string get_algorithm();
+    void set_query(std::string query_);
+    std::string get_query();
+    void set_target(std::string target_);
+    std::string get_target();
+
+    float get_score();
+};
+
+class GenomeMap{
+    std::string chromosome_name;
+    std::vector<unsigned int> heatmap;
+    int heatmap_start;
+    int heatmap_end;
+public:
+    GenomeMap();
+}
