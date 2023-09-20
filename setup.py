@@ -1,14 +1,15 @@
 import sys
 import os
+from glob import glob
 from pybind11 import get_cmake_dir
-from pybind11.setup_helpers import Pybind11Extension, build_ext
+from pybind11.setup_helpers import Pybind11Extension
 from setuptools import setup, find_packages
 import sequence_analysis
 
 cxx_std = int(os.environ.get("CMAKE_CXX_STANDARD", "20"))
 
 ext_modules = [
-    Pybind11Extension("sequence_analysis_cpp", ["src/sequence_analysis.cpp", "src/sequence.cpp", "src/orf.cpp", "src/seq_set.cpp"], cxx_std=cxx_std)
+    Pybind11Extension("sequence_analysis_cpp", sorted(glob("src/*.cpp")), cxx_std=cxx_std)
 ]
 
 setup(
@@ -20,7 +21,7 @@ setup(
         author_email='irem.altan@yale.edu',
         license='',
         packages=find_packages(),
-        install_requires=['numpy','matplotlib','biopython>=1.80','scikit-learn','colorama','networkx', 'pybind11'],
+        install_requires=['numpy','matplotlib','colorama','networkx', 'pybind11'],
         python_requires='>=3.6',
         ext_modules=ext_modules
     )
