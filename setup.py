@@ -21,7 +21,7 @@ setup(
         author_email='irem.altan@yale.edu',
         license='',
         packages=find_packages(),
-        install_requires=['numpy','matplotlib','colorama','networkx', 'pybind11', 'biopython', 'pydot'],
+        install_requires=['numpy','matplotlib','colorama','networkx', 'pybind11', 'biopython', 'pydot', 'pytest'],
         python_requires='>=3.10',
         ext_modules=ext_modules
     )

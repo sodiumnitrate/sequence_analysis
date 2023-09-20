@@ -11,6 +11,7 @@
 #include <cstring>
 #include <sstream>
 #include "includes.hpp"
+#include "profiler.cpp"
 
 namespace py = pybind11;
 
@@ -81,7 +82,23 @@ std::unordered_map<std::string, char> codon_to_aa_map = {
     {"GGG", 'G'}
 };
 
+bool is_stop(std::string &codon){
+    if (codon[0] != 'U' && codon[0] != 'T') return false;
+    if (codon[1] != 'A' && codon[1] != 'G') return false;
+    if (codon[2] != 'A' && codon[2] != 'G') return false;
+    if (codon[1] == 'G' && codon[2] == 'G') return false;
+    return true;
+}
+
+bool is_start(std::string &codon){
+    if (codon[0] != 'A') return false;
+    if (codon[1] != 'T' && codon[1] != 'U') return false;
+    if (codon[2] != 'G') return false;
+    return true;
+}
+
 char codon_to_aa(std::string codon){
+    PROFILE_FUNCTION();
     // requires c++20
     std::ranges::replace(codon, 'T', 'U');
     return codon_to_aa_map[codon];
@@ -89,6 +106,7 @@ char codon_to_aa(std::string codon){
 
 
 Sequence::Sequence(std::string &seq_str_) {
+    PROFILE_FUNCTION();
     std::transform(seq_str_.begin(), seq_str_.end(), seq_str_.begin(), ::toupper);
     seq_str = seq_str_;
 }
@@ -116,6 +134,7 @@ bool const Sequence::operator<(const Sequence& other) const{
 
 // function to set type
 void Sequence::set_type(std::string seq_type=""){
+    PROFILE_FUNCTION();
     if (seq_str.length() == 0)
     {
         std::cout << "WARNING: empty sequence. Can't set type." << std::endl;
@@ -193,6 +212,7 @@ int Sequence::find_codon(std::string codon){
 
 // reverse
 Sequence Sequence::reverse(){
+    PROFILE_FUNCTION();
     // reverse sequence and return as new obj
     std::string reversed;
     for (int i = seq_str.length() - 1; i >= 0; i--){
@@ -206,6 +226,7 @@ Sequence Sequence::reverse(){
 
 // complement
 Sequence Sequence::complement(){
+    PROFILE_FUNCTION();
     // check type
     if (type.compare("rna") != 0 && type.compare("dna") != 0){
         std::cout << "ERROR: can't complement if type not rna or dna." << std::endl;
@@ -239,6 +260,7 @@ Sequence Sequence::complement(){
 
 // reverse complement
 Sequence Sequence::reverse_complement(){
+    PROFILE_FUNCTION();
     Sequence new_seq = Sequence(seq_str).reverse().complement();
     new_seq.set_name(name);
     new_seq.set_type(type);
@@ -246,6 +268,7 @@ Sequence Sequence::reverse_complement(){
 }
 // frame shift
 Sequence Sequence::frame_shift(int frame){
+    PROFILE_FUNCTION();
     // frame shift and return new obj
     std::string new_str;
     if (frame <= 0 || frame > 2){
@@ -265,6 +288,7 @@ Sequence Sequence::frame_shift(int frame){
 
 // translate
 Sequence Sequence::translate(){
+    PROFILE_FUNCTION();
     if (type.compare("rna") != 0 && type.compare("dna") != 0){
         std::cout << "ERROR: can't complement if type not rna or dna." << std::endl;
         std::string empty;
@@ -301,6 +325,9 @@ void Sequence::write_fasta(std::string file_name){
 
 // get orfs
 std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min_len=80){
+    PROFILE_FUNCTION();
+    Instrumentor::Get().LaunchSession("myprofiler", "profiler.json");
+    std::cout << "Entered the function" << std::endl;
     std::vector<OpenReadingFrame> result;
     if (type.compare("dna") != 0 && type.compare("rna") != 0){
         std::cout << "ERROR: open reading frames can be found for DNA or RNA sequences only." << std::endl;
@@ -308,36 +335,42 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
     }
     // remove gaps
     std::string seq = seq_str;
+    unsigned int seq_length = seq_str.length();
     seq.erase(remove(seq.begin(), seq.end(), '-'), seq.end());
     Sequence modded(seq);
     Sequence shifted(seq);
     int order_vals[2] = {-1, 1};
+    int len_str, start_ind, stop_ind;
+    std::string sequence, curr_fragment, curr_codon;
+    bool recording;
     for (int frame = 0; frame < 3; frame++){
         for (int order : order_vals ){
             // looping over 6 frames (3 frames * 2 order)
             if (order == 1){
                 shifted = modded.frame_shift(frame);
+
             }
             else{
                 shifted = modded.reverse_complement().frame_shift(frame);
             }
-            int len_str = shifted.length() / 3;
-            int start_ind = 0;
-            int stop_ind = 0;
-            std::string curr_fragment;
-            std::string curr_codon;
-            bool recording = false;
+
+            len_str = shifted.length() / 3;
+            sequence = shifted.get_seq();
+            start_ind = 0;
+            stop_ind = 0;
+            recording = false;
             for (int ptr = 0; ptr < 3 * len_str; ptr += 3)
             {
-                curr_codon = shifted.get_seq().substr(ptr, 3);
-                if (codon_to_aa(curr_codon) == 'M' && !recording){
+                curr_codon = sequence.substr(ptr, 3);
+                if (is_start(curr_codon) && !recording){
                     start_ind = ptr;
                     recording = true;
                 }
+
                 if (recording){
                     curr_fragment += curr_codon;
                 }
-                if (codon_to_aa(curr_codon) == '*' || ptr == 3*(len_str-1)){
+                if (is_stop(curr_codon) || ptr == 3*(len_str-1)){
                     if (recording){
                         if (min_len > curr_fragment.length()){
                             recording = false;
@@ -348,8 +381,8 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
                         start_ind += frame;
                         stop_ind += frame;
                         if (order == -1){
-                            start_ind = seq_str.length() - start_ind;
-                            stop_ind = seq_str.length() - stop_ind;
+                            start_ind = seq_length - start_ind;
+                            stop_ind = seq_length - stop_ind;
                         }
                         if (start_ind > stop_ind){
                             int dummy = stop_ind;
@@ -367,8 +400,10 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
                     }
                 }
             }
+            
         }
     }
+    Instrumentor::Get().EndSession();
     return result;
 }
 

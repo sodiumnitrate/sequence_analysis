@@ -94,3 +94,4 @@ This is still a work in progress. The goal is to implement the following feature
 - Parallelize some functionality on `python` side, with careful removal of GIL on `C++` side?
 - Finish `PairwiseAligner`
 - Clustering with pairwise distance calculation using `edlib`?
+- The ability to stop execution with Ctrl+C
