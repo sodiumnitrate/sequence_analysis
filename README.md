@@ -4,6 +4,8 @@ This python module puts together some tools to do very basic (protein/dna/rna) s
 
 ## Installation
 
+First, make sure your python version is `>=3.10`. Then, make sure `wheel` is installed: `pip install wheel`. Then:
+
     git clone https://github.com/sodiumnitrate/sequence_analysis.git
     pip install ./sequence_analysis
 
