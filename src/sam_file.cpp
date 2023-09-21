@@ -126,6 +126,8 @@ void SamFile::read(){
         seq_start = fmin(seq_start, pos);
         seq_end = fmax(seq_end, pos + length);
     }
+
+    std::cout << "Done reading. The final range is: (" << seq_start << ", " << seq_end << ")." << std::endl;
 }
 
 GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_name){
