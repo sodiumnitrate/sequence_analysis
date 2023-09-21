@@ -105,6 +105,12 @@ class TestSeqSet:
         assert sset.records[2].name == ""
         assert sset.records[2].seq_str == "AAAAA"
 
+    def test_read_fasta_2(self):
+        sset = SeqSet()
+        sset.read_fasta("aux_files/reference_set_dna.fasta")
+        assert len(sset) == 3
+        assert sset.records[-1].name == "UBIQUITIN_ESC_2"
+
     def test_write_phylip(self):
         sset = SeqSet()
         s1 = Sequence("A"*230)

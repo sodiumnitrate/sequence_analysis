@@ -41,6 +41,20 @@ class TestSamFile:
         assert sf.get_seq_start() != 0
         assert sf.get_seq_end() == 128727393
 
+    def test_read_3(self):
+        sf = SamFile()
+        sf.file_name = "aux_files/sam_test.sam"
+        sf.read()
+        assert len(sf) == 12
+
+    def test_normalize(self):
+        sf = SamFile()
+        sf.file_name = "aux_files/reference_out.sam"
+        sf.set_normalized_false()
+        assert not sf.get_normalized()
+        sf.get_lengths_from_fasta("aux_files/reference_set_dna.fasta")
+        sf.read()
+
     def test_get_genome_map(self):
         sf = SamFile()
         sf.file_name = "aux_files/sam_test.sam"

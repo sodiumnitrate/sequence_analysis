@@ -159,6 +159,7 @@ void SeqSet::read_fasta(std::string file_name){
     Sequence new_seq(seq);
     new_seq.set_name(name);
     records.push_back(new_seq);
+    in_file.close();
 }
 
 // write phylip
@@ -259,6 +260,11 @@ std::unordered_map<std::string, unsigned int> SeqSet::get_names_and_lengths_from
             seq += line;
         }
     }
+    // add the final one
+    lengths[name] = seq.length();
+
+
+    in_file.close();
     return lengths;
 }
 

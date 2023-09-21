@@ -147,8 +147,8 @@ class SamFile{
     std::string file_name;
 
     // filter options
-    std::vector<int> start = {0}; //for each name in mapped onto, give start and end
-    std::vector<int> end = {1};
+    std::vector<int> start_indices = {0}; //for each name in mapped onto, give start and end
+    std::vector<int> end_indices = {-1};
     std::vector<std::string> mapped_onto = {""};
     float min_score = 0;
 

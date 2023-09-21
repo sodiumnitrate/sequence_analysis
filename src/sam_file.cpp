@@ -22,8 +22,8 @@ void SamFile::set_filter_options(std::vector<int> start_, std::vector<int> end_,
         std::cout << "WARNING: start, end, and mapped_onto lists must have the same size." << std::endl;
         return;
     }
-    start = start_;
-    end = end_;
+    start_indices = start_;
+    end_indices = end_;
     mapped_onto = mapped_onto_;
     min_score = min_score_;
 }
@@ -82,13 +82,23 @@ void SamFile::read(){
         }
         std::istringstream ss(line);
         ss >> seq_name >> dummy >> ref_name >> pos >> dummy >> dummy >> dummy >> dummy >> dummy >> seq >> dummy;
+
         // apply first set of filters
         for(unsigned int i = 0; i < mapped_onto.size(); i++){
-            if ( ref_name.compare(mapped_onto[i]) != 0 && mapped_onto[i].compare("") != 0){
-                skip = true;
-            }
+            std::cout << i << "/" << mapped_onto.size() << ", " << mapped_onto[i] << ", "  << ref_name << std::endl;
+            if ( ref_name.compare(mapped_onto[i]) != 0 ){
+                if (mapped_onto[i].compare("") != 0){
+                    skip = true;
+                }
+                else{
+                    if (mapped_onto.size() > 1 && i > 0){
+                        skip = true;
+                    }
+                }
+            } 
+            
             length = seq.size();
-            if ( pos + length < start[i] || (pos > end[i] && end[i] != -1) ){
+            if ( pos + length < start_indices[i] || (pos > end_indices[i] && end_indices[i] != -1) ){
                 skip = true;
             }
         }
@@ -100,6 +110,9 @@ void SamFile::read(){
                 score = std::stof(flag.substr(5, flag.length()));
                 if (!normalized_score){
                     auto it = lengths.find(seq_name);
+                    if ( it == lengths.end()){
+                        std::cout << "ERROR: sequence with name " << seq_name << " was not found in the lengths list." << std::endl;
+                    }
                     score = score / (float) it->second;
                 }
                 if (score < min_score){
