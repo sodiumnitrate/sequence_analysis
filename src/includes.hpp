@@ -35,10 +35,10 @@ class Sequence {
     std::string seq_str;
     std::string type;
 public:
-    Sequence(std::string &seq_str_);
-    void set_name(std::string &name_);
+    Sequence(std::string seq_str_);
+    void set_name(std::string name_);
     std::string get_name();
-    void set_seq(std::string &seq_str_);
+    void set_seq(std::string seq_str_);
     std::string get_seq();
     std::string get_type();
 

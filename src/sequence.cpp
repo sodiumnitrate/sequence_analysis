@@ -103,14 +103,14 @@ char codon_to_aa(std::string &codon){
 }
 
 
-Sequence::Sequence(std::string &seq_str_) {
+Sequence::Sequence(std::string seq_str_) {
     std::transform(seq_str_.begin(), seq_str_.end(), seq_str_.begin(), ::toupper);
     seq_str = seq_str_;
 }
 
-void Sequence::set_name(std::string &name_) { name = name_; }
+void Sequence::set_name(std::string name_) { name = name_; }
 std::string Sequence::get_name() { return name; }
-void Sequence::set_seq(std::string &seq_str_) { seq_str = seq_str_; }
+void Sequence::set_seq(std::string seq_str_) { seq_str = seq_str_; }
 std::string Sequence::get_seq() { return seq_str; }
 std::string Sequence::get_type() { return type; }
 
@@ -331,6 +331,11 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
     int len_str, start_ind, stop_ind;
     std::string sequence, curr_fragment, curr_codon;
     bool recording;
+
+    // other declarations
+
+    OpenReadingFrame orf;
+    Sequence fragment(" "), prot(" ");
     for (int frame = 0; frame < 3; frame++){
         for (int order : order_vals ){
             // looping over 6 frames (3 frames * 2 order)
@@ -376,10 +381,9 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
                             stop_ind = start_ind;
                             start_ind = dummy;
                         }
-                        OpenReadingFrame orf;
-                        Sequence fragment(curr_fragment);
+                        fragment.set_seq(curr_fragment);
                         fragment.set_type();
-                        Sequence prot = fragment.translate();
+                        prot = fragment.translate();
                         orf.set_props(shifted.get_seq(), modded.get_seq(), prot.get_seq(), start_ind, stop_ind, order, frame);
                         result.push_back(orf);
                         recording = false;
