@@ -85,7 +85,6 @@ void SamFile::read(){
 
         // apply first set of filters
         for(unsigned int i = 0; i < mapped_onto.size(); i++){
-            std::cout << i << "/" << mapped_onto.size() << ", " << mapped_onto[i] << ", "  << ref_name << std::endl;
             if ( ref_name.compare(mapped_onto[i]) != 0 ){
                 if (mapped_onto[i].compare("") != 0){
                     skip = true;
