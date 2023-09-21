@@ -4,7 +4,7 @@
 // ORF class
 class OpenReadingFrame{
     std::string rna_sequence;
-    std::string parent_sequence;
+    //std::string parent_sequence;
     std::string protein_sequence;
     int start;
     int stop;
@@ -12,7 +12,8 @@ class OpenReadingFrame{
     int frame;
 public:
     OpenReadingFrame();
-    void set_props(std::string rna_sequence_, std::string parent_sequence_, std::string protein_sequence_, int start_, int stop_, int strand_, int frame_);
+    //void set_props(std::string rna_sequence_, std::string parent_sequence_, std::string protein_sequence_, int start_, int stop_, int strand_, int frame_);
+    void set_props(std::string rna_sequence_, std::string protein_sequence_, int start_, int stop_, int strand_, int frame_);
     void set_start(int start_);
     int get_start();
     void set_stop(int stop_);
@@ -23,8 +24,8 @@ public:
     int get_frame();
     std::string get_rna_sequence();
     void set_rna_sequence(std::string rs);
-    std::string get_parent_sequence();
-    void set_parent_sequence(std::string ps);
+    //std::string get_parent_sequence();
+    //void set_parent_sequence(std::string ps);
     std::string get_protein_sequence();
     void set_protein_sequence(std::string ps);
 };

@@ -19,7 +19,6 @@ TODO: sequence logo class by itself?
 #include <cstring>
 #include <sstream>
 #include <unistd.h>
-//#include "/usr/local/opt/libomp/include/omp.h"
 #include "includes.hpp"
 
 namespace py = pybind11;

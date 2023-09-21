@@ -316,6 +316,7 @@ void Sequence::write_fasta(std::string file_name){
 
 // get orfs
 std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min_len=80){
+
     std::vector<OpenReadingFrame> result;
     if (type.compare("dna") != 0 && type.compare("rna") != 0){
         std::cout << "ERROR: open reading frames can be found for DNA or RNA sequences only." << std::endl;
@@ -325,17 +326,17 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
     std::string seq = seq_str;
     unsigned int seq_length = seq_str.length();
     seq.erase(remove(seq.begin(), seq.end(), '-'), seq.end());
+
+    // declarations
     Sequence modded(seq);
     Sequence shifted(seq);
     int order_vals[2] = {-1, 1};
     int len_str, start_ind, stop_ind;
     std::string sequence, curr_fragment, curr_codon;
     bool recording;
-
-    // other declarations
-
     OpenReadingFrame orf;
     Sequence fragment(" "), prot(" ");
+
     for (int frame = 0; frame < 3; frame++){
         for (int order : order_vals ){
             // looping over 6 frames (3 frames * 2 order)
@@ -351,6 +352,7 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
             start_ind = 0;
             stop_ind = 0;
             recording = false;
+
             for (int ptr = 0; ptr < 3 * len_str; ptr += 3)
             {
                 curr_codon = sequence.substr(ptr, 3);
@@ -381,11 +383,15 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
                             stop_ind = start_ind;
                             start_ind = dummy;
                         }
+                        
                         fragment.set_seq(curr_fragment);
                         fragment.set_type();
                         prot = fragment.translate();
-                        orf.set_props(shifted.get_seq(), modded.get_seq(), prot.get_seq(), start_ind, stop_ind, order, frame);
+                        //orf.set_props(shifted.get_seq(), modded.get_seq(), prot.get_seq(), start_ind, stop_ind, order, frame);
+                        //orf.set_props(shifted.get_seq(), prot.get_seq(), start_ind, stop_ind, order, frame);
+                        orf.set_props(fragment.get_seq(), prot.get_seq(), start_ind, stop_ind, order, frame);
                         result.push_back(orf);
+                        
                         recording = false;
                         curr_fragment = "";
                     }
@@ -394,6 +400,7 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
             
         }
     }
+
     return result;
 }
 
