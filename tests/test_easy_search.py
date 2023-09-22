@@ -2,7 +2,7 @@
 Unit tests for easy-search.
 """
 import tempfile
-from sequence_analysis.easy_search import EasySearch
+from sequence_analysis import EasySearch
 
 class TestEasySearch:
     def test_init(self):

@@ -2,9 +2,9 @@
 This file holds the sequence set (seq_set) class and attributed methods.
 Includes I/O of .fasta files, and various filtering methods.
 """
-import sequence_analysis_cpp
+from .sequence_analysis_cpp import SeqSet as SeqSet_cpp
 
-class SeqSet(sequence_analysis_cpp.SeqSet):
+class SeqSet(SeqSet_cpp):
     """This class holds a list of sequence objects of a given type."""
     def __str__(self):
         """__str__ function for sequence set (seq_set) object."""

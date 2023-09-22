@@ -1,9 +1,9 @@
 """
 This file holds the sequence class and related methods.
 """
-import sequence_analysis_cpp
+from .sequence_analysis_cpp import Sequence as Sequence_cpp
 
-class Sequence(sequence_analysis_cpp.Sequence):
+class Sequence(Sequence_cpp):
     """
     Python bindings for the Sequence class. Inherits the C++ class to add
     a bunch of python-specific functions.

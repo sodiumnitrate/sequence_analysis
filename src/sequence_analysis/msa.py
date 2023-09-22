@@ -17,7 +17,7 @@ import subprocess
 import os
 import time
 
-from sequence_analysis.seq_set import SeqSet
+from sequence_analysis import SeqSet
 
 class MSA:
     """

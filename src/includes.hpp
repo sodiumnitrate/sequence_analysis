@@ -140,6 +140,7 @@ public:
     std::string get_sample_name();
     void set_sample_name(std::string samp);
     void set_heatmap(std::vector<unsigned int> heatmap_, int heatmap_start_, int heatmap_end_);
+    void add_map(GenomeMap* new_gm);
 };
 
 class SamFile{

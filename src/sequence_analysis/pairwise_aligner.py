@@ -1,9 +1,9 @@
 """
 This file holds the PairwiseAligner class and related methods.
 """
-import sequence_analysis_cpp
+from .sequence_analysis_cpp import PairwiseAligner as PairwiseAligner_cpp
 
-class PairwiseAligner(sequence_analysis_cpp.PairwiseAligner):
+class PairwiseAligner(PairwiseAligner_cpp):
     """
     Python bindings for the PairwiseAligner class.
 

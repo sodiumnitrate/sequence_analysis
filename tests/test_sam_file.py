@@ -3,7 +3,7 @@ Unit tests for the SamFile class.
 """
 import numpy as np
 
-from sequence_analysis.sam_file import SamFile
+from sequence_analysis import SamFile
 
 class TestSamFile:
     def test_init(self):

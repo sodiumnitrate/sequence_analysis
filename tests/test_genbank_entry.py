@@ -1,5 +1,5 @@
-from sequence_analysis.genbank_entry import GenBankEntry
-from sequence_analysis.sequence import Sequence
+from sequence_analysis import GenBankEntry
+from sequence_analysis import Sequence
 
 class TestGenBankEntry:
     def test_fetch(self):

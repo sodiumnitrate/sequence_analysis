@@ -1,10 +1,10 @@
 """
 This file holds the open reading frame class.
 """
-import sequence_analysis_cpp
+from .sequence_analysis_cpp import OpenReadingFrame as OpenReadingFrame_cpp
 
 
-class OpenReadingFrame(sequence_analysis_cpp.OpenReadingFrame):
+class OpenReadingFrame(OpenReadingFrame_cpp):
     """
     This class holds the open reading frame information for a given dna or 
     rna sequence.

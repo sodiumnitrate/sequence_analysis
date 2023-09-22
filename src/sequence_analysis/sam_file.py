@@ -1,9 +1,9 @@
 """
 Python bindings for the SamFile object.
 """
-import sequence_analysis_cpp
+from .sequence_analysis_cpp import SamFile as SamFile_cpp
 
-class SamFile(sequence_analysis_cpp.SamFile):
+class SamFile(SamFile_cpp):
     """
     Python bindings for the SamFile class.
     """
