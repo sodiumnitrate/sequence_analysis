@@ -16,7 +16,7 @@ First, make sure your python version is `>=3.10`. Then, make sure `wheel` is ins
 Creating and manipulating Sequence objects:
 
 ```python
-from sequence_analysis.sequence import Sequence
+from sequence_analysis import Sequence
 
 # create seq
 seq = Sequence("ACGT")
@@ -55,8 +55,8 @@ There is a SeqSet object that contains a vector of Sequence objects. More manipu
 Create sequence sets:
 
 ```python
-from sequence_analysis.seq_set import SeqSet
-from sequence_analysis.sequence import Sequence
+from sequence_analysis import SeqSet
+from sequence_analysis import Sequence
 
 sset = SeqSet()
 s1 = Sequence("ACGT")
@@ -87,7 +87,7 @@ Removing duplicates sorts the sequences in alphabetical order, and extends the n
 
 This is still a work in progress. The goal is to implement the following features (in no particular order):
 
-- Move from `setuptools` to `CMake` to compile `C++` code
+- ~~Move from `setuptools` to `CMake` to compile `C++` code~~
 - Implement unit tests on the `C++` side within `CMake`
 - Docs
 - `OpenMP` under the hood for some functions (to work both on macOS & linux -- the macOS requirement is hard.)
