@@ -2,7 +2,7 @@
 This file contains the GenBankEntry class.
 """
 from Bio import Entrez
-from sequence_analysis.sequence import Sequence
+from sequence_analysis import Sequence
 
 class GenBankEntry:
     """

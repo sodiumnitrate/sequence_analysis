@@ -1,7 +1,7 @@
 """
 Unit tests for GenomeMap.
 """
-from sequence_analysis.genome_map import GenomeMap
+from sequence_analysis import GenomeMap
 
 class TestGenomeMap:
     def test_init(self):

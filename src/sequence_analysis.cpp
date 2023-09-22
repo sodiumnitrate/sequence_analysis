@@ -21,6 +21,9 @@ TODO: sequence logo class by itself?
 #include <unistd.h>
 #include "includes.hpp"
 
+#define STRINGIFY(x) #x
+#define MACRO_STRINGIFY(x) STRINGIFY(x)
+
 namespace py = pybind11;
 
 void init_sequence(py::module_ &);
@@ -37,4 +40,10 @@ PYBIND11_MODULE(sequence_analysis_cpp, m){
     init_sam_file(m);
     init_pairwise_aligner(m);
     init_genome_map(m);
+    
+#ifdef VERSION_INFO
+    m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
+#else
+    m.attr("__version__") = "dev";
+#endif
 }

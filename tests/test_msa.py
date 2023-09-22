@@ -1,5 +1,5 @@
-from sequence_analysis.msa import MSA
-from sequence_analysis.seq_set import SeqSet
+from sequence_analysis import MSA
+from sequence_analysis import SeqSet
 
 import os
 

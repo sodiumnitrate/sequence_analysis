@@ -6,7 +6,7 @@ TODO:
 - more translate tests
 """
 import tempfile
-from sequence_analysis.sequence import Sequence
+from sequence_analysis import Sequence
 
 class TestSequence:
     def test_init(self):

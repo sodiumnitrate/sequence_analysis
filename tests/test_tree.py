@@ -1,5 +1,5 @@
 import pytest
-from sequence_analysis.tree import Tree
+from sequence_analysis import Tree
 
 import pdb
 
@@ -79,18 +79,18 @@ class TestTree:
 
     def test_write(self):
         tree = Tree("(((A,B)C,D,X)E,((F,G)Y),Z)H;")
-        tree.render_graph("test.png")
+        tree.render_graph("aux_files/test.png")
 
         tree.add_node_to_edge('new', ['A','C'])
-        tree.render_graph('test_node_added.png')
+        tree.render_graph('aux_files/test_node_added.png')
 
         tree.re_root('new')
-        tree.render_graph('test_new_root.png')
+        tree.render_graph('aux_files/test_new_root.png')
 
     def test_distances(self):
         tree = Tree("(((A:0.1,B:0.5)C:0.12,D:0.55,X:0.01)E:0.4,((F:0.8,G:0.7)Y:0.3)N:0.1,Z:0.2)H;")
 
-        tree.render_graph('test_distances.png')
+        tree.render_graph('aux_files/test_distances.png')
 
         node = tree.get_node_with_name_bfs('A')
         assert node.distance_to_parent == 0.1

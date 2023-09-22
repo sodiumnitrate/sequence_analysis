@@ -3,8 +3,8 @@ Unit tests for SeqSet.
 """
 import tempfile
 
-from sequence_analysis.seq_set import SeqSet
-from sequence_analysis.sequence import Sequence
+from sequence_analysis import SeqSet
+from sequence_analysis import Sequence
 
 class TestSeqSet:
     def test_init(self, capsys):

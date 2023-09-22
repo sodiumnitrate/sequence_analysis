@@ -40,6 +40,12 @@ void GenomeMap::set_heatmap(std::vector<unsigned int> heatmap_, int heatmap_star
     heatmap_end = heatmap_end_;
 }
 
+// add info from another genome map
+void GenomeMap::add_map(GenomeMap* new_gm){
+    int new_gm_start = new_gm->heatmap_start;
+    int new_gm_end = new_gm->heatmap_end;
+}
+
 void init_genome_map(py::module_ &m){
     py::class_<GenomeMap>(m, "GenomeMap", py::dynamic_attr())
         .def(py::init<>())

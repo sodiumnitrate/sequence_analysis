@@ -1,9 +1,9 @@
 """
 GenomeMap class.
 """
-import sequence_analysis_cpp
+from .sequence_analysis_cpp import GenomeMap as GenomeMap_cpp
 
-class GenomeMap(sequence_analysis_cpp.GenomeMap):
+class GenomeMap(GenomeMap_cpp):
     """
     Python bindings for GenomeMap.
 
