@@ -14,7 +14,10 @@
 
 namespace py = pybind11;
 
+// constructor
 SamFile::SamFile(){}
+
+// set filter options for reading sam files
 void SamFile::set_filter_options(std::vector<int> start_, std::vector<int> end_, std::vector<std::string> mapped_onto_, float min_score_)
 {
     // check that start, end, and mapped_onto have the same size
@@ -28,21 +31,32 @@ void SamFile::set_filter_options(std::vector<int> start_, std::vector<int> end_,
     min_score = min_score_;
 }
 
+// get size of sam_file
 int SamFile::size(){
     return entries.size();
 }
 
 void SamFile::set_file_name(std::string file_name_) { file_name = file_name_;}
+
 std::string SamFile::get_file_name(){return file_name;}
+
 void SamFile::set_normalized_true(){normalized_score = true;}
+
 void SamFile::set_normalized_false(){normalized_score = false;}
+
 bool SamFile::get_normalized(){return normalized_score;}
+
 int SamFile::get_seq_start() { return seq_start;}
+
 int SamFile::get_seq_end() { return seq_end;}
+
+// read in sequence lengths from a fasta file (for when normalization of alignment scores is needed)
 void SamFile::get_lengths_from_fasta(std::string fasta_file_name){
     SeqSet sset;
     lengths = sset.get_names_and_lengths_from_fasta(fasta_file_name);
 }
+
+// read info from sam file
 void SamFile::read(){
     std::ifstream in_file(file_name);
     std::string line;
@@ -64,7 +78,7 @@ void SamFile::read(){
     std::string as_flag = "AS:i:";
     bool skip = false;
     while(std::getline(in_file, line)){
-        skip = false;
+        //skip = false;
         if (line[0] == '@'){
             // do stuff with headers
             if(line[1] == 'S' && line[2] == 'Q'){
@@ -83,25 +97,20 @@ void SamFile::read(){
         std::istringstream ss(line);
         ss >> seq_name >> dummy >> ref_name >> pos >> dummy >> dummy >> dummy >> dummy >> dummy >> seq >> dummy;
 
-        // apply first set of filters
+        // apply filters----------------
+        skip = true;
         for(unsigned int i = 0; i < mapped_onto.size(); i++){
-            if ( ref_name.compare(mapped_onto[i]) != 0 ){
-                if (mapped_onto[i].compare("") != 0){
-                    skip = true;
+            if ( ref_name.compare(mapped_onto[i]) == 0 || mapped_onto[i].compare("") == 0){
+                length = seq.size();
+                if ( pos + length > start_indices[i] && (end_indices[i] == -1 || pos < end_indices[i])){
+                    skip = false;
+                    break;
                 }
-                else{
-                    if (mapped_onto.size() > 1 && i > 0){
-                        skip = true;
-                    }
-                }
-            } 
-            
-            length = seq.size();
-            if ( pos + length < start_indices[i] || (pos > end_indices[i] && end_indices[i] != -1) ){
-                skip = true;
             }
         }
         if (skip) continue;
+        // -----------------------------
+
         // check alignment score
         while ( ss >> flag){
             // if flag is AS
