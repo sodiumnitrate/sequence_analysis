@@ -47,6 +47,13 @@ class TestSamFile:
         sf.read()
         assert len(sf) == 12
 
+    def test_read_4(self):
+        sf = SamFile()
+        sf.file_name = "aux_files/sam_test.sam"
+        sf.set_filter_options([0], [-1], ["CM042140.1", "CM042177.1"], 0)
+        sf.read()
+        assert len(sf) == 12
+
     def test_normalize(self):
         sf = SamFile()
         sf.file_name = "aux_files/reference_out.sam"
