@@ -81,3 +81,17 @@ class TestSamFile:
         heatmap = gm.get_heatmap(sf.get_seq_start()+100, sf.get_seq_start()+200)
 
         assert len(heatmap) == 101
+
+    def test_sam_file_add(self):
+        sam1 = SamFile()
+        sam1.file_name = "aux_files/sam_test.sam"
+        sam1.set_filter_options([0], [-1], ["CM042140.1"], 97)
+        sam1.read()
+
+        sam2 = SamFile()
+        sam2.file_name = "aux_files/sam_test.sam"
+        sam2.set_filter_options([0], [-1], ["CM042140.1"], 97)
+        sam2.read()
+
+        sam1.add_sam_file(sam2)
+        assert len(sam1) == 2*len(sam2)

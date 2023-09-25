@@ -180,6 +180,7 @@ public:
     void get_lengths_from_fasta(std::string fasta_file_name);
     void read();
     GenomeMap get_genome_map(std::string mapped_name, std::string sample_name);
+    void add_sam_file(SamFile* other);
 };
 
 class PairwiseAligner{

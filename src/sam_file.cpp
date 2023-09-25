@@ -100,7 +100,9 @@ void SamFile::read(){
         // apply filters----------------
         skip = true;
         for(unsigned int i = 0; i < mapped_onto.size(); i++){
+            // if name matches or is empty, don't skip
             if ( ref_name.compare(mapped_onto[i]) == 0 || mapped_onto[i].compare("") == 0){
+                // if read overlaps with the region requested, don't skip
                 length = seq.size();
                 if ( pos + length > start_indices[i] && (end_indices[i] == -1 || pos < end_indices[i])){
                     skip = false;
@@ -108,6 +110,7 @@ void SamFile::read(){
                 }
             }
         }
+        // if the conditions above are not met, skip
         if (skip) continue;
         // -----------------------------
 
@@ -181,6 +184,25 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
     return result;
 }
 
+// function to add info from another sam file
+void SamFile::add_sam_file(SamFile* other){
+    // assume filtering options are the same, or compatible
+    // TODO: check for this
+
+    for (auto entry : other->entries){
+        entries.push_back(entry);
+    }
+
+    for (auto header : other->headers){
+        headers.push_back(header);
+    }
+
+    seq_start = fmin(seq_start, other->seq_start);
+    seq_end = fmax(seq_end, other->seq_end);
+
+    return;
+}
+
 void init_sam_file(py::module_ &m){
     py::class_<SamFile>(m, "SamFile", py::dynamic_attr())
         .def(py::init<>())
@@ -209,5 +231,6 @@ void init_sam_file(py::module_ &m){
                      return "<empty sequence_analysis.SamFile object>";
                  }
              })
+        .def("add_sam_file", &SamFile::add_sam_file)
         ;
 }
