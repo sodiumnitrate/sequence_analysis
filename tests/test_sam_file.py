@@ -50,7 +50,7 @@ class TestSamFile:
     def test_read_4(self):
         sf = SamFile()
         sf.file_name = "aux_files/sam_test.sam"
-        sf.set_filter_options([0], [-1], ["CM042140.1", "CM042177.1"], 0)
+        sf.set_filter_options([0,0], [-1,-1], ["CM042140.1", "CM042177.1"], 0)
         sf.read()
         assert len(sf) == 12
 
@@ -95,3 +95,34 @@ class TestSamFile:
 
         sam1.add_sam_file(sam2)
         assert len(sam1) == 2*len(sam2)
+
+    def test_get_entries_headers(self):
+        sf = SamFile()
+        sf.file_name = "aux_files/sam_test.sam"
+        sf.set_filter_options([0], [-1], ["CM042140.1"], 97)
+        sf.read()
+
+        assert len(sf) == 9
+        entries = sf.get_entries()
+        assert len(entries) == 9
+        for el in entries:
+            assert "CM042140.1" in el
+
+        headers = sf.get_headers()
+        assert len(headers) == 1
+        assert "CM042140.1" in headers[0]
+
+    def test_get_entries_headers_2(self):
+        sf = SamFile()
+        sf.file_name = "aux_files/sam_test.sam"
+        sf.set_filter_options([0,0], [-1,-1], ["CM042140.1", "CM042177.1"], 0)
+        sf.read()
+        assert len(sf) == 12
+        entries = sf.get_entries()
+        for el in entries:
+            assert "CM042140.1" in el or "CM042177.1" in el
+
+        headers = sf.get_headers()
+        assert len(headers) == 2
+        for el in headers:
+            assert "CM042140.1" in el or "CM042177.1" in el

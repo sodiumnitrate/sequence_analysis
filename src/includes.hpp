@@ -181,6 +181,9 @@ public:
     void read();
     GenomeMap get_genome_map(std::string mapped_name, std::string sample_name);
     void add_sam_file(SamFile* other);
+    std::vector<std::string> get_entries();
+    std::vector<std::string> get_headers();
+    bool are_filters_equal(SamFile* other);
 };
 
 class PairwiseAligner{

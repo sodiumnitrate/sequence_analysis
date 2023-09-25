@@ -8,6 +8,8 @@ TODO:
 import tempfile
 from sequence_analysis import Sequence
 
+import pdb
+
 class TestSequence:
     def test_init(self):
         seq = Sequence("ACGT")
@@ -106,3 +108,15 @@ class TestSequence:
         ours = [orf.protein_sequence.strip("*") for orf in orfs]
 
         assert set(expasy) == set(ours)
+
+        for orf in orfs:
+            idx1 = orf.start
+            idx2 = orf.stop
+            strand = orf.strand
+            frame = orf.frame
+            subseq = Sequence(ubiquitin.seq_str[idx1:idx2])
+            if strand == -1:
+                subseq = subseq.reverse_complement()
+
+            p = subseq.translate()
+            assert orf.protein_sequence == p.seq_str

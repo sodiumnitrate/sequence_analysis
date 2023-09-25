@@ -22,8 +22,7 @@ void SamFile::set_filter_options(std::vector<int> start_, std::vector<int> end_,
 {
     // check that start, end, and mapped_onto have the same size
     if (!(start_.size() == end_.size() && end_.size() == mapped_onto_.size())){
-        std::cout << "WARNING: start, end, and mapped_onto lists must have the same size." << std::endl;
-        return;
+        throw "ERROR: start, end, and mapped_onto lists must have the same size.";
     }
     start_indices = start_;
     end_indices = end_;
@@ -77,6 +76,27 @@ void SamFile::read(){
     float score;
     std::string as_flag = "AS:i:";
     bool skip = false;
+
+    // some preprocessing to facilitate filtering
+    std::unordered_set<std::string> nameset;
+    bool contains_empty = false;
+    for (unsigned int i = 0; i < mapped_onto.size(); i++){
+        nameset.insert(mapped_onto[i]);
+        if(mapped_onto[i].compare("") == 0) contains_empty = true;
+    }
+
+    std::unordered_map<int, int> idx_map;
+    std::unordered_map<std::string, std::vector<int>> name_to_end_idx;
+    for (const auto& name : nameset){
+        std::vector<int> empty;
+        name_to_end_idx[name] = empty; 
+    }
+    for (unsigned int i = 0; i < mapped_onto.size(); i++){
+        // not sure this would work
+        name_to_end_idx.at(mapped_onto[i]).push_back(end_indices[i]);
+        idx_map[end_indices[i]] = start_indices[i];
+    }
+
     while(std::getline(in_file, line)){
         //skip = false;
         if (line[0] == '@'){
@@ -86,10 +106,8 @@ void SamFile::read(){
                 std::string target_name, dummy;
                 ss >> dummy >> target_name >> dummy;
                 target_name = target_name.substr(3, target_name.length());
-                for(unsigned int i = 0; i < mapped_onto.size(); i++){
-                    if (target_name.compare(mapped_onto[i]) == 0){
-                        headers.push_back(line);
-                    }
+                if (nameset.find(target_name) != nameset.end()){
+                    headers.push_back(line);
                 }
             }
             continue;
@@ -99,6 +117,18 @@ void SamFile::read(){
 
         // apply filters----------------
         skip = true;
+        // check name first
+        if (nameset.find(ref_name) != nameset.end() || contains_empty){
+            // now compare end index and pos (we need pos < end index)
+            auto const it = std::lower_bound(name_to_end_idx.at(name).begin(), name_to_end_idx.at(name).end(), pos);
+            if (it != name_to_end_idx.at(name).end()){
+                int idx = it->second;
+                int s_idx = idx_map.find(idx)->second;
+                length = seq.size();
+                if ( s_idx < pos + length ) skip = false;
+            }
+        }
+        /*
         for(unsigned int i = 0; i < mapped_onto.size(); i++){
             // if name matches or is empty, don't skip
             if ( ref_name.compare(mapped_onto[i]) == 0 || mapped_onto[i].compare("") == 0){
@@ -109,7 +139,7 @@ void SamFile::read(){
                     break;
                 }
             }
-        }
+        }*/
         // if the conditions above are not met, skip
         if (skip) continue;
         // -----------------------------
@@ -184,17 +214,37 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
     return result;
 }
 
+// figure out how to make it available as a common util
+template<typename T>
+bool are_vector_contents_equal(std::vector<T> &first, std::vector<T> &second){
+    if (first.size() != second.size()){
+        return false;
+    }
+
+    std::sort(first.begin(), first.end());
+    std::sort(second.begin(), second.end());
+
+    return first == second;
+}
+
+bool SamFile::are_filters_equal(SamFile* other){
+    if (min_score != other->min_score) return false;
+    if (!are_vector_contents_equal(headers, other->headers)) return false;
+    if (!are_vector_contents_equal(start_indices, other->start_indices)) return false;
+    if (!are_vector_contents_equal(end_indices, other->end_indices)) return false;
+
+    return true;
+}
+
 // function to add info from another sam file
 void SamFile::add_sam_file(SamFile* other){
     // assume filtering options are the same, or compatible
-    // TODO: check for this
+    if (!this->are_filters_equal(other)){
+        throw "Filters of the SamFile objects to be added are not equal.";
+    }
 
     for (auto entry : other->entries){
         entries.push_back(entry);
-    }
-
-    for (auto header : other->headers){
-        headers.push_back(header);
     }
 
     seq_start = fmin(seq_start, other->seq_start);
@@ -202,6 +252,9 @@ void SamFile::add_sam_file(SamFile* other){
 
     return;
 }
+
+std::vector<std::string> SamFile::get_entries(){return entries;}
+std::vector<std::string> SamFile::get_headers(){return headers;}
 
 void init_sam_file(py::module_ &m){
     py::class_<SamFile>(m, "SamFile", py::dynamic_attr())
@@ -223,6 +276,8 @@ void init_sam_file(py::module_ &m){
         .def("get_seq_start", &SamFile::get_seq_start)
         .def("get_seq_end", &SamFile::get_seq_end)
         .def("get_genome_map", &SamFile::get_genome_map)
+        .def("get_entries", &SamFile::get_entries)
+        .def("get_headers", &SamFile::get_headers)
         .def("__repr__",
              [](SamFile &a){
                  if ( a.size() > 0){
