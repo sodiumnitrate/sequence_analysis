@@ -164,7 +164,7 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
 
     // TODO: check values of seq_end and seq_start?
     // we are ready to create our heatmap
-    int length = seq_end - seq_start + 1;
+    int length = seq_end - seq_start;
     std::vector<unsigned int> heatmap;
     heatmap.resize(length);
     std::fill(heatmap.begin(), heatmap.end(), 0);
