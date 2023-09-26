@@ -117,7 +117,7 @@ void SamFile::read(){
                     if ( it == lengths.end()){
                         std::cout << "ERROR: sequence with name " << seq_name << " was not found in the lengths list." << std::endl;
                     }
-                    score = score / (float) it->second;
+                    score = 100 * score / (2*(float) it->second);
                 }
                 if (score < min_score){
                     skip = true;
@@ -126,6 +126,7 @@ void SamFile::read(){
             }
         }
         if (skip) continue;
+        normalized_scores.push_back(score);
 
         // passed all the tests
         entries.push_back(line);
@@ -142,6 +143,8 @@ void SamFile::read(){
 std::vector<int> SamFile::get_starts(){return start_indices;}
 std::vector<int> SamFile::get_ends(){return end_indices;}
 std::vector<std::string> SamFile::get_names(){return mapped_onto;}
+
+std::vector<float> SamFile::get_normalized_scores(){return normalized_scores;}
 
 GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_name){
     GenomeMap result;
@@ -274,5 +277,6 @@ void init_sam_file(py::module_ &m){
         .def("get_starts", &SamFile::get_starts)
         .def("get_ends", &SamFile::get_ends)
         .def("get_names", &SamFile::get_names)
+        .def("get_normalized_scores", &SamFile::get_normalized_scores)
         ;
 }

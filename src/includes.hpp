@@ -169,6 +169,7 @@ class SamFile{
     // if AS is not normalized, we need to use sequence lengths
     bool normalized_score = true;
     std::unordered_map<std::string, unsigned int> lengths;
+    std::vector<float> normalized_scores;
 
     // headers
     std::vector<std::string> headers;
@@ -201,6 +202,7 @@ public:
     std::vector<int> get_starts();
     std::vector<int> get_ends();
     std::vector<std::string> get_names();
+    std::vector<float> get_normalized_scores();
 };
 
 class PairwiseAligner{

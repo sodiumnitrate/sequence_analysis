@@ -65,6 +65,10 @@ class TestSamFile:
         sf.get_lengths_from_fasta("aux_files/reference_set_dna.fasta")
         sf.read()
 
+        scores = sf.get_normalized_scores()
+        for score in scores:
+            assert score >= 0 and score <= 100
+
     def test_get_genome_map(self):
         sf = SamFile()
         sf.file_name = "aux_files/sam_test.sam"
