@@ -197,6 +197,10 @@ public:
     std::vector<std::string> get_entries();
     std::vector<std::string> get_headers();
     bool are_filters_equal(SamFile* other);
+    void copy_filters_from_another(SamFile* other);
+    std::vector<int> get_starts();
+    std::vector<int> get_ends();
+    std::vector<std::string> get_names();
 };
 
 class PairwiseAligner{

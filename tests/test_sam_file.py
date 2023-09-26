@@ -2,10 +2,11 @@
 Unit tests for the SamFile class.
 """
 import numpy as np
-
-from sequence_analysis import SamFile
+import time
 
 import pdb
+
+from sequence_analysis import SamFile
 
 class TestSamFile:
     def test_init(self):
@@ -98,6 +99,18 @@ class TestSamFile:
         sam1.add_sam_file(sam2)
         assert len(sam1) == 2*len(sam2)
 
+    def test_sam_file_add_2(self):
+        sam1 = SamFile()
+        sam1.file_name = "aux_files/sam_test.sam"
+        sam1.set_filter_options([0], [-1], ["CM042140.1"], 97)
+        sam1.read()
+
+        sam2 = SamFile()
+        sam2.copy_filters_from_another(sam1)
+        sam2.add_sam_file(sam1)
+
+        assert len(sam1) == len(sam2)
+
     def test_get_entries_headers(self):
         sf = SamFile()
         sf.file_name = "aux_files/sam_test.sam"
@@ -128,3 +141,33 @@ class TestSamFile:
         assert len(headers) == 2
         for el in headers:
             assert "CM042140.1" in el or "CM042177.1" in el
+
+    def test_copy_filters(self):
+        sf = SamFile()
+        sf.file_name = "aux_files/sam_test.sam"
+        sf.set_filter_options([0], [-1], ["CM042140.1"], 97)
+        starts = sf.get_starts()
+        ends = sf.get_ends()
+        names = sf.get_names()
+        sf.read()
+
+        sf2 = SamFile()
+        sf2.file_name = "aux_files/sam_test.sam"
+        sf2.copy_filters_from_another(sf)
+        starts2 = sf.get_starts()
+        ends2 = sf.get_ends()
+        names2 = sf.get_names()
+
+        assert starts == starts2
+        assert ends == ends2
+        assert names == names2
+
+        sf2.read()
+
+        assert len(sf) == len(sf2)
+
+    def test_read_parallel(self):
+        sf = SamFile()
+        sf.read_multiple_files(["aux_files/sam_test.sam", "aux_files/sam_test_2.sam"])
+
+        assert len(sf) == 24

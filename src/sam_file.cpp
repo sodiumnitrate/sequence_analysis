@@ -57,6 +57,9 @@ void SamFile::get_lengths_from_fasta(std::string fasta_file_name){
 
 // read info from sam file
 void SamFile::read(){
+    std::cout << min_score << std::endl;
+    // release GIL to be able to run this parallel from python side
+    py::gil_scoped_release release;
     std::ifstream in_file(file_name);
     std::string line;
     // if scores are not normalized, we need to have length info
@@ -131,7 +134,14 @@ void SamFile::read(){
     }
 
     std::cout << "Done reading. The final range is: (" << seq_start << ", " << seq_end << ")." << std::endl;
+
+    // re-acquire GIL
+    py::gil_scoped_acquire acquire;
 }
+
+std::vector<int> SamFile::get_starts(){return start_indices;}
+std::vector<int> SamFile::get_ends(){return end_indices;}
+std::vector<std::string> SamFile::get_names(){return mapped_onto;}
 
 GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_name){
     GenomeMap result;
@@ -190,17 +200,25 @@ bool are_vector_contents_equal(std::vector<T> &first, std::vector<T> &second){
 
 bool SamFile::are_filters_equal(SamFile* other){
     if (min_score != other->min_score) return false;
-    if (!are_vector_contents_equal(headers, other->headers)) return false;
+    if (!are_vector_contents_equal(mapped_onto, other->mapped_onto)) return false;
     if (!are_vector_contents_equal(start_indices, other->start_indices)) return false;
     if (!are_vector_contents_equal(end_indices, other->end_indices)) return false;
 
     return true;
 }
 
+void SamFile::copy_filters_from_another(SamFile* other){
+    min_score = other->min_score;
+    mapped_onto = other->mapped_onto;
+    start_indices = other->start_indices;
+    end_indices = other->end_indices;
+}
+
 // function to add info from another sam file
 void SamFile::add_sam_file(SamFile* other){
     // assume filtering options are the same, or compatible
     if (!this->are_filters_equal(other)){
+        std::cout << "FILTERS ARE NOT EQUAL" << std::endl;
         throw "Filters of the SamFile objects to be added are not equal.";
     }
 
@@ -208,8 +226,12 @@ void SamFile::add_sam_file(SamFile* other){
         entries.push_back(entry);
     }
 
+    std::cout << "merged entries" << std::endl;
+
     seq_start = fmin(seq_start, other->seq_start);
     seq_end = fmax(seq_end, other->seq_end);
+
+    std::cout << "merged ranges" << std::endl;
 
     return;
 }
@@ -248,5 +270,9 @@ void init_sam_file(py::module_ &m){
                  }
              })
         .def("add_sam_file", &SamFile::add_sam_file)
+        .def("copy_filters_from_another", &SamFile::copy_filters_from_another)
+        .def("get_starts", &SamFile::get_starts)
+        .def("get_ends", &SamFile::get_ends)
+        .def("get_names", &SamFile::get_names)
         ;
 }
