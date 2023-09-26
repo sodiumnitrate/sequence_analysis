@@ -1,5 +1,8 @@
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
+#include <cmath>
 
 // ORF class
 class OpenReadingFrame{
@@ -141,6 +144,16 @@ public:
     void set_sample_name(std::string samp);
     void set_heatmap(std::vector<unsigned int> heatmap_, int heatmap_start_, int heatmap_end_);
     void add_map(GenomeMap* new_gm);
+};
+
+class SamFilter{
+    std::unordered_set<std::string> nameset;
+    std::unordered_map<std::string, std::vector<std::tuple<int, int> > > nuc_ranges;
+    bool contains_empty = false;
+public:
+    SamFilter(std::vector<std::string>& names, std::vector<int>& starts, std::vector<int>& ends);
+    bool query(std::string& name, int start, int end);
+    bool check_name(std::string& name);
 };
 
 class SamFile{

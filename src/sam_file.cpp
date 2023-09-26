@@ -75,27 +75,9 @@ void SamFile::read(){
     int pos, length;
     float score;
     std::string as_flag = "AS:i:";
-    bool skip = false;
 
     // some preprocessing to facilitate filtering
-    std::unordered_set<std::string> nameset;
-    bool contains_empty = false;
-    for (unsigned int i = 0; i < mapped_onto.size(); i++){
-        nameset.insert(mapped_onto[i]);
-        if(mapped_onto[i].compare("") == 0) contains_empty = true;
-    }
-
-    std::unordered_map<int, int> idx_map;
-    std::unordered_map<std::string, std::vector<int>> name_to_end_idx;
-    for (const auto& name : nameset){
-        std::vector<int> empty;
-        name_to_end_idx[name] = empty; 
-    }
-    for (unsigned int i = 0; i < mapped_onto.size(); i++){
-        // not sure this would work
-        name_to_end_idx.at(mapped_onto[i]).push_back(end_indices[i]);
-        idx_map[end_indices[i]] = start_indices[i];
-    }
+    SamFilter filter_obj(mapped_onto, start_indices, end_indices);
 
     while(std::getline(in_file, line)){
         //skip = false;
@@ -106,7 +88,7 @@ void SamFile::read(){
                 std::string target_name, dummy;
                 ss >> dummy >> target_name >> dummy;
                 target_name = target_name.substr(3, target_name.length());
-                if (nameset.find(target_name) != nameset.end()){
+                if (filter_obj.check_name(target_name)){
                     headers.push_back(line);
                 }
             }
@@ -115,36 +97,14 @@ void SamFile::read(){
         std::istringstream ss(line);
         ss >> seq_name >> dummy >> ref_name >> pos >> dummy >> dummy >> dummy >> dummy >> dummy >> seq >> dummy;
 
+        auto length = seq.length();
+
         // apply filters----------------
-        skip = true;
-        // check name first
-        if (nameset.find(ref_name) != nameset.end() || contains_empty){
-            // now compare end index and pos (we need pos < end index)
-            auto const it = std::lower_bound(name_to_end_idx.at(name).begin(), name_to_end_idx.at(name).end(), pos);
-            if (it != name_to_end_idx.at(name).end()){
-                int idx = it->second;
-                int s_idx = idx_map.find(idx)->second;
-                length = seq.size();
-                if ( s_idx < pos + length ) skip = false;
-            }
-        }
-        /*
-        for(unsigned int i = 0; i < mapped_onto.size(); i++){
-            // if name matches or is empty, don't skip
-            if ( ref_name.compare(mapped_onto[i]) == 0 || mapped_onto[i].compare("") == 0){
-                // if read overlaps with the region requested, don't skip
-                length = seq.size();
-                if ( pos + length > start_indices[i] && (end_indices[i] == -1 || pos < end_indices[i])){
-                    skip = false;
-                    break;
-                }
-            }
-        }*/
-        // if the conditions above are not met, skip
-        if (skip) continue;
+        if (!(filter_obj.query(ref_name, pos, pos + length))) continue;
         // -----------------------------
 
         // check alignment score
+        bool skip = false;
         while ( ss >> flag){
             // if flag is AS
             if (flag.compare(0, 5, as_flag) == 0){
@@ -163,6 +123,7 @@ void SamFile::read(){
             }
         }
         if (skip) continue;
+
         // passed all the tests
         entries.push_back(line);
         seq_start = fmin(seq_start, pos);

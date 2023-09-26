@@ -5,6 +5,8 @@ import numpy as np
 
 from sequence_analysis import SamFile
 
+import pdb
+
 class TestSamFile:
     def test_init(self):
         sf = SamFile()
