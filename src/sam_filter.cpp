@@ -101,8 +101,6 @@ bool SamFilter::query(std::string& name, int start, int end){
     }
     int s, e;
     bool works = false;
-    std::cout << "now i'm here " << std::endl;
-    std::cout << curr_name << std::endl;
     for (auto t : nuc_ranges.at(curr_name)){
         s = std::get<0>(t);
         e = std::get<1>(t);
