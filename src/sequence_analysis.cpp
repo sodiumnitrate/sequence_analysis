@@ -18,7 +18,7 @@ TODO: sequence logo class by itself?
 #include <fstream>
 #include <cstring>
 #include <sstream>
-#include <unistd.h>
+//#include <unistd.h>
 #include "includes.hpp"
 
 #define STRINGIFY(x) #x
