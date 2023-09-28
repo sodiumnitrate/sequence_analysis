@@ -223,11 +223,21 @@ public:
 };
 
 class PairwiseAligner{
-    std::string algorithm = "local"; //TODO: switch to enum
+    enum direction {up, left, upper_left, none};
+
+    std::string algorithm = "global"; //TODO: switch to enum
     std::string query;
     std::string target;
 
+    int gap_penalty = -8;
+
     float score;
+
+    std::string query_aligned;
+    std::string target_aligned;
+    std::string alignment_string;
+    int **F;
+    direction **pointers;
 public:
     PairwiseAligner();
     void set_algorithm(std::string alg);
@@ -237,6 +247,14 @@ public:
     void set_target(std::string target_);
     std::string get_target();
 
+    // alloc memory based on query and target size, choose correct algs, etc.
+    void align();
+
+    void needleman_wunsch();
+    void traceback_nw();
+
     float get_score();
+
+    ~PairwiseAligner();
 };
 
