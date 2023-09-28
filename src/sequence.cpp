@@ -78,6 +78,7 @@ std::unordered_map<std::string, char> codon_to_aa_map = {
     {"GGU", 'G'},
     {"GGC", 'G'},
     {"GGA", 'G'},
+    {"GGG", 'G'},
     {"TTT", 'F'},
     {"TTC", 'F'},
     {"TTA", 'L'},
