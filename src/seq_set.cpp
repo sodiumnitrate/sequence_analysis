@@ -18,9 +18,9 @@ namespace py = pybind11;
 SeqSet::SeqSet() {};
 void SeqSet::set_name(std::string &name_) {name = name_;}
 std::string SeqSet::get_name() {return name;}
-int SeqSet::size() { return records.size(); }
+int SeqSet::size() { return n_seqs; }
 void SeqSet::set_type(std::string seq_type=""){
-    if ( records.size() == 0){
+    if ( n_seqs == 0){
         std::cout << "WARNING: there are no sequences in the set to determine type." << std::endl;
         return;
     }
@@ -41,6 +41,7 @@ std::string SeqSet::get_type(){ return type; };
 
 void SeqSet::set_records(std::vector<Sequence> &records_) {
     records = records_;
+    n_seqs = records.size();
     this->set_type();
 }
 std::vector<Sequence> SeqSet::get_records() { return records;}
@@ -49,6 +50,7 @@ std::vector<Sequence> SeqSet::get_records() { return records;}
 void SeqSet::add_sequence(Sequence seq){
     // TODO: add check for type
     records.push_back(seq);
+    n_seqs++;
     return;
 }
 
@@ -70,6 +72,7 @@ void SeqSet::alphabetize(){
 
 // remove duplicates
 void SeqSet::remove_duplicates(){
+    int to_remove = 0;
     if(records.size() < 2){
         return;
     }
@@ -84,6 +87,7 @@ void SeqSet::remove_duplicates(){
         if (records[i] == records[i-1]){
             name += '_' + records[i].get_name();
             records[i].set_name(flag);
+            to_remove++;
         }
         else{
             if(i - idx > 1){
@@ -99,12 +103,16 @@ void SeqSet::remove_duplicates(){
         records.begin(), records.end(), 
         [](auto t){return t.get_name().compare("**")==0;}),
         records.end());
+
+    // update count
+    n_seqs -= to_remove;
 }
 
 // add elements from another SeqSet instance
 void SeqSet::add_set(SeqSet* sset){
     for (auto t : sset->get_records()){
         records.push_back(t);
+        n_seqs++;
     }
 }
 
@@ -113,7 +121,7 @@ void SeqSet::write_fasta(std::string file_name){
     std::ofstream out_file;
     out_file.open(file_name);
     for (auto t : records){
-        out_file << ">" << name << std::endl;
+        out_file << ">" << t.get_name() << std::endl;
         for (int i = 0; i < t.length(); i++){
             if (i != 0 && i % 79 == 0){
                 out_file << std::endl;
@@ -144,6 +152,7 @@ void SeqSet::read_fasta(std::string file_name){
                 Sequence new_seq(seq);
                 new_seq.set_name(name);
                 records.push_back(new_seq);
+                n_seqs++;
                 seq = "";
             }
             // get new name
@@ -159,6 +168,7 @@ void SeqSet::read_fasta(std::string file_name){
     Sequence new_seq(seq);
     new_seq.set_name(name);
     records.push_back(new_seq);
+    n_seqs++;
     in_file.close();
 }
 

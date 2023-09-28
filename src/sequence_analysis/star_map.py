@@ -26,6 +26,8 @@ class StarMap:
 
         self.exec_str = None
 
+        # is the star executable accessible?
+        self.star = None
         self.check_for_STAR()
 
     def check_for_STAR(self):
@@ -35,13 +37,18 @@ class StarMap:
         """
         path = shutil.which("STAR")
         if path is None:
-            print("ERROR: STAR not found.")
-            raise OSError
+            self.star = False
+        else:
+            self.star = True
 
     def index_genome(self, genome_fasta, genome_dir):
         """
         Given a .fasta file for the genome, generate indices.
         """
+        if not self.star:
+            print("ERROR: STAR not found.")
+            raise OSError
+
         exec_string = f"STAR --runMode genomeGenerate --genomeDir {genome_dir} --genomeFastaFiles {genome_fasta} --runThreadN {self.n_threads}"
 
         self.exec_str = exec_string
@@ -61,6 +68,10 @@ class StarMap:
         """
         Align reads given a query fasta file and genome dir with indices.
         """
+        if not self.star:
+            print("ERROR: STAR not found.")
+            raise OSError
+
         if self.genome_dir is None:
             print("ERROR: genomeDir not found. Please set it.")
             raise ValueError

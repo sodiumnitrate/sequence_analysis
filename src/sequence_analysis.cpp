@@ -32,6 +32,7 @@ void init_seq_set(py::module_ &);
 void init_sam_file(py::module_ &);
 void init_pairwise_aligner(py::module_ &);
 void init_genome_map(py::module_ &);
+void init_fasta_iterator(py::module_ &);
 
 PYBIND11_MODULE(sequence_analysis_cpp, m){
     init_sequence(m);
@@ -40,6 +41,7 @@ PYBIND11_MODULE(sequence_analysis_cpp, m){
     init_sam_file(m);
     init_pairwise_aligner(m);
     init_genome_map(m);
+    init_fasta_iterator(m);
     
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

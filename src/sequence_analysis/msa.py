@@ -59,9 +59,7 @@ class MSA:
         Check that mafft is installed and is accessible.
         """
         if which('mafft') is None:
-            print("ERROR: mafft either not installed, or executable not in path.")
-            # TODO: is this the correct way?
-            raise OSError
+            self.mafft = False
         else:
             self.mafft = True
 
@@ -95,6 +93,10 @@ class MSA:
         If clean=True, remove tmp files so that the aligned sequences live within
         the MSA object, in memory only.
         """
+        if not self.mafft:
+            print("ERROR: mafft either not installed, or executable not in path.")
+            # TODO: is this the correct way?
+            raise OSError
 
         if self.scratch_folder_name[-1] == '/':
             self.scratch_folder_name = self.scratch_folder_name[:-1]

@@ -47,7 +47,9 @@ SamFilter::SamFilter(std::vector<std::string>& names, std::vector<int>& starts, 
 
     // merge intervals
     for (auto name : nameset){
-        const unsigned int len = nuc_ranges.at(name).size();
+        unsigned int len = nuc_ranges.at(name).size();
+        std::vector<int> visited;
+        for (unsigned int i = 0; i < len; i++) visited.push_back(0);
 
         // adjacency matrix
         std::vector<std::vector<int> > adjacency(len);
@@ -66,7 +68,6 @@ SamFilter::SamFilter(std::vector<std::string>& names, std::vector<int>& starts, 
         }
 
         // bfs
-        int visited[len];
         int curr_idx, min_start, max_end;
         for (auto& t : visited) t = 0;
         std::vector<std::tuple<int, int> > curr;

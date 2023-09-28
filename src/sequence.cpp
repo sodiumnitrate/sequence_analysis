@@ -78,7 +78,43 @@ std::unordered_map<std::string, char> codon_to_aa_map = {
     {"GGU", 'G'},
     {"GGC", 'G'},
     {"GGA", 'G'},
-    {"GGG", 'G'}
+    {"TTT", 'F'},
+    {"TTC", 'F'},
+    {"TTA", 'L'},
+    {"TTG", 'L'},
+    {"CTT", 'L'},
+    {"CTC", 'L'},
+    {"CTA", 'L'},
+    {"CTG", 'L'},
+    {"ATT", 'I'},
+    {"ATC", 'I'},
+    {"ATA", 'I'},
+    {"ATG", 'M'},
+    {"GTT", 'V'},
+    {"GTC", 'V'},
+    {"GTA", 'V'},
+    {"GTG", 'V'},
+    {"TCT", 'S'},
+    {"TCC", 'S'},
+    {"TCA", 'S'},
+    {"TCG", 'S'},
+    {"CCT", 'P'},
+    {"ACT", 'T'},
+    {"GCT", 'A'},
+    {"TAT", 'Y'},
+    {"TAC", 'Y'},
+    {"TAA", '*'},
+    {"TAG", '*'},
+    {"CAT", 'H'},
+    {"AAT", 'N'},
+    {"GAT", 'D'},
+    {"TGT", 'C'},
+    {"TGC", 'C'},
+    {"TGA", '*'},
+    {"TGG", 'W'},
+    {"CGT", 'R'},
+    {"AGT", 'S'},
+    {"GGT", 'G'}
 };
 
 bool is_stop(std::string &codon){
@@ -97,8 +133,6 @@ bool is_start(std::string &codon){
 }
 
 char codon_to_aa(std::string &codon){
-    // requires c++20
-    std::ranges::replace(codon, 'T', 'U');
     return codon_to_aa_map[codon];
 }
 

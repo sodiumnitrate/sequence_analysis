@@ -24,11 +24,12 @@ class TestMSA:
         seqs.read_fasta("aux_files/cluster_test_2.fasta")
 
         msa = MSA(seqs)
-        msa.align(clean=True)
+        if msa.mafft:
+            msa.align(clean=True)
 
-        assert msa.alignment_info is not None
-        assert msa.aligned_sequences is not None
-        assert len(msa.aligned_sequences) == len(msa.sequences)
-        assert msa.elapsed is not None
+            assert msa.alignment_info is not None
+            assert msa.aligned_sequences is not None
+            assert len(msa.aligned_sequences) == len(msa.sequences)
+            assert msa.elapsed is not None
 
-        assert not os.path.exists(msa.scratch_folder_name)
+            assert not os.path.exists(msa.scratch_folder_name)

@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <cmath>
+#include <fstream>
 
 // ORF class
 class OpenReadingFrame{
@@ -77,10 +78,25 @@ public:
     Sequence translate();
 
     // write fasta
-    void write_fasta(std::string file_name);
+    void write_fasta(std::string file_name_);
 
     // get orfs
     std::vector<OpenReadingFrame> get_open_reading_frames(unsigned int min_len);
+};
+
+// TODO: use this in other fasta reading ops
+class FastaIterator{
+    std::string file_name;
+    std::ifstream file_handle;
+
+    //  things to use to keep track of reading seqs
+    int seq_ct = 0;
+    std::string name;
+    std::string seq;
+    std::string line;
+public:
+    FastaIterator(std::string file_name);
+    Sequence get_next();
 };
 
 class SeqSet {
@@ -88,6 +104,7 @@ class SeqSet {
     // pointers to sequences!
     std::vector<Sequence> records;
     std::string type;
+    int n_seqs = 0;
 public:
     SeqSet();
     void set_name(std::string &name_);

@@ -27,6 +27,7 @@ class EasySearch:
             raise ValueError
 
         # check that we have mmseqs2 installed
+        self.mmseqs2 = None
         self.check_for_mmseqs2()
 
         self.search_type = None
@@ -46,16 +47,17 @@ class EasySearch:
         """
         path = shutil.which("mmseqs")
         if path is None:
-            print("ERROR: mmseqs not found.")
-
-            # is this the right exception to raise?
-            raise OSError
+            self.mmseqs2 = False
+            return
 
         result = subprocess.run(["mmseqs"], shell=True, capture_output=True, text=True)
         
         if 'MMseqs2' not in result.stdout:
-            print("ERROR: something's wrong with the mmseqs2 installation.")
-            raise OSError
+            self.mmseqs2 = False
+            return
+
+        self.mmseqs2 = True
+
 
     def set_search_parameters(self,
                               search_type=3,
@@ -85,6 +87,11 @@ class EasySearch:
         """
         Given the options, run mmseqs2.
         """
+        if not self.mmseqs2:
+            print("ERROR: mmseqs not found.")
+            # is this the right exception to raise?
+            raise OSError
+
         if any([self.search_type is None, self.max_e_value is None, self.cov_mode is None, self.output_name is None]):
             print("WARNING: setting default search parameters.")
             self.set_search_parameters()

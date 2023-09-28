@@ -24,5 +24,6 @@ class TestEasySearch:
         with tempfile.TemporaryDirectory() as tmpdirname:
             es.set_search_parameters(search_type=3, output_name=f"{tmpdirname}/out.sam", tmp_folder_name=f"{tmpdirname}/tmp")
 
-            es.run_search()
-            assert es.exec_string is not None
+            if es.mmseqs2:
+                es.run_search()
+                assert es.exec_string is not None
