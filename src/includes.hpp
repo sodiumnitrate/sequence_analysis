@@ -4,6 +4,8 @@
 #include <unordered_set>
 #include <cmath>
 #include <fstream>
+#include "pair_score.hpp"
+
 
 // ORF class
 class OpenReadingFrame{
@@ -240,6 +242,8 @@ class PairwiseAligner{
 
     std::vector<std::vector<int>> F;
     std::vector<std::vector<direction>> pointers;
+
+    PairScore* ps;
 public:
     PairwiseAligner();
     void set_algorithm(std::string alg);
@@ -256,5 +260,10 @@ public:
     void traceback_nw();
 
     float get_score();
+    std::string get_query_aligned();
+    std::string get_target_aligned();
+    std::string get_match_string();
+    std::vector<std::vector<int>> get_F();
+    std::vector<std::vector<direction>> get_pointers();
 };
 

@@ -95,3 +95,4 @@ This is still a work in progress. The goal is to implement the following feature
 - Finish `PairwiseAligner`
 - Clustering with pairwise distance calculation using `edlib`?
 - The ability to stop execution with Ctrl+C
+- Better error messages/handling

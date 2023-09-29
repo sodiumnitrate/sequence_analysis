@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 std::unordered_map<std::string, int> read_scores(std::string& name);
 

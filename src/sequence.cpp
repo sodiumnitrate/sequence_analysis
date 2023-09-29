@@ -14,7 +14,7 @@
 
 namespace py = pybind11;
 
-const std::unordered_map<std::string, char> codon_to_aa_map = {
+std::unordered_map<std::string, char> codon_to_aa_map = {
     {"UUU", 'F'},
     {"UUC", 'F'},
     {"UUA", 'L'},
