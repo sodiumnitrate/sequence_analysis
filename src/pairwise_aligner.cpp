@@ -11,14 +11,15 @@
 #include <cstring>
 #include <sstream>
 #include "includes.hpp"
+#include "pair_score.hpp"
 
 namespace py = pybind11;
 
 enum algorithms {local, global};
 
-std::unordered_map<std::string, int> blosum50;
-
-PairwiseAligner::PairwiseAligner(){};
+PairwiseAligner::PairwiseAligner(){
+    PairScore ps("blosum50");
+};
 void PairwiseAligner::set_algorithm(std::string alg) {algorithm = alg;}
 std::string PairwiseAligner::get_algorithm() {return algorithm;}
 void PairwiseAligner::set_query(std::string query_) {query = query_;}
@@ -32,15 +33,11 @@ void PairwiseAligner::align(){
     const int n = query.size() + 1;
     const int m = target.size() + 1;
 
-    F = new int*[n];
-    for (auto t : F){
-        new int[m];
-    }
+    // allocate memory for F and pointers
+    F.resize(n, std::vector<int>(m));
+    pointers.resize(n, std::vector<direction>(m));
 
-    pointers = new direction*[n];
-    for (auto t : pointers){
-        new direction[m];
-    }
+    if (algorithm.compare("global")==0) needleman_wunsch();
 }
 
 // Implementation of Needleman-Wunsch
@@ -51,7 +48,6 @@ void PairwiseAligner::needleman_wunsch(){
     direction pointers[n][m];
 
     // init matrices
-    int F[n][m];
     for (int i = 0; i < n; i++){
         for (int j = 0; j < m; j++){
             F[i][j] = 0;
@@ -112,20 +108,36 @@ void PairwiseAligner::needleman_wunsch(){
 }
 
 void PairwiseAligner::traceback_nw(){
+    int row_ptr = n - 1;
+    int col_ptr = m - 1;
 
-}
+    query_aligned = "";
+    target_aligned = "";
 
-// destructor
-PairwiseAligner::~PairwiseAligner(){
-    for (auto t : F){
-        delete t;
+    while (row_ptr > 0 || col_ptr > 0){
+        switch (pointers[row_ptr][col_ptr]){
+            case up:
+                query_aligned = "-" + query_aligned;
+                target_aligned = target[row_ptr - 1] + target_aligned;
+                alignment_string = "-" + alignment_string;
+                row_ptr--;
+                break;
+            case left:
+                query_aligned = query[col_ptr - 1] + query_aligned;
+                target_aligned = "-" + target_aligned;
+                alignment_string = "-" + alignment_string;
+                col_ptr--;
+                break;
+            case upper_left:
+                query_aligned = query[col_ptr - 1] + query_aligned;
+                target_aligned = target[row_ptr - 1] + target_aligned;
+                if (query[col_ptr - 1] == target[row_ptr -1]) alignment_string = "|" + alignment_string;
+                else alignment_string = " " + alignment_string;
+                row_ptr--;
+                col_ptr--;
+                break;
+        }
     }
-    delete F;
-
-    for (auto t : pointers){
-        delete t;
-    }
-    delete pointers;
 }
 
 

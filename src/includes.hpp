@@ -222,9 +222,10 @@ public:
     std::vector<float> get_normalized_scores();
 };
 
-class PairwiseAligner{
-    enum direction {up, left, upper_left, none};
 
+enum direction {up, left, upper_left, none};
+
+class PairwiseAligner{
     std::string algorithm = "global"; //TODO: switch to enum
     std::string query;
     std::string target;
@@ -236,8 +237,9 @@ class PairwiseAligner{
     std::string query_aligned;
     std::string target_aligned;
     std::string alignment_string;
-    int **F;
-    direction **pointers;
+
+    std::vector<std::vector<int>> F;
+    std::vector<std::vector<direction>> pointers;
 public:
     PairwiseAligner();
     void set_algorithm(std::string alg);
@@ -254,7 +256,5 @@ public:
     void traceback_nw();
 
     float get_score();
-
-    ~PairwiseAligner();
 };
 
