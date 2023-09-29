@@ -39,7 +39,7 @@ void PairwiseAligner::align(){
 
     if (algorithm.compare("global")==0) {
         needleman_wunsch();
-        std::cout << "running traceback" << std::endl;
+        std::cout << "running traceback" <<
         traceback_nw();
         }
 }
