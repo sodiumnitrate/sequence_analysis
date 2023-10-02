@@ -175,3 +175,11 @@ class TestSamFile:
         sf.read_multiple_files(["aux_files/sam_test.sam", "aux_files/sam_test_2.sam"])
 
         assert len(sf) == 24
+
+    def test_get_multimapping_stats(self):
+        sf = SamFile()
+        sf.file_name = "aux_files/sam_test.sam"
+        sf.read()
+
+        multimappers_dict = sf.get_multimapping_stats()
+        assert len(multimappers_dict['SRR18071790.135420']) == 3

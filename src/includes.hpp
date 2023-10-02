@@ -196,6 +196,9 @@ class SamFile{
     // vector that will hold the read lines
     std::vector<std::string> entries;
 
+    // unordered_map to hold info about multimappers
+    std::unordered_map<std::string, std::vector<int> > unique_names_to_entry_idx;
+
     // beginning and end for the reads 
     int seq_start = std::numeric_limits<int>::max();
     int seq_end = 0;
@@ -222,6 +225,8 @@ public:
     std::vector<int> get_ends();
     std::vector<std::string> get_names();
     std::vector<float> get_normalized_scores();
+    void generate_multimapping_stats();
+    std::unordered_map<std::string, std::vector<int> > get_multimapping_stats();
 };
 
 

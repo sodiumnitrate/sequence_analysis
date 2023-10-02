@@ -242,6 +242,27 @@ void SamFile::add_sam_file(SamFile* other){
 std::vector<std::string> SamFile::get_entries(){return entries;}
 std::vector<std::string> SamFile::get_headers(){return headers;}
 
+void SamFile::generate_multimapping_stats(){
+    if (entries.size() == 0) {
+        std::cout << "WARNING: no entries found." << std::endl;
+        return;
+    }
+
+    std::string read_name;
+    int idx = 0;
+    for (const auto& t : entries){
+        std::istringstream ss(t);
+        ss >> read_name;
+        unique_names_to_entry_idx[read_name].push_back(idx);
+        idx++;
+    }
+}
+
+std::unordered_map<std::string, std::vector<int> > SamFile::get_multimapping_stats(){
+    generate_multimapping_stats();
+    return unique_names_to_entry_idx;
+}
+
 void init_sam_file(py::module_ &m){
     py::class_<SamFile>(m, "SamFile", py::dynamic_attr())
         .def(py::init<>())
@@ -278,5 +299,6 @@ void init_sam_file(py::module_ &m){
         .def("get_ends", &SamFile::get_ends)
         .def("get_names", &SamFile::get_names)
         .def("get_normalized_scores", &SamFile::get_normalized_scores)
+        .def("get_multimapping_stats", &SamFile::get_multimapping_stats)
         ;
 }
