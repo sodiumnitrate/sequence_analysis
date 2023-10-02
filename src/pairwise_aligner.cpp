@@ -34,12 +34,12 @@ void PairwiseAligner::align(){
     const int m = target.size() + 1;
 
     // allocate memory for F and pointers
-    F.resize(n, std::vector<int>(m));
-    pointers.resize(n, std::vector<direction>(m));
+    F.resize(m, std::vector<int>(n));
+    pointers.resize(m, std::vector<direction>(n));
 
     if (algorithm.compare("global")==0) {
         needleman_wunsch();
-        std::cout << "running traceback" <<
+        std::cout << "running traceback" << std::endl;
         traceback_nw();
         }
 }
@@ -49,23 +49,21 @@ void PairwiseAligner::needleman_wunsch(){
     const int n = query.size() + 1;
     const int m = target.size() + 1;
 
-    direction pointers[n][m];
-
     // init matrices
-    for (int i = 0; i < n; i++){
-        for (int j = 0; j < m; j++){
+    for (int i = 0; i < m; i++){
+        for (int j = 0; j < n; j++){
             F[i][j] = 0;
-            pointers[n][m] = none;
+            pointers[i][j] = none;
         }
     }
 
     // boundaries
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < m; i++)
     {
         F[i][0] = i * gap_penalty;
         pointers[i][0] = up;
     }
-    for (int i = 0; i < m; i++)
+    for (int i = 0; i < n; i++)
     {
         F[0][i] = i * gap_penalty;
         pointers[0][i] = left;
@@ -74,19 +72,19 @@ void PairwiseAligner::needleman_wunsch(){
     pointers[0][0] = none;
 
     int down, right, lower_right;
-    for (int i = 1; i < n; i++)
+    for (int i = 1; i < m; i++)
     {
-        for (int j = 1; j < m; j++)
+        for (int j = 1; j < n; j++)
         {
             // x_i and y_j are aligned
-            lower_right = F[i - 1][j - 1] + ps->query(query[i - 1], target[j - 1]);
+            lower_right = F[i - 1][j - 1] + ps->query(target[i - 1], query[j - 1]);
             // x_i is aligned to a gap
             down = F[i][j - 1] + gap_penalty;
             // y_j is aligned to a gap
             right = F[i - 1][j] + gap_penalty;
 
             if (lower_right > down){
-                if (lower_right > right){
+                if (lower_right >= right){
                     F[i][j] = lower_right;
                     pointers[i][j] = upper_left;
                 }
@@ -96,7 +94,7 @@ void PairwiseAligner::needleman_wunsch(){
                 }
             }
             else{
-                if (down > right){
+                if (down >= right){
                     F[i][j] = down;
                     pointers[i][j] = up;
                 }
@@ -108,15 +106,15 @@ void PairwiseAligner::needleman_wunsch(){
         }
     }
 
-    score = F[n-1][m-1];
+    score = F[m-1][n-1];
 }
 
 void PairwiseAligner::traceback_nw(){
     std::cout << "now im here" << std::endl;
     const int n = query.size() + 1;
     const int m = target.size() + 1;
-    int row_ptr = n - 1;
-    int col_ptr = m - 1;
+    int row_ptr = m - 1;
+    int col_ptr = n - 1;
 
     query_aligned = "";
     target_aligned = "";
