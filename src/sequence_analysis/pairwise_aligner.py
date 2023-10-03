@@ -12,4 +12,14 @@ class PairwiseAligner(PairwiseAligner_cpp):
     std::string query
     float score
     """
-    pass
+    def __init__(self, query=None, target=None, algorithm=None):
+        """
+        Overload C++ constructor for faster init.
+        """
+        super(PairwiseAligner, self).__init__()
+        if query is not None:
+            self.query = query
+        if target is not None:
+            self.target = target
+        if algorithm is not None:
+            self.algorithm = algorithm

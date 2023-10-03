@@ -1,4 +1,4 @@
-#include "pair_score.hpp"
+#include "include/pair_score.hpp"
 
 PairScore::PairScore(std::string name_)
 {

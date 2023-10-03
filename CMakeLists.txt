@@ -12,7 +12,7 @@ find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
 
 file (GLOB SOURCE_FILES "src/*.cpp")
-file (GLOB HEADER_FILES "src/*.hpp")
+file (GLOB HEADER_FILES "src/include/*.hpp")
 
 #python_add_library(sequence_analysis_cpp MODULE src/utils.cpp src/genome_map.cpp src/orf.cpp src/pairwise_aligner.cpp src/sam_file.cpp src/seq_set.cpp src/sequence.cpp src/sequence_analysis.cpp WITH_SOABI)
 

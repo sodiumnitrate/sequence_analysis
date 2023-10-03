@@ -5,8 +5,6 @@ import sys
 sys.path.insert(0, '.') 
 
 from sequence_analysis import FastaIterator
-from sequence_analysis import Sequence
-import pdb
 
 class TestFastaIterator:
     def test_init(self):

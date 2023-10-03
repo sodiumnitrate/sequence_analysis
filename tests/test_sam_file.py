@@ -14,6 +14,10 @@ class TestSamFile:
         assert sf.file_name is not None
         assert sf.get_normalized()
 
+    def test_init_2(self):
+        sf = SamFile(file_name="aux_files/sam_test.sam")
+        assert sf.file_name == "aux_files/sam_test.sam"
+
     def test_set_filter(self):
         sf = SamFile()
         sf.file_name = "aux_files/sam_test.sam"

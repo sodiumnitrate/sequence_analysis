@@ -8,18 +8,11 @@ TODO: sequence logo class by itself?
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <vector>
-#include <string>
-#include <unordered_set>
-#include <iostream>
-#include <cctype>
-#include <unordered_map>
-#include <algorithm>
-#include <fstream>
-#include <cstring>
-#include <sstream>
-//#include <unistd.h>
-#include "includes.hpp"
+#include "include/seq_set.hpp"
+#include "include/sam_file.hpp"
+#include "include/pairwise_aligner.hpp"
+#include "include/genome_map.hpp"
+#include "include/fasta_iterator.hpp"
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
