@@ -23,7 +23,7 @@ jobs:
         submodules: true
 
     - name: Apt install system dependencies (linux)
-      if: ${{ startsWith(matrix.platform, 'linux-') }}
+      if: ${{ startsWith(matrix.platform, 'ubuntu-') }}
       run: |
         echo "::group::Run sudo apt-get update"
         sudo apt-get update
