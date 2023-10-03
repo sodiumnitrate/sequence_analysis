@@ -6,6 +6,9 @@ import tempfile
 from sequence_analysis import SeqSet
 from sequence_analysis import Sequence
 
+import sys
+sys.path.insert(0, '.') 
+
 class TestSeqSet:
     def test_init(self, capsys):
         sset = SeqSet()

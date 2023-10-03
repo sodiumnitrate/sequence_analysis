@@ -1,7 +1,7 @@
 import pytest
 from sequence_analysis import Tree
-
-import pdb
+import sys
+sys.path.insert(0, '.') 
 
 class TestTree:
     def test_gen(self):

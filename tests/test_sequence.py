@@ -5,10 +5,12 @@ TODO:
 - more edge cases for type assignment
 - more translate tests
 """
+import sys
+sys.path.insert(0, '.') 
+
 import tempfile
 from sequence_analysis import Sequence
 
-import pdb
 
 class TestSequence:
     def test_init(self):

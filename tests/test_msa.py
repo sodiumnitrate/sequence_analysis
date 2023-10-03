@@ -2,6 +2,8 @@ from sequence_analysis import MSA
 from sequence_analysis import SeqSet
 
 import os
+import sys
+sys.path.insert(0, '.') 
 
 class TestMSA:
     def test_msa_setup(self):

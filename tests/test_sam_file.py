@@ -2,9 +2,8 @@
 Unit tests for the SamFile class.
 """
 import numpy as np
-import time
-
-import pdb
+import sys
+sys.path.insert(0, '.') 
 
 from sequence_analysis import SamFile
 

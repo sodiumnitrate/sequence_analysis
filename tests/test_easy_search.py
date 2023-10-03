@@ -1,6 +1,9 @@
 """
 Unit tests for easy-search.
 """
+import sys
+sys.path.insert(0, '.') 
+
 import tempfile
 from sequence_analysis import EasySearch
 

@@ -1,6 +1,9 @@
 """
 Unit tests for the fasta iterator object.
 """
+import sys
+sys.path.insert(0, '.') 
+
 from sequence_analysis import FastaIterator
 from sequence_analysis import Sequence
 import pdb
