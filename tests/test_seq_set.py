@@ -10,7 +10,7 @@ import sys
 sys.path.insert(0, '.') 
 
 class TestSeqSet:
-    def test_init(self, capsys):
+    def test_init(self):
         sset = SeqSet()
         s1 = Sequence("ACGT")
         s2 = Sequence("GGCCTT")
@@ -24,9 +24,15 @@ class TestSeqSet:
         assert sset.type == 'dna'
         sset.records = [s3, s1, s2]
         assert sset.type == 'protein'
+    
+    def test_init_2(self):
+        sset = SeqSet(list_of_seqs=[Sequence("ACGT"), Sequence("GGCCTT")])
+        assert len(sset) == 2
+        assert sset.type == "dna"
 
-        captured = capsys.readouterr()
-        # do stuff
+    def test_init_3(self):
+        sset = SeqSet(file_name="aux_files/test.fasta")
+        assert len(sset) == 3
 
     def test_add_sequence(self):
         sset = SeqSet()

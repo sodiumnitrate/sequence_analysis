@@ -14,6 +14,12 @@ class TestPairwiseAligner:
         assert pa.query == "ACGT"
         assert pa.target == "ACCT"
 
+    def test_init_2(self):
+        pa = PairwiseAligner(query="ACGT", target="ACCT", algorithm="global")
+        assert pa.algorithm == "global"
+        assert pa.query == "ACGT"
+        assert pa.target == "ACCT"
+
     def test_align(self):
         pa = PairwiseAligner()
         pa.query = "HEAGAWGHEE"

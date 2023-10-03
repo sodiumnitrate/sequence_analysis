@@ -12,12 +12,16 @@ class Sequence(Sequence_cpp):
     std::string seq_str;
     std::string type;
     """
-    def __init__(self, seq_str):
+    def __init__(self, seq_str, name=None):
         """
         Overload the constructor on C++ side so that you can auto-assign type.
         """
         super(Sequence, self).__init__(seq_str)
         self.set_type()
+        if name is not None:
+            if not isinstance(name, str):
+                raise TypeError
+            self.name = name
 
     def __getitem__(self, key):
         """Overwrites __getitem__ so that a part of the sequence can be returned."""

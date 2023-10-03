@@ -10,7 +10,15 @@ class SamFile(SamFile_cpp):
     """
     Python bindings for the SamFile class.
     """
-    pass
+    def __init__(self, file_name=None):
+        """
+        Overloads the C++ constructor.
+        """
+        super(SamFile, self).__init__()
+        if file_name is not None:
+            if not isinstance(file_name, str):
+                raise TypeError
+            self.file_name = file_name
 
     def read_multiple_files(self, file_names):
         """
