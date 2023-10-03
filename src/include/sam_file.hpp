@@ -35,6 +35,9 @@ class SamFile{
     // beginning and end for the reads 
     int seq_start = std::numeric_limits<int>::max();
     int seq_end = 0;
+
+    // multiplicities
+    std::unordered_map<std::string, int> multiplicity;
 public:
     SamFile();
     void set_filter_options(std::vector<int> start_, std::vector<int> end_, std::vector<std::string> mapped_onto_, float min_score_);
@@ -60,6 +63,8 @@ public:
     std::vector<float> get_normalized_scores();
     void generate_multimapping_stats();
     std::unordered_map<std::string, std::vector<int> > get_multimapping_stats();
+    
+    void set_multiplicity(std::unordered_map<std::string, int> mult);
 };
 
 

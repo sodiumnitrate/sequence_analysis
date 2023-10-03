@@ -150,6 +150,10 @@ std::vector<std::string> SamFile::get_names(){return mapped_onto;}
 
 std::vector<float> SamFile::get_normalized_scores(){return normalized_scores;}
 
+void SamFile::set_multiplicity(std::unordered_map<std::string, int> mult){
+    multiplicity = mult;
+}
+
 GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_name){
     GenomeMap result;
     result.set_chromosome_name(mapped_name);
@@ -176,16 +180,20 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
     heatmap.resize(length);
     std::fill(heatmap.begin(), heatmap.end(), 0);
 
-    std::string dummy, seq, ref_name;
+    std::string dummy, seq, ref_name, seq_name;
     int pos;
+    int multi;
     for(auto t : entries){
         std::istringstream ss(t);
-        ss >> dummy >> dummy >> ref_name >> pos >> dummy >> dummy >> dummy >> dummy >> dummy >> seq;
+        ss >> seq_name >> dummy >> ref_name >> pos >> dummy >> dummy >> dummy >> dummy >> dummy >> seq;
         // skip if name doesn't match
         if(ref_name.compare(mapped_name) != 0) continue;
 
+        if (multiplicity.empty()) multi = 1;
+        else multi = multiplicity[seq_name];
+
         for(unsigned int i = pos - seq_start; i < pos + seq.length() - seq_start; i++){
-            heatmap[i] += 1;
+            heatmap[i] += multi;
         }
     }
     result.set_heatmap(heatmap, seq_start, seq_end);
@@ -304,5 +312,6 @@ void init_sam_file(py::module_ &m){
         .def("get_names", &SamFile::get_names)
         .def("get_normalized_scores", &SamFile::get_normalized_scores)
         .def("get_multimapping_stats", &SamFile::get_multimapping_stats)
+        .def("set_multiplicity", &SamFile::set_multiplicity)
         ;
 }
