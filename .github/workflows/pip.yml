@@ -27,7 +27,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Apt install system dependencies (linux)
-      if: ${{ startsWith(matrix.name, 'linux-') && !contains(matrix.name, '-skip-exe')}}
+      if: ${{ startsWith(matrix.patform, 'linux-') }}
       run: |
         echo "::group::Run sudo apt-get update"
         sudo apt-get update
@@ -43,7 +43,7 @@ jobs:
       shell: bash
 
     - name: Brew install system dependencies (macos)
-      if: ${{ startsWith(matrix.name, 'macos-') && !contains(matrix.name, '-skip-exe') }}
+      if: ${{ startsWith(matrix.patform, 'macos-')}}
       run: |
         echo "::group::Run brew update --preinstall"
         brew update --preinstall
@@ -59,7 +59,7 @@ jobs:
       shell: bash
 
     - name: Choco install system dependencies (windows)
-      if: ${{ startsWith(matrix.name, 'windows-') && !contains(matrix.name, '-skip-exe')}}
+      if: ${{ startsWith(matrix.patform, 'windows-') }}
       run: |
         echo "::group::Run choco install --no-progress graphviz"
         choco install --no-progress graphviz
