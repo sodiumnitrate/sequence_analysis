@@ -81,6 +81,8 @@ void SamFile::read(){
 
     // some preprocessing to facilitate filtering
     SamFilter filter_obj(mapped_onto, start_indices, end_indices);
+    
+    int idx = 0;
 
     while(std::getline(in_file, line)){
         //skip = false;
@@ -127,6 +129,7 @@ void SamFile::read(){
         }
         if (skip) continue;
         normalized_scores.push_back(score);
+        unique_names_to_entry_idx[seq_name].push_back(idx);
 
         // passed all the tests
         entries.push_back(line);
@@ -259,7 +262,7 @@ void SamFile::generate_multimapping_stats(){
 }
 
 std::unordered_map<std::string, std::vector<int> > SamFile::get_multimapping_stats(){
-    generate_multimapping_stats();
+    //generate_multimapping_stats();
     return unique_names_to_entry_idx;
 }
 
