@@ -10,7 +10,7 @@
 #include <fstream>
 #include <cstring>
 #include <sstream>
-#include "includes.hpp"
+#include "include/sam_file.hpp"
 
 namespace py = pybind11;
 

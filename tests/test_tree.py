@@ -108,7 +108,7 @@ class TestTree:
 
         tree.re_root('C')
 
-        tree.render_graph('test_reroot_distances.png')
+        tree.render_graph('aux_files/test_reroot_distances.png')
         assert tree.get_node_with_name_bfs('C').distance_to_parent is None
         assert tree.get_node_with_name_bfs('B').distance_to_parent == 0.5
         assert tree.get_node_with_name_bfs('H').distance_to_parent == 0.4

@@ -1,4 +1,3 @@
-#include "includes.hpp"
 #include <vector>
 #include <string>
 #include <tuple>
@@ -7,6 +6,7 @@
 #include <unordered_set>
 #include <cmath>
 #include <iostream>
+#include "include/sam_filter.hpp"
 
 SamFilter::SamFilter(std::vector<std::string>& names, std::vector<int>& starts, std::vector<int>& ends){
     // check input sizes
