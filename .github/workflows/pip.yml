@@ -26,6 +26,51 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: Apt install system dependencies (linux)
+      if: ${{ startsWith(matrix.name, 'linux-') && !contains(matrix.name)}}
+      run: |
+        echo "::group::Run sudo apt-get update"
+        sudo apt-get update
+        echo "::endgroup::"
+        echo "::group::Run sudo apt-get install graphviz"
+        sudo apt-get install graphviz
+        echo "::endgroup::"
+        echo "::group::Run dot -V"
+        DOT_VERSION="$(dot -V 2>&1)"
+        echo $DOT_VERSION;
+        echo "::endgroup::"
+        echo "::notice::Apt installed ${DOT_VERSION#dot - }"
+      shell: bash
+
+    - name: Brew install system dependencies (macos)
+      if: ${{ startsWith(matrix.name, 'macos-') && !contains(matrix.name) }}
+      run: |
+        echo "::group::Run brew update --preinstall"
+        brew update --preinstall
+        echo "::endgroup::"
+        echo "::group::Run brew install graphviz"
+        brew install graphviz
+        echo "::endgroup::"
+        echo "::group::Run dot -V"
+        DOT_VERSION="$(dot -V 2>&1)"
+        echo $DOT_VERSION
+        echo "::endgroup::"
+        echo "::notice::Brew installed ${DOT_VERSION#dot - }"
+      shell: bash
+
+    - name: Choco install system dependencies (windows)
+      if: ${{ startsWith(matrix.name, 'windows-') && !contains(matrix.name)}}
+      run: |
+        echo "::group::Run choco install --no-progress graphviz"
+        choco install --no-progress graphviz
+        echo "::endgroup::"
+        echo "::group::Run dot -V"
+        DOT_VERSION="$(dot -V 2>&1)"
+        echo $DOT_VERSION
+        echo "::endgroup::"
+        echo "::notice::Choco installed ${DOT_VERSION#dot - }"
+      shell: bash
+
     - name: Add requirements
       run: python -m pip install --upgrade wheel setuptools biopython numpy pydot
 
@@ -33,4 +78,6 @@ jobs:
       run: pip install --verbose .[test]
 
     - name: Test
-      run: python -m pytest
+      run: |
+        cd tests
+        python -m pytest
