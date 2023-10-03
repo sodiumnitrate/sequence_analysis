@@ -1,3 +1,8 @@
+[![Pip Actions Status][actions-pip-badge]][actions-pip-link]
+
+[actions-pip-link]:        https://github.com/sodiumnitrate/sequence_analysis/actions?query=workflow%3APip
+[actions-pip-badge]:       https://github.com/sodiumnitrate/sequence_analysis/workflows/Pip/badge.svg
+
 # sequence_analysis
 
 This python module puts together some tools to do very basic (protein/dna/rna) sequence analysis. Some of these were created for research and some for my own education. Please use at your own risk. 
