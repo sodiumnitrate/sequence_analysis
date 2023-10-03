@@ -22,12 +22,8 @@ jobs:
       with:
         submodules: true
 
-    - uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-
     - name: Apt install system dependencies (linux)
-      if: ${{ startsWith(matrix.patform, 'linux-') }}
+      if: ${{ startsWith(matrix.platform, 'linux-') }}
       run: |
         echo "::group::Run sudo apt-get update"
         sudo apt-get update
@@ -43,7 +39,7 @@ jobs:
       shell: bash
 
     - name: Brew install system dependencies (macos)
-      if: ${{ startsWith(matrix.patform, 'macos-')}}
+      if: ${{ startsWith(matrix.platform, 'macos-')}}
       run: |
         echo "::group::Run brew update --preinstall"
         brew update --preinstall
@@ -59,7 +55,7 @@ jobs:
       shell: bash
 
     - name: Choco install system dependencies (windows)
-      if: ${{ startsWith(matrix.patform, 'windows-') }}
+      if: ${{ startsWith(matrix.platform, 'windows-') }}
       run: |
         echo "::group::Run choco install --no-progress graphviz"
         choco install --no-progress graphviz
@@ -70,6 +66,10 @@ jobs:
         echo "::endgroup::"
         echo "::notice::Choco installed ${DOT_VERSION#dot - }"
       shell: bash
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
 
     - name: Add requirements
       run: python -m pip install --upgrade wheel setuptools biopython numpy pydot
