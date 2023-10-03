@@ -130,6 +130,7 @@ void SamFile::read(){
         if (skip) continue;
         normalized_scores.push_back(score);
         unique_names_to_entry_idx[seq_name].push_back(idx);
+        idx++;
 
         // passed all the tests
         entries.push_back(line);
