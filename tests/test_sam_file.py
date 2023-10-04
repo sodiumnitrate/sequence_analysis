@@ -82,6 +82,29 @@ class TestSamFile:
         mapped_names = gm.get_mapped_read_names(sf.get_seq_start(), sf.get_seq_end())
         assert len(mapped_names) == 9
 
+    def test_get_genome_map_multi(self):
+        sf = SamFile()
+        sf.set_filter_options([0], [-1], ["CM042140.1"], 97)
+        sf.read("aux_files/sam_test.sam")
+
+        multiplicity = {}
+        for header in sf.get_headers():
+            multiplicity[header] = 2
+
+        sf.set_multiplicity(multiplicity)
+        gm = sf.get_genome_map("CM042140.1", "tissue")
+        heatmap1 = gm.get_heatmap(sf.get_seq_start()+100, sf.get_seq_start()+200)
+
+        sf1 = SamFile()
+        sf1.set_filter_options([0], [-1], ["CM042140.1"], 97)
+        sf1.read("aux_files/sam_test.sam")
+
+        gm1 = sf1.get_genome_map("CM042140.1", "tissue")
+        heatmap2 = gm1.get_heatmap(sf.get_seq_start()+100, sf.get_seq_start()+200)
+
+        assert np.sum(heatmap1) == 2 * np.sum(heatmap2)
+
+
     def test_sam_file_add(self):
         sam1 = SamFile()
         sam1.set_filter_options([0], [-1], ["CM042140.1"], 97)
