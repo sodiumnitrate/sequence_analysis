@@ -194,7 +194,10 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
         if (multiplicity.empty()){
             multi = 1;
         }
-        else multi = multiplicity[seq_name];
+        else {
+            multi = multiplicity[seq_name];
+            std::cout << multi << " " << seq_name << std::endl;
+        }
 
         if (multiplicity.find(seq_name) == multiplicity.end()) {
             std::cout << "seq_name " << seq_name << " not found in multiplicity dict." << std::endl;
