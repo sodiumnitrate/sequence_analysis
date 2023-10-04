@@ -207,7 +207,6 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
         if (multi == 0) throw;
 
         for(unsigned int i = pos - seq_start; i < end - seq_start; i++){
-            std::cout << "adding " << multi << " to heatmap at pos " << i << std::endl;
             heatmap[i] += multi;
             overlap = true;
         }
