@@ -196,6 +196,11 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
         }
         else multi = multiplicity[seq_name];
 
+        if (multiplicity.find(seq_name) == multiplicity.end()) {
+            std::cout << "seq_name " << seq_name << " not found in multiplicity dict." << std::endl;
+            throw;
+        }
+
         for(unsigned int i = pos - seq_start; i < end - seq_start; i++){
             std::cout << "adding " << multi << " to heatmap at pos " << i << std::endl;
             heatmap[i] += multi;
