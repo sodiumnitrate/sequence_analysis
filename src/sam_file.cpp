@@ -185,7 +185,7 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
     for(auto& t : entries){
         overlap = false;
         ref_name = t.get_mapped_onto();
-        seq_name = t.get_seq_str();
+        seq_name = t.get_read_name();
         pos = t.get_start_pos();
         end = t.get_end_pos();
         // skip if name doesn't match
