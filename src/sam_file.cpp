@@ -200,7 +200,7 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
     return result;
 }
 
-// figure out how to make it available as a common util
+// TODO: make it available as a common util
 template<typename T>
 bool are_vector_contents_equal(std::vector<T> &first, std::vector<T> &second){
     if (first.size() != second.size()){
