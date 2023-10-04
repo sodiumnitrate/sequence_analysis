@@ -192,12 +192,12 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
         if(ref_name.compare(mapped_name) != 0) continue;
 
         if (multiplicity.empty()){
-            std::cout << "multiplicity empty" << std::endl;
             multi = 1;
         }
         else multi = multiplicity[seq_name];
 
         for(unsigned int i = pos - seq_start; i < end - seq_start; i++){
+            std::cout << "adding " << multi << " to heatmap at pos " << i << std::endl;
             heatmap[i] += multi;
             overlap = true;
         }
