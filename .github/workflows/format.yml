@@ -8,7 +8,11 @@ on:
   pull_request:
   push:
     branches:
-    - master
+    - main
+    paths:
+      - '**.py'
+      - '**.cpp'
+      - '**.hpp'
     paths-ignore:
       - 'tests/aux_files/**'
 
