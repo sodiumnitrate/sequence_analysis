@@ -196,7 +196,6 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
         }
         else {
             multi = multiplicity[seq_name];
-            std::cout << multi << " " << seq_name << std::endl;
         }
 
         if (multiplicity.find(seq_name) == multiplicity.end()) {
