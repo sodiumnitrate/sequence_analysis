@@ -7,40 +7,31 @@ sys.path.insert(0, '.')
 
 from sequence_analysis import SamFile
 
+
 class TestSamFile:
     def test_init(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
-        assert sf.file_name is not None
         assert sf.get_normalized()
-
-    def test_init_2(self):
-        sf = SamFile(file_name="aux_files/sam_test.sam")
-        assert sf.file_name == "aux_files/sam_test.sam"
 
     def test_set_filter(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
         sf.set_filter_options([0], [-1], ["CM042140.1"], 0)
 
     def test_read_1(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
         sf.set_filter_options([0], [-1], ["CM042140.1"], 0)
-        sf.read()
+        sf.read("aux_files/sam_test.sam")
         assert len(sf) == 10
 
         sf2 = SamFile()
-        sf2.file_name = "aux_files/sam_test.sam"
         sf2.set_filter_options([0], [-1], ["CM042177.1"], 0)
-        sf2.read()
+        sf2.read("aux_files/sam_test.sam")
         assert len(sf2) == 2
 
     def test_read_2(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
         sf.set_filter_options([0], [-1], ["CM042140.1"], 97)
-        sf.read()
+        sf.read("aux_files/sam_test.sam")
         assert sf.get_normalized()
         assert len(sf) == 9
 
@@ -49,24 +40,21 @@ class TestSamFile:
 
     def test_read_3(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
-        sf.read()
+        sf.read("aux_files/sam_test.sam")
         assert len(sf) == 12
 
     def test_read_4(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
         sf.set_filter_options([0,0], [-1,-1], ["CM042140.1", "CM042177.1"], 0)
-        sf.read()
+        sf.read("aux_files/sam_test.sam")
         assert len(sf) == 12
 
     def test_normalize(self):
         sf = SamFile()
-        sf.file_name = "aux_files/reference_out.sam"
         sf.set_normalized_false()
         assert not sf.get_normalized()
         sf.get_lengths_from_fasta("aux_files/reference_set_dna.fasta")
-        sf.read()
+        sf.read("aux_files/reference_out.sam")
 
         scores = sf.get_normalized_scores()
         for score in scores:
@@ -74,9 +62,8 @@ class TestSamFile:
 
     def test_get_genome_map(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
         sf.set_filter_options([0], [-1], ["CM042140.1"], 97)
-        sf.read()
+        sf.read("aux_files/sam_test.sam")
 
         gm = sf.get_genome_map("CM042140.1", "tissue")
 
@@ -92,25 +79,25 @@ class TestSamFile:
 
         assert len(heatmap) == 101
 
+        mapped_names = gm.get_mapped_read_names(sf.get_seq_start(), sf.get_seq_end())
+        assert len(mapped_names) == 9
+
     def test_sam_file_add(self):
         sam1 = SamFile()
-        sam1.file_name = "aux_files/sam_test.sam"
         sam1.set_filter_options([0], [-1], ["CM042140.1"], 97)
-        sam1.read()
+        sam1.read("aux_files/sam_test.sam")
 
         sam2 = SamFile()
-        sam2.file_name = "aux_files/sam_test.sam"
         sam2.set_filter_options([0], [-1], ["CM042140.1"], 97)
-        sam2.read()
+        sam2.read("aux_files/sam_test.sam")
 
         sam1.add_sam_file(sam2)
         assert len(sam1) == 2*len(sam2)
 
     def test_sam_file_add_2(self):
         sam1 = SamFile()
-        sam1.file_name = "aux_files/sam_test.sam"
         sam1.set_filter_options([0], [-1], ["CM042140.1"], 97)
-        sam1.read()
+        sam1.read("aux_files/sam_test.sam")
 
         sam2 = SamFile()
         sam2.copy_filters_from_another(sam1)
@@ -118,31 +105,22 @@ class TestSamFile:
 
         assert len(sam1) == len(sam2)
 
-    def test_get_entries_headers(self):
+    def test_get_headers(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
         sf.set_filter_options([0], [-1], ["CM042140.1"], 97)
-        sf.read()
+        sf.read("aux_files/sam_test.sam")
 
         assert len(sf) == 9
-        entries = sf.get_entries()
-        assert len(entries) == 9
-        for el in entries:
-            assert "CM042140.1" in el
 
         headers = sf.get_headers()
         assert len(headers) == 1
         assert "CM042140.1" in headers[0]
 
-    def test_get_entries_headers_2(self):
+    def test_get_headers_2(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
         sf.set_filter_options([0,0], [-1,-1], ["CM042140.1", "CM042177.1"], 0)
-        sf.read()
+        sf.read("aux_files/sam_test.sam")
         assert len(sf) == 12
-        entries = sf.get_entries()
-        for el in entries:
-            assert "CM042140.1" in el or "CM042177.1" in el
 
         headers = sf.get_headers()
         assert len(headers) == 2
@@ -151,15 +129,13 @@ class TestSamFile:
 
     def test_copy_filters(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
         sf.set_filter_options([0], [-1], ["CM042140.1"], 97)
         starts = sf.get_starts()
         ends = sf.get_ends()
         names = sf.get_names()
-        sf.read()
+        sf.read("aux_files/sam_test.sam")
 
         sf2 = SamFile()
-        sf2.file_name = "aux_files/sam_test.sam"
         sf2.copy_filters_from_another(sf)
         starts2 = sf.get_starts()
         ends2 = sf.get_ends()
@@ -169,7 +145,7 @@ class TestSamFile:
         assert ends == ends2
         assert names == names2
 
-        sf2.read()
+        sf2.read("aux_files/sam_test.sam")
 
         assert len(sf) == len(sf2)
 
@@ -181,8 +157,7 @@ class TestSamFile:
 
     def test_get_multimapping_stats(self):
         sf = SamFile()
-        sf.file_name = "aux_files/sam_test.sam"
-        sf.read()
+        sf.read("aux_files/sam_test.sam")
 
         multimappers_dict = sf.get_multimapping_stats()
         assert len(multimappers_dict['SRR18071790.135420']) == 3

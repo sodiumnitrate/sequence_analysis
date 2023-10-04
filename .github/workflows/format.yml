@@ -9,6 +9,8 @@ on:
   push:
     branches:
     - master
+    paths-ignore:
+      - 'tests/aux_files/**'
 
 jobs:
   pre-commit:

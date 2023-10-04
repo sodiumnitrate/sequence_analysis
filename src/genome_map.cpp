@@ -31,8 +31,38 @@ std::vector<unsigned int> GenomeMap::get_heatmap(int start, int end){
     std::vector<unsigned int> sub(first, last);
     return sub;
 }
+
+void GenomeMap::set_mapped_entries(std::vector<SamEntry*> mapped_entries_){
+    mapped_entries = mapped_entries_;
+}
+
+std::vector<std::string> GenomeMap::get_mapped_read_names(int start, int end){
+    // start and end are *not* relative to vector indices. They are absolute nucleotide indices
+    std::vector<std::string> result;
+
+    if (start < heatmap_start || end > heatmap_end){
+        std::cout << "WARNING: requested range=(" << start <<','<<end<<") is outside the heatmap range=(" << heatmap_start << ',' << heatmap_end << ")." << std::endl;
+        return result;
+    }
+
+    // pick the mapped entries that overlap with the requested range
+    int start_idx, end_idx;
+    std::string read_name;
+    for (auto& t : mapped_entries){
+        start_idx = t->get_start_pos();
+        end_idx = t->get_end_pos();
+        read_name = t->get_read_name();
+        if (start_idx < end && end_idx > start){
+            result.push_back(read_name);
+        } 
+    }
+
+    return result;
+}
+
 void GenomeMap::set_sample_name(std::string samp){sample_name = samp;}
 std::string GenomeMap::get_sample_name(){return sample_name;}
+
 // the following method sets heatmap -- to use from SamFile and not expose it to python
 void GenomeMap::set_heatmap(std::vector<unsigned int> heatmap_, int heatmap_start_, int heatmap_end_){
     heatmap = heatmap_;
@@ -56,5 +86,6 @@ void init_genome_map(py::module_ &m){
         .def("set_sample_name", &GenomeMap::set_sample_name)
         .def_property("sample_name", &GenomeMap::get_sample_name, &GenomeMap::set_sample_name)
         .def("get_heatmap", &GenomeMap::get_heatmap)
+        .def("get_mapped_read_names", &GenomeMap::get_mapped_read_names)
         ;
 }

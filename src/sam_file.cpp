@@ -35,10 +35,6 @@ int SamFile::size(){
     return entries.size();
 }
 
-void SamFile::set_file_name(std::string file_name_) { file_name = file_name_;}
-
-std::string SamFile::get_file_name(){return file_name;}
-
 void SamFile::set_normalized_true(){normalized_score = true;}
 
 void SamFile::set_normalized_false(){normalized_score = false;}
@@ -56,7 +52,7 @@ void SamFile::get_lengths_from_fasta(std::string fasta_file_name){
 }
 
 // read info from sam file
-void SamFile::read(){
+void SamFile::read(std::string file_name){
     std::cout << min_score << std::endl;
     // release GIL to be able to run this parallel from python side
     py::gil_scoped_release release;
@@ -105,7 +101,7 @@ void SamFile::read(){
         auto length = seq.length();
 
         // apply filters----------------
-        if (!(filter_obj.query(ref_name, pos, pos + length))) continue;
+        if (!(filter_obj.query(ref_name, pos, pos + length - 1))) continue;
         // -----------------------------
 
         // check alignment score
@@ -133,7 +129,8 @@ void SamFile::read(){
         idx++;
 
         // passed all the tests
-        entries.push_back(line);
+        SamEntry entry(seq_name, seq, ref_name, pos, pos + length - 1, score);
+        entries.push_back(entry);
         seq_start = fmin(seq_start, pos);
         seq_end = fmax(seq_end, pos + length);
     }
@@ -181,22 +178,31 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
     std::fill(heatmap.begin(), heatmap.end(), 0);
 
     std::string dummy, seq, ref_name, seq_name;
-    int pos;
+    int pos, end;
     int multi;
-    for(auto t : entries){
-        std::istringstream ss(t);
-        ss >> seq_name >> dummy >> ref_name >> pos >> dummy >> dummy >> dummy >> dummy >> dummy >> seq;
+    bool overlap;
+    std::vector<SamEntry*> mapped;
+    for(auto& t : entries){
+        overlap = false;
+        ref_name = t.get_mapped_onto();
+        seq_name = t.get_seq_str();
+        pos = t.get_start_pos();
+        end = t.get_end_pos();
         // skip if name doesn't match
         if(ref_name.compare(mapped_name) != 0) continue;
 
         if (multiplicity.empty()) multi = 1;
         else multi = multiplicity[seq_name];
 
-        for(unsigned int i = pos - seq_start; i < pos + seq.length() - seq_start; i++){
+        for(unsigned int i = pos - seq_start; i < end - seq_start; i++){
             heatmap[i] += multi;
+            overlap = true;
         }
+
+        if (overlap) mapped.push_back(&t);
     }
     result.set_heatmap(heatmap, seq_start, seq_end);
+    result.set_mapped_entries(mapped);
     return result;
 }
 
@@ -251,7 +257,7 @@ void SamFile::add_sam_file(SamFile* other){
     return;
 }
 
-std::vector<std::string> SamFile::get_entries(){return entries;}
+std::vector<SamEntry> SamFile::get_entries(){return entries;}
 std::vector<std::string> SamFile::get_headers(){return headers;}
 
 void SamFile::generate_multimapping_stats(){
@@ -262,9 +268,8 @@ void SamFile::generate_multimapping_stats(){
 
     std::string read_name;
     int idx = 0;
-    for (const auto& t : entries){
-        std::istringstream ss(t);
-        ss >> read_name;
+    for (auto& t : entries){
+        read_name = t.get_read_name();
         unique_names_to_entry_idx[read_name].push_back(idx);
         idx++;
     }
@@ -284,9 +289,6 @@ void init_sam_file(py::module_ &m){
              [](SamFile &a){
                  return a.size();
              })
-        .def("set_file_name", &SamFile::set_file_name)
-        .def("get_file_name", &SamFile::get_file_name)
-        .def_property("file_name", &SamFile::get_file_name, &SamFile::set_file_name)
         .def("set_normalized_true", &SamFile::set_normalized_true)
         .def("set_normalized_false", &SamFile::set_normalized_false)
         .def("get_lengths_from_fasta", &SamFile::get_lengths_from_fasta)
@@ -295,7 +297,7 @@ void init_sam_file(py::module_ &m){
         .def("get_seq_start", &SamFile::get_seq_start)
         .def("get_seq_end", &SamFile::get_seq_end)
         .def("get_genome_map", &SamFile::get_genome_map)
-        .def("get_entries", &SamFile::get_entries)
+        //.def("get_entries", &SamFile::get_entries)
         .def("get_headers", &SamFile::get_headers)
         .def("__repr__",
              [](SamFile &a){
