@@ -13,8 +13,6 @@ on:
       - '**.py'
       - '**.cpp'
       - '**.hpp'
-    paths-ignore:
-      - 'tests/aux_files/**'
 
 jobs:
   pre-commit:
