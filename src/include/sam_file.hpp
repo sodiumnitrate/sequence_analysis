@@ -61,6 +61,7 @@ public:
     std::unordered_map<std::string, std::vector<int> > get_multimapping_stats();
     
     void set_multiplicity(std::unordered_map<std::string, int> mult);
+    std::unordered_map<std::string, int> get_multiplicity();
 };
 
 

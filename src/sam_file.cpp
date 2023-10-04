@@ -201,6 +201,8 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
             throw;
         }
 
+        if (multi == 0) throw;
+
         for(unsigned int i = pos - seq_start; i < end - seq_start; i++){
             std::cout << "adding " << multi << " to heatmap at pos " << i << std::endl;
             heatmap[i] += multi;
@@ -288,6 +290,10 @@ std::unordered_map<std::string, std::vector<int> > SamFile::get_multimapping_sta
     return unique_names_to_entry_idx;
 }
 
+std::unordered_map<std::string, int> SamFile::get_multiplicity(){
+    return multiplicity;
+}
+
 void init_sam_file(py::module_ &m){
     py::class_<SamFile>(m, "SamFile", py::dynamic_attr())
         .def(py::init<>())
@@ -323,5 +329,6 @@ void init_sam_file(py::module_ &m){
         .def("get_normalized_scores", &SamFile::get_normalized_scores)
         .def("get_multimapping_stats", &SamFile::get_multimapping_stats)
         .def("set_multiplicity", &SamFile::set_multiplicity)
+        .def("get_multiplicity", &SamFile::get_multiplicity)
         ;
 }
