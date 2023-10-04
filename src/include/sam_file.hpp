@@ -7,11 +7,9 @@
 #include "genome_map.hpp"
 #include "sam_filter.hpp"
 #include "seq_set.hpp"
+#include "sam_entry.hpp"
 
 class SamFile{
-    // path to the .sam file
-    std::string file_name;
-
     // filter options
     std::vector<int> start_indices = {0}; //for each name in mapped onto, give start and end
     std::vector<int> end_indices = {-1};
@@ -27,7 +25,7 @@ class SamFile{
     std::vector<std::string> headers;
 
     // vector that will hold the read lines
-    std::vector<std::string> entries;
+    std::vector<SamEntry> entries;
 
     // unordered_map to hold info about multimappers
     std::unordered_map<std::string, std::vector<int> > unique_names_to_entry_idx;
@@ -42,18 +40,16 @@ public:
     SamFile();
     void set_filter_options(std::vector<int> start_, std::vector<int> end_, std::vector<std::string> mapped_onto_, float min_score_);
     int size();
-    void set_file_name(std::string file_name_);
-    std::string get_file_name();
     void set_normalized_true();
     void set_normalized_false();
     bool get_normalized();
     int get_seq_start();
     int get_seq_end();
     void get_lengths_from_fasta(std::string fasta_file_name);
-    void read();
+    void read(std::string file_name);
     GenomeMap get_genome_map(std::string mapped_name, std::string sample_name);
     void add_sam_file(SamFile* other);
-    std::vector<std::string> get_entries();
+    std::vector<SamEntry> get_entries();
     std::vector<std::string> get_headers();
     bool are_filters_equal(SamFile* other);
     void copy_filters_from_another(SamFile* other);
