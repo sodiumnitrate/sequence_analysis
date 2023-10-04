@@ -191,7 +191,10 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
         // skip if name doesn't match
         if(ref_name.compare(mapped_name) != 0) continue;
 
-        if (multiplicity.empty()) multi = 1;
+        if (multiplicity.empty()){
+            std::cout << "multiplicity empty" << std::endl;
+            multi = 1;
+        }
         else multi = multiplicity[seq_name];
 
         for(unsigned int i = pos - seq_start; i < end - seq_start; i++){
