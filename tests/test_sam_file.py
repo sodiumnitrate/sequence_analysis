@@ -7,6 +7,7 @@ sys.path.insert(0, '.')
 
 from sequence_analysis import SamFile
 
+import pdb
 
 class TestSamFile:
     def test_init(self):
@@ -87,9 +88,17 @@ class TestSamFile:
         sf.set_filter_options([0], [-1], ["CM042140.1"], 97)
         sf.read("aux_files/sam_test.sam")
 
-        multiplicity = {}
-        for header in sf.get_headers():
-            multiplicity[header] = 2
+        # double counts
+        multiplicity = {"SRR18071790.134779":2,
+                        "SRR18071790.134809":2,
+                        "SRR18071790.134866":2,
+                        "SRR18071790.134932":2,
+                        "SRR18071790.135003":2,
+                        "SRR18071790.135067":2,
+                        "SRR18071790.135115":2,
+                        "SRR18071790.135306":2,
+                        "SRR18071790.135320":2,
+                        "SRR18071790.135420":6}
 
         sf.set_multiplicity(multiplicity)
         gm = sf.get_genome_map("CM042140.1", "tissue")

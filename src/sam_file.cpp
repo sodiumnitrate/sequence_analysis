@@ -71,7 +71,7 @@ void SamFile::read(std::string file_name){
         return;
     }
     std::string dummy, ref_name, seq, flag, seq_name;
-    int pos, length;
+    int pos, length, bin_flag;
     float score;
     std::string as_flag = "AS:i:";
 
@@ -96,7 +96,7 @@ void SamFile::read(std::string file_name){
             continue;
         }
         std::istringstream ss(line);
-        ss >> seq_name >> dummy >> ref_name >> pos >> dummy >> dummy >> dummy >> dummy >> dummy >> seq >> dummy;
+        ss >> seq_name >> bin_flag >> ref_name >> pos >> dummy >> dummy >> dummy >> dummy >> dummy >> seq >> dummy;
 
         auto length = seq.length();
 
@@ -124,11 +124,21 @@ void SamFile::read(std::string file_name){
             }
         }
         if (skip) continue;
+
+        // passed all the tests
         normalized_scores.push_back(score);
         unique_names_to_entry_idx[seq_name].push_back(idx);
         idx++;
 
-        // passed all the tests
+        // check if reverse complemented
+        bin_flag = bin_flag >> 4;
+        if (bin_flag & 1){
+            // need to reverse complement
+            Sequence seq_ob(seq);
+            Sequence seq_r = seq_ob.reverse_complement();
+            seq = seq_r.get_seq();
+        }
+        
         SamEntry entry(seq_name, seq, ref_name, pos, pos + length - 1, score);
         entries.push_back(entry);
         seq_start = fmin(seq_start, pos);
@@ -195,15 +205,19 @@ GenomeMap SamFile::get_genome_map(std::string mapped_name, std::string sample_na
             multi = 1;
         }
         else {
+            if (multiplicity.find(seq_name) == multiplicity.end()) {
+                std::cout << "seq_name " << seq_name << " not found in multiplicity dict." << std::endl;
+                throw;
+            } 
             multi = multiplicity[seq_name];
         }
 
-        if (multiplicity.find(seq_name) == multiplicity.end()) {
-            std::cout << "seq_name " << seq_name << " not found in multiplicity dict." << std::endl;
+        
+
+        if (multi == 0) {
+            std::cout << "multiplicity is zero" << std::endl;
             throw;
         }
-
-        if (multi == 0) throw;
 
         for(unsigned int i = pos - seq_start; i < end - seq_start; i++){
             heatmap[i] += multi;
