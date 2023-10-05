@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "sequence.hpp"
 
 class SamEntry{
     std::string read_name;
@@ -18,4 +19,5 @@ public:
     int get_start_pos();
     int get_end_pos();
     int get_length();
+    Sequence to_sequence();
 };

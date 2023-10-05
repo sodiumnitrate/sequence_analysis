@@ -2,7 +2,6 @@
 Unit tests for pairwise aligner.
 """
 from sequence_analysis import PairwiseAligner
-import pdb
 
 class TestPairwiseAligner:
     def test_init(self):

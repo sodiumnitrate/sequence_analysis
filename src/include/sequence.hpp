@@ -9,6 +9,7 @@ class Sequence {
     std::string seq_str;
     std::string type;
 public:
+    Sequence();
     Sequence(std::string seq_str_);
     void set_name(std::string name_);
     std::string get_name();

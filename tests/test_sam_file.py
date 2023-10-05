@@ -7,8 +7,6 @@ sys.path.insert(0, '.')
 
 from sequence_analysis import SamFile
 
-import pdb
-
 class TestSamFile:
     def test_init(self):
         sf = SamFile()
@@ -193,3 +191,13 @@ class TestSamFile:
 
         multimappers_dict = sf.get_multimapping_stats()
         assert len(multimappers_dict['SRR18071790.135420']) == 3
+
+    def test_to_seq_set(self):
+        sf = SamFile()
+        sf.read("aux_files/sam_test.sam")
+
+        sset = sf.to_seq_set()
+        assert len(sset) == len(sf)
+        sset.remove_duplicates()
+        assert len(sset) == len(sf) - 2
+        assert sset.records[0].name.startswith("SRR180")

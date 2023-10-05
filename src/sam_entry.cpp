@@ -17,3 +17,9 @@ std::string SamEntry::get_mapped_onto(){ return mapped_onto; }
 int SamEntry::get_start_pos(){ return start_pos; }
 int SamEntry::get_end_pos(){ return end_pos; }
 int SamEntry::get_length(){ return end_pos - start_pos + 1; }
+
+Sequence SamEntry::to_sequence() {
+    Sequence result(sequence);
+    result.set_name(read_name);
+    return result;
+}

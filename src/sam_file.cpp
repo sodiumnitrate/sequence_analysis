@@ -309,6 +309,16 @@ std::unordered_map<std::string, int> SamFile::get_multiplicity(){
     return multiplicity;
 }
 
+SeqSet SamFile::to_seq_set(){
+    SeqSet sset;
+    Sequence curr_seq;
+    for (auto& t : entries){
+        curr_seq = t.to_sequence();
+        sset.add_sequence(curr_seq);
+    }
+    return sset;
+}
+
 void init_sam_file(py::module_ &m){
     py::class_<SamFile>(m, "SamFile", py::dynamic_attr())
         .def(py::init<>())
@@ -345,5 +355,6 @@ void init_sam_file(py::module_ &m){
         .def("get_multimapping_stats", &SamFile::get_multimapping_stats)
         .def("set_multiplicity", &SamFile::set_multiplicity)
         .def("get_multiplicity", &SamFile::get_multiplicity)
+        .def("to_seq_set", &SamFile::to_seq_set)
         ;
 }

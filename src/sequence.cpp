@@ -137,6 +137,7 @@ char codon_to_aa(std::string &codon){
     return codon_to_aa_map[codon];
 }
 
+Sequence::Sequence(){};
 
 Sequence::Sequence(std::string seq_str_) {
     std::transform(seq_str_.begin(), seq_str_.end(), seq_str_.begin(), ::toupper);
