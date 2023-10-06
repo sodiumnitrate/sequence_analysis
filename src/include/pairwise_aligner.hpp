@@ -30,6 +30,8 @@ public:
     void set_target(std::string target_);
     std::string get_target();
 
+    void set_gap_penalty(int p);
+
     // alloc memory based on query and target size, choose correct algs, etc.
     void align();
 
@@ -42,5 +44,8 @@ public:
     std::string get_match_string();
     std::vector<std::vector<int>> get_F();
     std::vector<std::vector<direction>> get_pointers();
+
+    void smith_waterman();
+    void traceback_sw(int max_row, int max_col);
 };
 

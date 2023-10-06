@@ -3,6 +3,7 @@ Unit tests for pairwise aligner.
 """
 from sequence_analysis import PairwiseAligner
 
+
 class TestPairwiseAligner:
     def test_init(self):
         pa = PairwiseAligner()
@@ -23,5 +24,15 @@ class TestPairwiseAligner:
         pa = PairwiseAligner()
         pa.query = "HEAGAWGHEE"
         pa.target = "PAWHEAE"
+
+        pa.align()
+
+    def test_align_2(self):
+        pa = PairwiseAligner()
+        pa.algorithm = "local"
+        pa.query = "HEAGAWGHEE"
+        pa.target = "PAWHEAE"
+
+        pa.set_gap_penalty(10)
 
         pa.align()
