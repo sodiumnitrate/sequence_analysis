@@ -170,12 +170,12 @@ void PairwiseAligner::smith_waterman(){
 
     // boundaries
     for (int i = 0; i < m; i++){
-        F[i][0] = i * gap_penalty;
-        pointers[i][0] = up;
+        F[i][0] = 0;
+        pointers[i][0] = none;
     }
     for (int i = 0; i < n; i++){
-        F[0][i] = i * gap_penalty;
-        pointers[0][i] = left;
+        F[0][i] = 0;
+        pointers[0][i] = none;
     }
 
     pointers[0][0] = none;
@@ -189,9 +189,9 @@ void PairwiseAligner::smith_waterman(){
             // x_i and y_j are aligned
             lower_right = F[i - 1][j - 1] + ps->query(target[i - 1], query[j - 1]);
             // x_i is aligned to gap
-            down = F[i][j - 1] + gap_penalty;
+            right = F[i][j - 1] + gap_penalty;
             // y_j is aligned to gap
-            right = F[i - 1][j] + gap_penalty;
+            down = F[i - 1][j] + gap_penalty;
 
             // TODO: find a better way to do this
             max_val = fmax(fmax(fmax(0, down), right), lower_right);
@@ -202,13 +202,15 @@ void PairwiseAligner::smith_waterman(){
                 max_col = j;
             }
 
-            if (max_val == 0) pointers[i][j] = none;
+            if (max_val == right) pointers[i][j] = left;
             else if (max_val == down) pointers[i][j] = up;
-            else if (max_val == right) pointers[i][j] = left;
             else if (max_val == lower_right) pointers[i][j] = upper_left;
+            else if (max_val == 0) pointers[i][j] = none;
+
         }
     }
     score = F_max;
+
     traceback_sw(max_row, max_col);
 }
 
@@ -223,7 +225,6 @@ void PairwiseAligner::traceback_sw(int max_row, int max_col){
     alignment_string = "";
 
     while(curr_score != 0){
-        std::cout << row_ptr << ", " << col_ptr << ": " << pointers[row_ptr][col_ptr] << std::endl;
         switch (pointers[row_ptr][col_ptr]){
             case up:
                 query_aligned = "-" + query_aligned;
@@ -232,10 +233,10 @@ void PairwiseAligner::traceback_sw(int max_row, int max_col){
                 row_ptr--;
                 break;
             case left:
-                query_aligned = "-" + query_aligned;
+                query_aligned = query[col_ptr - 1] + query_aligned;
                 target_aligned = "-" + target_aligned;
                 alignment_string = "-" + alignment_string;
-                col_ptr;
+                col_ptr--;
                 break;
             case upper_left:
                 query_aligned = query[col_ptr - 1] + query_aligned;
