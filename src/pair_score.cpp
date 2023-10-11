@@ -6,7 +6,27 @@ PairScore::PairScore(std::string name_)
     std::cout << name << std::endl;
     if (name.compare("blosum50") == 0) init_blosum50();
     else if (name.compare("blosum62") == 0) init_blosum62();
+    else if (name.compare("blastn") == 0) init_blastn();
     else throw "unrecognized name";
+}
+
+void PairScore::init_blastn(){
+    scores.clear();
+    std::string letters = "ACGTU";
+
+    for(auto let1 : letters){
+        for (auto let2 : letters){
+            std::string pair;
+            pair.push_back(let1);
+            pair.push_back(let2);
+            if (let1 == let2){
+                scores[pair] = 1;
+            }
+            else{
+                scores[pair] = -2;
+            }
+        }
+    }
 }
 
 void PairScore::init_blosum50(){

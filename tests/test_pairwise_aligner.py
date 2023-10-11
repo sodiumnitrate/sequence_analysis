@@ -38,4 +38,11 @@ class TestPairwiseAligner:
 
         pa.align()
 
-        pdb.set_trace()
+    def test_align_blastn(self):
+        pa = PairwiseAligner("blastn")
+        pa.algorithm = "local"
+
+        pa.target = "GGTACGTACG"
+        pa.query = "ACCT"
+
+        pa.align()

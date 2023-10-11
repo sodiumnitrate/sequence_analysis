@@ -14,11 +14,13 @@
 
 namespace py = pybind11;
 
-enum algorithms {local, global};
-
 PairwiseAligner::PairwiseAligner(){
     ps = new PairScore("blosum50");
 };
+PairwiseAligner::PairwiseAligner(std::string scoring){
+    set_gap_penalty(-2);
+    ps = new PairScore(scoring);
+}
 void PairwiseAligner::set_algorithm(std::string alg) {algorithm = alg;}
 std::string PairwiseAligner::get_algorithm() {return algorithm;}
 void PairwiseAligner::set_query(std::string query_) {query = query_;}

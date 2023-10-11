@@ -23,6 +23,7 @@ class PairwiseAligner{
     PairScore* ps;
 public:
     PairwiseAligner();
+    PairwiseAligner(std::string scoring);
     void set_algorithm(std::string alg);
     std::string get_algorithm();
     void set_query(std::string query_);

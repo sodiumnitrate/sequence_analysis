@@ -16,5 +16,6 @@ public:
 
     void init_blosum50();
     void init_blosum62();
+    void init_blastn();
     int query(char res1, char res2);
 };
