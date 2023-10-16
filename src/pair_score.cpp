@@ -12,7 +12,7 @@ PairScore::PairScore(std::string name_)
 
 void PairScore::init_blastn(){
     scores.clear();
-    std::string letters = "ACGTU";
+    std::string letters = "ACGTUN";
 
     for(auto let1 : letters){
         for (auto let2 : letters){
@@ -23,7 +23,11 @@ void PairScore::init_blastn(){
                 scores[pair] = 1;
             }
             else{
-                scores[pair] = -2;
+                if (let1 == 'N' || let2 == 'N') scores[pair] = 1;
+                else
+                {
+                    scores[pair] = -2;
+                }
             }
         }
     }
