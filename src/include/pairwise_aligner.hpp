@@ -9,7 +9,7 @@ class PairwiseAligner{
     std::string query;
     std::string target;
 
-    int gap_penalty = -8;
+    int gap_penalty;
 
     float score;
 
@@ -22,8 +22,7 @@ class PairwiseAligner{
 
     PairScore* ps;
 public:
-    PairwiseAligner();
-    PairwiseAligner(std::string scoring);
+    PairwiseAligner(std::string scoring_, int gap_penalty_);
     void set_algorithm(std::string alg);
     std::string get_algorithm();
     void set_query(std::string query_);

@@ -42,7 +42,7 @@ class TestPairwiseAligner:
         pa.align()
 
     def test_align_blastn(self):
-        pa = PairwiseAligner("blastn")
+        pa = PairwiseAligner("blastn", -2)
         pa.algorithm = "local"
 
         pa.target = "GGTACGTACG"

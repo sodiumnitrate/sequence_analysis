@@ -14,13 +14,12 @@
 
 namespace py = pybind11;
 
-PairwiseAligner::PairwiseAligner(){
-    ps = new PairScore("blosum50");
-};
-PairwiseAligner::PairwiseAligner(std::string scoring){
-    set_gap_penalty(-2);
+PairwiseAligner::PairwiseAligner(std::string scoring, int gap_penalty_){
+    set_gap_penalty(gap_penalty_);
+    std::cout << "gap penalty is set to: " << gap_penalty << std::endl;
     ps = new PairScore(scoring);
 }
+
 void PairwiseAligner::set_algorithm(std::string alg) {algorithm = alg;}
 std::string PairwiseAligner::get_algorithm() {return algorithm;}
 void PairwiseAligner::set_query(std::string query_) {query = query_;}
@@ -265,7 +264,7 @@ std::vector<std::vector<direction>> PairwiseAligner::get_pointers(){return point
 
 void init_pairwise_aligner(py::module_ &m){
     py::class_<PairwiseAligner>(m, "PairwiseAligner", py::dynamic_attr())
-        .def(py::init<>())
+        .def(py::init<std::string, int>())
         .def("set_algorithm", &PairwiseAligner::set_algorithm)
         .def("get_algorithm", &PairwiseAligner::get_algorithm)
         .def_property("algorithm", &PairwiseAligner::get_algorithm, &PairwiseAligner::set_algorithm)
