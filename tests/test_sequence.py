@@ -132,3 +132,9 @@ class TestSequence:
 
             p = subseq.translate()
             assert orf.protein_sequence == p.seq_str
+
+    def test_slice(self):
+        seq = Sequence("ACGTCCGGAATTG")
+        res = seq[3:]
+        assert isinstance(res, str)
+        assert len(res) == len(seq) - 3

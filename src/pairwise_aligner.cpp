@@ -40,7 +40,9 @@ void PairwiseAligner::align(){
     const int m = target.size() + 1;
 
     // allocate memory for F and pointers
+    F.clear();
     F.resize(m, std::vector<int>(n));
+    pointers.clear();
     pointers.resize(m, std::vector<direction>(n));
 
     if (algorithm.compare("global")==0) {

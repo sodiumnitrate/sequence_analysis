@@ -133,3 +133,10 @@ class TestSeqSet:
 
         sset.write_phylip("aux_files/test_s.phy", "sequential")
         sset.write_phylip("aux_files/test_i.phy", "interleaved")
+
+    def test_slice(self):
+        sset = SeqSet(file_name="aux_files/test.fasta")
+        first = sset[0]
+        assert isinstance(first.seq_str, str)
+        last_two = sset[1:]
+        assert len(last_two) == 2

@@ -36,3 +36,18 @@ class SeqSet(SeqSet_cpp):
     def __str__(self):
         """__str__ function for sequence set (seq_set) object."""
         return f"Sequence set object with {len(self)} sequences of type {self.type}"
+
+    def add_records(self, list_of_sequences):
+        if not isinstance(list_of_sequences, list):
+            raise TypeError
+
+        for el in list_of_sequences:
+            self.add_sequence(el)
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self.records[index]
+        elif isinstance(index, slice):
+            new_set = SeqSet()
+            new_set.add_records(self.records[index])
+            return new_set

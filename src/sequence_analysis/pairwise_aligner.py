@@ -15,6 +15,8 @@ class PairwiseAligner(PairwiseAligner_cpp):
     def __init__(self, query=None, target=None, algorithm=None):
         """
         Overload C++ constructor for faster init.
+
+        TODO: reconcile this with the overloaded constructor on the C++ side.
         """
         super(PairwiseAligner, self).__init__()
         if query is not None:
