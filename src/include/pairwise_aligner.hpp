@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include "pair_score.hpp"
+#include "../edlib/include/edlib.h"
 
 enum direction {up, left, upper_left, none};
 
@@ -8,6 +9,8 @@ class PairwiseAligner{
     std::string algorithm = "global"; //TODO: switch to enum
     std::string query;
     std::string target;
+
+    std::string scoring;
 
     int gap_penalty;
 
@@ -37,6 +40,8 @@ public:
 
     void needleman_wunsch();
     void traceback_nw();
+
+    void levenshtein();
 
     float get_score();
     std::string get_query_aligned();

@@ -14,9 +14,11 @@
 
 namespace py = pybind11;
 
-PairwiseAligner::PairwiseAligner(std::string scoring, int gap_penalty_){
+PairwiseAligner::PairwiseAligner(std::string scoring_, int gap_penalty_){
+    scoring = scoring_;
     set_gap_penalty(gap_penalty_);
     std::cout << "gap penalty is set to: " << gap_penalty << std::endl;
+    if (scoring_.compare("levenshtein") == 0) std::cout << "gap penalty is ignored for Levenshtein distance." << std::endl;
     ps = new PairScore(scoring);
 }
 
@@ -40,10 +42,14 @@ void PairwiseAligner::align(){
 
     // allocate memory for F and pointers
     F.clear();
-    F.resize(m, std::vector<int>(n));
+    if (scoring.compare("levensthein") != 0) F.resize(m, std::vector<int>(n));
     pointers.clear();
-    pointers.resize(m, std::vector<direction>(n));
+    if (scoring.compare("levensthein") != 0) pointers.resize(m, std::vector<direction>(n));
 
+    if (scoring.compare("levenshtein") == 0) {
+        levenshtein();
+        return;
+    }
     if (algorithm.compare("global")==0) {
         needleman_wunsch();
         traceback_nw();
@@ -261,6 +267,71 @@ std::string PairwiseAligner::get_target_aligned(){return target_aligned;}
 std::string PairwiseAligner::get_match_string(){return alignment_string;}
 std::vector<std::vector<int>> PairwiseAligner::get_F(){return F;}
 std::vector<std::vector<direction>> PairwiseAligner::get_pointers(){return pointers;}
+
+void PairwiseAligner::levenshtein(){
+    EdlibAlignResult res;
+    int dist;
+    if (algorithm.compare("local") == 0)
+    {
+        res = edlibAlign(query.c_str(), query.size(), target.c_str(), target.size(),
+                         edlibNewAlignConfig(-1, EDLIB_MODE_HW, EDLIB_TASK_PATH, NULL, 0));
+        dist = res.editDistance;
+        score = -1 *((float) dist  - ((float) query.size()));
+    }
+    else{
+        res = edlibAlign(query.c_str(), query.size(), target.c_str(), target.size(),
+                         edlibNewAlignConfig(-1, EDLIB_MODE_NW, EDLIB_TASK_PATH, NULL, 0));
+        dist = res.editDistance;
+        score = -1 * ((float) dist  - fmax(query.size(), target.size()));
+    }
+
+    // generate alignment strings
+    const char* cigar = edlibAlignmentToCigar(res.alignment, res.alignmentLength, EDLIB_CIGAR_EXTENDED);
+    std::string cigar_string = cigar;
+    int* start = res.startLocations;
+    int target_pos;
+    if (start == NULL) target_pos = 0;
+    else target_pos = res.startLocations[0];
+    int query_pos = 0;
+    std::string curr_num;
+    int num;
+    for(auto curr_char : cigar_string){
+        if (isdigit(curr_char)) curr_num.push_back(curr_char);
+        else{
+            num = std::stoi(curr_num);
+            curr_num.clear();
+
+            for(int i = 0; i < num; i++){
+                if(curr_char == '='){
+                    target_aligned.push_back(target[target_pos]);
+                    target_pos++;
+                    query_aligned.push_back(query[query_pos]);
+                    query_pos++;
+                    alignment_string.push_back('|');
+                }
+                else if (curr_char == 'I'){
+                    target_aligned.push_back('-');
+                    query_aligned.push_back(query[query_pos]);
+                    query_pos++;
+                    alignment_string.push_back('-');
+                }
+                else if (curr_char == 'D'){
+                    target_aligned.push_back(target[target_pos]);
+                    target_pos++;
+                    query_aligned.push_back('-');
+                    alignment_string.push_back('-');
+                }
+                else{
+                    target_aligned.push_back(target[target_pos]);
+                    target_pos++;
+                    query_aligned.push_back(query[query_pos]);
+                    query_pos++;
+                    alignment_string.push_back('.');
+                }
+            }
+        }
+    }
+}
 
 void init_pairwise_aligner(py::module_ &m){
     py::class_<PairwiseAligner>(m, "PairwiseAligner", py::dynamic_attr())

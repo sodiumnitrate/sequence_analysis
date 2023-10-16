@@ -49,3 +49,31 @@ class TestPairwiseAligner:
         pa.query = "ACCT"
 
         pa.align()
+
+    def test_levenshtein(self):
+        pa = PairwiseAligner("levenshtein")
+        pa.algorithm = "local"
+
+        pa.query = "AAACGTGG"
+        pa.target = "AACGTT"
+        pa.align()
+
+        assert len(pa.get_query_aligned()) == len(pa.get_target_aligned())
+        assert len(pa.get_match_string()) == len(pa.get_query_aligned())
+        assert pa.get_score() == 5
+
+        assert '.' not in pa.get_match_string()
+
+    def test_levenshtein_2(self):
+        pa = PairwiseAligner("levenshtein")
+        pa.algorithm = "global"
+
+        pa.query = "AAACGTGG"
+        pa.target = "AACGTT"
+        pa.align()
+
+        assert len(pa.get_query_aligned()) == len(pa.get_target_aligned())
+        assert len(pa.get_match_string()) == len(pa.get_query_aligned())
+        assert pa.get_score() == 5
+
+        assert '.' in pa.get_match_string()

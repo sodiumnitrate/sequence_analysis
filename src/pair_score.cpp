@@ -7,6 +7,7 @@ PairScore::PairScore(std::string name_)
     if (name.compare("blosum50") == 0) init_blosum50();
     else if (name.compare("blosum62") == 0) init_blosum62();
     else if (name.compare("blastn") == 0) init_blastn();
+    else if (name.compare("levenshtein") == 0) return;
     else throw "unrecognized name";
 }
 

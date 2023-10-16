@@ -2,6 +2,7 @@
 This file holds the PairwiseAligner class and related methods.
 """
 from .sequence_analysis_cpp import PairwiseAligner as PairwiseAligner_cpp
+from math import ceil
 
 class PairwiseAligner(PairwiseAligner_cpp):
     """
@@ -23,3 +24,16 @@ class PairwiseAligner(PairwiseAligner_cpp):
             self.query = query
         if algorithm is not None:
             self.algorithm = algorithm
+
+    def print(self, char_per_line=80):
+        """
+        Function to print alignment.
+        """
+        query_aligned = self.get_query_aligned()
+        target_aligned = self.get_target_aligned()
+        match = self.get_match_string()
+        n_lines = int(ceil(len(match) / char_per_line))
+        for i in range(n_lines):
+            print(query_aligned[i*char_per_line:(i+1)*char_per_line])
+            print(match[i*char_per_line:(i+1)*char_per_line])
+            print(target_aligned[i*char_per_line:(i+1)*char_per_line])
