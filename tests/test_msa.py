@@ -1,8 +1,9 @@
 from sequence_analysis import MSA
-from sequence_analysis import SeqSet
+from sequence_analysis import SeqSet, Sequence
 
 import os
 import sys
+
 sys.path.insert(0, '.') 
 
 class TestMSA:
@@ -35,3 +36,21 @@ class TestMSA:
             assert msa.elapsed is not None
 
             assert not os.path.exists(msa.scratch_folder_name)
+
+    def test_msa_align_by_codon(self):
+        seqs = SeqSet()
+        s1 = Sequence("ACGATG")
+        s1.name = "s1"
+        s2 = Sequence("AGGATC")
+        s2.name = "s2"
+        s3 = Sequence("GGGATCGCG")
+        s3.name = "s3"
+        seqs.add_records([s1, s2, s3])
+        seqs.type = 'dna'
+
+        msa = MSA(seqs)
+        if msa.mafft:
+            msa.align_by_codon(clean=True)
+            assert msa.alignment_info is not None
+            assert msa.aligned_sequences is not None
+            assert len(msa.aligned_sequences) == len(msa.sequences)

@@ -295,6 +295,10 @@ void PairwiseAligner::levenshtein(){
     int query_pos = 0;
     std::string curr_num;
     int num;
+
+    query_aligned = "";
+    target_aligned = "";
+    alignment_string = "";
     for(auto curr_char : cigar_string){
         if (isdigit(curr_char)) curr_num.push_back(curr_char);
         else{

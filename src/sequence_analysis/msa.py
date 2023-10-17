@@ -17,7 +17,7 @@ import subprocess
 import os
 import time
 
-from sequence_analysis import SeqSet
+from sequence_analysis import SeqSet, Sequence
 
 class MSA:
     """
@@ -57,6 +57,8 @@ class MSA:
     def check_for_mafft(self):
         """
         Check that mafft is installed and is accessible.
+
+        TODO: clean up
         """
         if which('mafft') is None:
             self.mafft = False
@@ -85,6 +87,60 @@ class MSA:
             self.output_name = file_name
         else:
             self.input_name = file_name
+
+    def align_by_codon(self, overwrite=False, clean=False):
+        """
+        Given DNA/RNA sequences, align by not splitting codons. (We are assuming that we are in
+        the correct reading frame).
+
+        Converts dna/rna sequences to amino acids, aligns, then converts them back to dna/rna,
+        using the original codons.
+        """
+        if self.sequences.type != 'dna' and self.sequences.type != 'rna':
+            print(f"ERROR: aligning by codon doesn't make sense for sequences of type {self.sequences.type}")
+            raise TypeError
+
+        # TODO: handle on the C++ side for speed
+        translated = SeqSet()
+        for seq in self.sequences:
+            t = seq.translate()
+            translated.add_sequence(t)
+
+        original = self.sequences
+        self.sequences = translated
+        self.align(overwrite=overwrite, clean=True)
+
+        # TODO: handle on the C++ side for speed
+        new_aligned = SeqSet()
+        for idx, seq in enumerate(self.aligned_sequences):
+            new_seq = ""
+            for i, lett in enumerate(seq.seq_str):
+                if lett == '-':
+                    new_seq = new_seq + '-' * 3
+                else:
+                    codon = original[idx].seq_str[i*3:(i+1)*3]
+                    new_seq = new_seq + codon
+
+            s = Sequence(new_seq)
+            s.name = seq.name
+            new_aligned.add_sequence(s)
+
+        self.aligned_sequences = new_aligned
+        self.sequences = original
+
+        if not clean:
+            if self.scratch_folder_name[-1] == '/':
+                self.scratch_folder_name = self.scratch_folder_name[:-1]
+                
+            created = False
+            if not os.path.exists(self.scratch_folder_name):
+                created = True
+                os.mkdir(self.scratch_folder_name)
+
+            if self.output_name is None:
+                self.default_output_name(overwrite=overwrite, aligned=True)
+
+            self.aligned_sequences.write_fasta(self.scratch_folder_name + '/' + self.output_name)
 
     def align(self, overwrite=False, clean=False):
         """
