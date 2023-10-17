@@ -201,3 +201,11 @@ class TestSamFile:
         sset.remove_duplicates()
         assert len(sset) == len(sf) - 2
         assert sset.records[0].name.startswith("SRR180")
+
+    def test_get_names(self):
+        sf = SamFile()
+        sf.read("aux_files/sam_test.sam")
+
+        names = sf.get_seq_names()
+        assert isinstance(names, set)
+        assert len(names) == 10

@@ -331,6 +331,7 @@ void PairwiseAligner::levenshtein(){
             }
         }
     }
+    edlibFreeAlignResult(res);
 }
 
 void init_pairwise_aligner(py::module_ &m){

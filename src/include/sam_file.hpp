@@ -63,6 +63,8 @@ public:
     void set_multiplicity(std::unordered_map<std::string, int> mult);
     std::unordered_map<std::string, int> get_multiplicity();
 
+    std::unordered_set<std::string> get_seq_names();
+
     SeqSet to_seq_set();
 };
 

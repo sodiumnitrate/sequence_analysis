@@ -319,6 +319,14 @@ SeqSet SamFile::to_seq_set(){
     return sset;
 }
 
+std::unordered_set<std::string> SamFile::get_seq_names(){
+    std::unordered_set<std::string> result;
+    for (auto& entry : entries){
+        result.insert(entry.get_read_name());
+    }
+    return result;
+}
+
 void init_sam_file(py::module_ &m){
     py::class_<SamFile>(m, "SamFile", py::dynamic_attr())
         .def(py::init<>())
@@ -356,5 +364,6 @@ void init_sam_file(py::module_ &m){
         .def("set_multiplicity", &SamFile::set_multiplicity)
         .def("get_multiplicity", &SamFile::get_multiplicity)
         .def("to_seq_set", &SamFile::to_seq_set)
+        .def("get_seq_names", &SamFile::get_seq_names)
         ;
 }

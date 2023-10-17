@@ -91,12 +91,12 @@ void SeqSet::remove_duplicates(){
         }
         else{
             if(i - idx > 1){
+                // TODO: remove duplicate names
                 records[idx].set_name(name);
             }
             name = records[i].get_name();
             idx=i;
         }
-        std::cout << i << " " << name << std::endl;
     }
     // remove the labeled ones
     records.erase(std::remove_if(
