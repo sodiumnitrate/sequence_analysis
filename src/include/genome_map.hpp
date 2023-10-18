@@ -27,4 +27,5 @@ public:
     void set_mapped_entries(std::vector<SamEntry*> mapped_entries_);
 
     void set_from_list(std::vector<int>& starts, std::vector<int>& ends);
+    void set_from_list(std::vector<int>& starts, std::vector<int>& ends, std::vector<int>& multiplicities);
 };

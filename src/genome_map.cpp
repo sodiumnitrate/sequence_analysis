@@ -97,6 +97,31 @@ void GenomeMap::set_from_list(std::vector<int>& starts, std::vector<int>& ends){
     }
 }
 
+void GenomeMap::set_from_list(std::vector<int>& starts, std::vector<int>& ends, std::vector<int>& multiplicities){
+    if (starts.size() != ends.size()){
+        std::cout << "number of start indices not the same as the number of end indices" << std::endl;
+        throw;
+    }
+    if (starts.size() != multiplicities.size()){
+        std::cout << "number of indices does not match the number of multiplicities";
+        throw;
+    }
+
+    heatmap_start = * std::min_element(starts.begin(), starts.end());
+    heatmap_end = *  std::max_element(ends.begin(), ends.end());
+
+    const unsigned int length = heatmap_end - heatmap_start + 1;
+
+    heatmap.resize(length);
+    std::fill(heatmap.begin(), heatmap.end(), 0);
+
+    for (auto i = 0; i < starts.size(); i++){
+        for (int j = starts[i]; j <= ends[i]; j++){
+            heatmap[j] += multiplicities[i];
+        }
+    }
+}
+
 
 void init_genome_map(py::module_ &m){
     py::class_<GenomeMap>(m, "GenomeMap", py::dynamic_attr())
@@ -109,6 +134,7 @@ void init_genome_map(py::module_ &m){
         .def_property("sample_name", &GenomeMap::get_sample_name, &GenomeMap::set_sample_name)
         .def("get_heatmap", &GenomeMap::get_heatmap)
         .def("get_mapped_read_names", &GenomeMap::get_mapped_read_names)
-        .def("set_from_list", &GenomeMap::set_from_list)
+        .def("set_from_list", py::overload_cast<std::vector<int>&, std::vector<int>&>(&GenomeMap::set_from_list))
+        .def("set_from_list", py::overload_cast<std::vector<int>&, std::vector<int>&, std::vector<int>&>(&GenomeMap::set_from_list))
         ;
 }

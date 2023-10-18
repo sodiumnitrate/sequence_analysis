@@ -24,3 +24,17 @@ class TestGenomeMap:
         assert heatmap[9] == 1
         assert heatmap[12] == 0
         assert heatmap[25] == 1
+
+    def test_init_from_list_2(self):
+        gm = GenomeMap()
+        gm.set_from_list([0, 5, 15, 20], [10, 8, 25, 22], [2, 1, 1, 2])
+        heatmap = gm.get_heatmap(0,25)
+
+        assert len(heatmap) == 26
+        assert heatmap[2] == 2
+        assert heatmap[5] == 3
+        assert heatmap[8] == 3
+        assert heatmap[9] == 2
+        assert heatmap[12] == 0
+        assert heatmap[20] == 3
+        assert heatmap[25] == 1
