@@ -77,3 +77,17 @@ class TestPairwiseAligner:
         assert pa.get_score() == 5
 
         assert '.' in pa.get_match_string()
+
+        assert pa.get_alignment_start() == 0
+        assert pa.get_alignment_end() == len(pa.target)
+
+    def test_levenshtein_3(self):
+        pa = PairwiseAligner("levenshtein")
+        pa.algorithm = "local"
+
+        pa.query = "ACT"
+        pa.target = "CGACTGAC"
+        pa.align()
+
+        assert pa.get_alignment_start() == 2
+        assert pa.get_alignment_end() == 5

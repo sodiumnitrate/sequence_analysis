@@ -25,4 +25,6 @@ public:
     void add_map(GenomeMap* new_gm);
     std::vector<std::string> get_mapped_read_names(int start, int end);
     void set_mapped_entries(std::vector<SamEntry*> mapped_entries_);
+
+    void set_from_list(std::vector<int>& starts, std::vector<int>& ends);
 };

@@ -20,6 +20,9 @@ class PairwiseAligner{
     std::string target_aligned;
     std::string alignment_string;
 
+    int alignment_start;
+    int alignment_end;
+
     std::vector<std::vector<int>> F;
     std::vector<std::vector<direction>> pointers;
 
@@ -52,5 +55,8 @@ public:
 
     void smith_waterman();
     void traceback_sw(int max_row, int max_col);
+
+    int get_alignment_start();
+    int get_alignment_end();
 };
 

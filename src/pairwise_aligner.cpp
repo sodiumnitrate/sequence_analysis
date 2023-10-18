@@ -122,6 +122,8 @@ void PairwiseAligner::needleman_wunsch(){
     }
 
     score = F[m-1][n-1];
+    alignment_start = 0;
+    alignment_end = m - 1;
 }
 
 void PairwiseAligner::traceback_nw(){
@@ -220,6 +222,8 @@ void PairwiseAligner::smith_waterman(){
     }
     score = F_max;
 
+    alignment_end = max_row;
+
     traceback_sw(max_row, max_col);
 }
 
@@ -260,6 +264,7 @@ void PairwiseAligner::traceback_sw(int max_row, int max_col){
         }
         curr_score = F[row_ptr][col_ptr];
     }
+    alignment_start = row_ptr;
 }
 
 std::string PairwiseAligner::get_query_aligned(){return query_aligned;}
@@ -292,6 +297,7 @@ void PairwiseAligner::levenshtein(){
     int target_pos;
     if (start == NULL) target_pos = 0;
     else target_pos = res.startLocations[0];
+    alignment_start = target_pos;
     int query_pos = 0;
     std::string curr_num;
     int num;
@@ -335,8 +341,12 @@ void PairwiseAligner::levenshtein(){
             }
         }
     }
+    alignment_end = target_pos;
     edlibFreeAlignResult(res);
 }
+
+int PairwiseAligner::get_alignment_start(){ return alignment_start; }
+int PairwiseAligner::get_alignment_end(){ return alignment_end; }
 
 void init_pairwise_aligner(py::module_ &m){
     py::class_<PairwiseAligner>(m, "PairwiseAligner", py::dynamic_attr())
@@ -357,5 +367,7 @@ void init_pairwise_aligner(py::module_ &m){
         .def("get_match_string", &PairwiseAligner::get_match_string)
         .def("get_F", &PairwiseAligner::get_F)
         .def("set_gap_penalty", &PairwiseAligner::set_gap_penalty)
+        .def("get_alignment_start", &PairwiseAligner::get_alignment_start)
+        .def("get_alignment_end", &PairwiseAligner::get_alignment_end)
     ;
 }
