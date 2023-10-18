@@ -18,11 +18,22 @@ GenomeMap::GenomeMap(){};
 void GenomeMap::set_chromosome_name(std::string ch_name){chromosome_name = ch_name;}
 std::string GenomeMap::get_chromosome_name(){return chromosome_name;}
 std::vector<unsigned int> GenomeMap::get_heatmap(int start, int end){
+    if(end < start){
+        int dummy = end;
+        end = start;
+        start = end;
+    }
+
+    if (start > heatmap_end || end < heatmap_start){
+        std::cout << "ranges don't overlap" << std::endl;
+        throw;
+    }
+
     // start and end are *not* relative to vector indices. They are absolute nucleotide indices
     if (start < heatmap_start || end > heatmap_end){
         std::cout << "WARNING: requested range=(" << start <<','<<end<<") is outside the heatmap range=(" << heatmap_start << ',' << heatmap_end << ")." << std::endl;
-        std::vector<unsigned int> blank;
-        return blank;
+        start = heatmap_start;
+        end = heatmap_end;
     }
 
     auto first = heatmap.begin() + (start - heatmap_start);
@@ -92,12 +103,16 @@ void GenomeMap::set_from_list(std::vector<int>& starts, std::vector<int>& ends){
 
     for (auto i = 0; i < starts.size(); i++){
         for (int j = starts[i]; j <= ends[i]; j++){
-            heatmap[j] += 1;
+            heatmap[j - heatmap_start] += 1;
         }
     }
 }
 
 void GenomeMap::set_from_list(std::vector<int>& starts, std::vector<int>& ends, std::vector<int>& multiplicities){
+    if (starts.size() == 0){
+        std::cout << "empty input" << std::endl;
+        throw;
+    }
     if (starts.size() != ends.size()){
         std::cout << "number of start indices not the same as the number of end indices" << std::endl;
         throw;
@@ -117,7 +132,7 @@ void GenomeMap::set_from_list(std::vector<int>& starts, std::vector<int>& ends, 
 
     for (auto i = 0; i < starts.size(); i++){
         for (int j = starts[i]; j <= ends[i]; j++){
-            heatmap[j] += multiplicities[i];
+            heatmap[j - heatmap_start] += multiplicities[i];
         }
     }
 }
