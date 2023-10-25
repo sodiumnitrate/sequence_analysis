@@ -29,3 +29,25 @@ class Sequence(Sequence_cpp):
             return self.seq_str[key]
         else:
             raise TypeError
+
+    def select_dna_as_protein(self, protein_sequence):
+        """
+        If we have a dna sequence, select a subsequence that corresponds
+        to the given protein sequence.
+
+        TODO: make seq object a valid input
+        """
+        if not isinstance(protein_sequence, str):
+            raise TypeError
+
+        if self.type != 'dna' and self.type != 'rna':
+            raise TypeError
+
+        orfs = self.get_open_reading_frames()
+        for orf in orfs:
+            idx = orf.protein_sequence.find(protein_sequence)
+            if idx != -1:
+                seq = Sequence(orf.rna_sequence[idx*3:idx*3+len(protein_sequence)*3])
+                return seq.seq_str
+
+        return None
