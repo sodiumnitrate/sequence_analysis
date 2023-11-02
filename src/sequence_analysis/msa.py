@@ -114,11 +114,13 @@ class MSA:
         new_aligned = SeqSet()
         for idx, seq in enumerate(self.aligned_sequences):
             new_seq = ""
-            for i, lett in enumerate(seq.seq_str):
+            ct = 0
+            for lett in seq.seq_str:
                 if lett == '-':
                     new_seq = new_seq + '-' * 3
                 else:
-                    codon = original[idx].seq_str[i*3:(i+1)*3]
+                    codon = original[idx].seq_str[ct*3:(ct+1)*3]
+                    ct += 1
                     new_seq = new_seq + codon
 
             s = Sequence(new_seq)

@@ -140,3 +140,44 @@ class TestSeqSet:
         assert isinstance(first.seq_str, str)
         last_two = sset[1:]
         assert len(last_two) == 2
+
+    def test_trim_gaps(self):
+        s1 = Sequence("--ACGT---")
+        s2 = Sequence("-AACGT---")
+        s3 = Sequence("-AACGTA--")
+        sset = SeqSet(list_of_seqs=[s1, s2, s3])
+        sset.trim_gaps()
+
+        for seq in sset:
+            assert '-' not in seq.seq_str
+            assert len(seq) == 4
+
+    def test_pairwise_distance(self):
+        s1 = Sequence("ACGTACGT")
+        s2 = Sequence("GGGGGG")
+        s3 = Sequence("CGCCCCCC")
+        s4 = Sequence("CCCCCCC")
+
+        sset = SeqSet(list_of_seqs=[s1, s2, s3, s4])
+        adjacency = sset.pairwise_distance()
+        for i in range(len(adjacency)):
+            assert adjacency[i][i] / len(sset[i]) == 1
+            for j in range(len(adjacency)):
+                assert adjacency[i][j] == adjacency[j][i]
+
+    def test_find_subset_with_names(self):
+        s1 = Sequence("ACGTACGT")
+        s1.name = "s1"
+        s2 = Sequence("GGGGGG")
+        s2.name = "s2"
+        s3 = Sequence("CGCCCCCC")
+        s3.name = "s3"
+        s4 = Sequence("CCCCCCC")
+        s4.name = "s4"
+
+        sset = SeqSet(list_of_seqs=[s1, s2, s3, s4])
+        newset = sset.find_subset_with_names(["s2", "s1"])
+        assert len(newset) == 2
+        names = [s.name for s in newset.records]
+        assert "s1" in names
+        assert "s2" in names

@@ -11,6 +11,8 @@ sys.path.insert(0, '.')
 import tempfile
 from sequence_analysis import Sequence
 
+import pdb
+
 class TestSequence:
     def test_init(self):
         seq = Sequence("ACGT")
@@ -146,3 +148,10 @@ class TestSequence:
         selected = dna_seq.select_dna_as_protein(prot)
 
         assert Sequence(selected).translate().seq_str == prot
+
+    def test_autocorr(self):
+        s1 = Sequence("YWYMDMWGYMGMHYGWMDMYHYW")
+        vec = s1.autocorr()
+
+        assert len(vec) == len(s1)
+        assert vec[0] > 0

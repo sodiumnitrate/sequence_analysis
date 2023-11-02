@@ -16,7 +16,8 @@ from .star_map import StarMap
 from .tree import Tree
 from .easy_search import EasySearch
 from .fasta_iterator import FastaIterator
+from .tree_builder import TreeBuilder
 
 # from .sequence_analysis_cpp import __doc__, __version__, GenomeMap, OpenReadingFrame, PairwiseAligner, SamFile, SeqSet, Sequence
 
-__all__ = ["__doc__", "__version__", "SeqSet", "Sequence", "OpenReadingFrame", "PairwiseAligner", "SamFile", "StarMap", "Tree", "MSA", "GenBankEntry", "GenomeMap", "EasySearch"]
+__all__ = ["__doc__", "__version__", "SeqSet", "Sequence", "OpenReadingFrame", "PairwiseAligner", "SamFile", "StarMap", "Tree", "MSA", "GenBankEntry", "GenomeMap", "EasySearch", "TreeBuilder"]

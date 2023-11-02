@@ -21,7 +21,7 @@ class SeqSet(SeqSet_cpp):
             if list_of_seqs is not None:
                 print("ERROR: you provided both a file_name and list_of_seqs. Not setting anything.")
                 raise ValueError
-            if Path(file_name).suffix in [".fasta", ".fna", ".fa", ".ffn", ".frn"]:
+            if Path(file_name).suffix in [".fasta", ".fna", ".fa", ".ffn", ".frn", ".fst"]:
                 self.read_fasta(file_name)
             else:
                 print(f"ERROR: file with suffix {Path(file_name).suffix} not supported.")

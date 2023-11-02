@@ -17,7 +17,18 @@ class TestTree:
         tree = Tree(tree_str)
         assert tree.root is not None
         assert len(tree.root.children) == 3
-        
+
+    def test_change_names(self):
+        tree_str = "(A,((B,C)D,E)F,G)H;"
+        tree = Tree(tree_str)
+
+        name_dict = {'A': 'A_new', 'B': 'B_new', 'C': 'C_new', 'D': 'D_new', 'E': 'E_new', 'F': 'F_new', 'G': 'G_new', 'H': 'H_new'}
+
+        tree.change_names(name_dict)
+
+        nw = tree.write_newick()
+        for val in name_dict.values():
+            assert val in nw
 
     def test_gen_3(self):
         tree_str = "(,(((((((((((((((((((,),((,),)),(,)),),),),),),),),(((((((((((,),),(,)),(,)),),),(,)),),),),)),((,),(,))),(,)),(((,),(,)),)),),),((,),)),),),);"

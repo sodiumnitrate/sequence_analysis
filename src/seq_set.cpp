@@ -11,6 +11,7 @@
 #include <cstring>
 #include <sstream>
 #include "include/seq_set.hpp"
+#include "include/pairwise_aligner.hpp"
 
 namespace py = pybind11;
 
@@ -278,6 +279,78 @@ std::unordered_map<std::string, unsigned int> SeqSet::get_names_and_lengths_from
     return lengths;
 }
 
+void SeqSet::trim_gaps(){
+    // assumes aligned sequences of the same length
+    int length = records[0].length();
+    std::unordered_set<int> idx_to_remove;
+    int idx;
+    for (auto& t : records){
+        if (t.length() != length){
+            std::cout << "Sequences have different lengths. Are you sure they are aligned?" << std::endl;
+            throw;
+        }
+        idx = 0;
+        for (auto lett : t.get_seq()){
+            if (lett == '-'){
+                idx_to_remove.insert(idx);
+            }
+            idx++;
+        }
+    }
+
+    std::string new_seq_str;
+    for (int j = 0; j < records.size(); j++){
+        new_seq_str = "";
+        for (int i = 0; i < length; i++){
+            if ( !idx_to_remove.contains(i)){
+                new_seq_str.push_back(records[j].get_seq()[i]);
+            }
+        }
+        records[j].set_seq(new_seq_str);
+    }
+}
+
+std::vector<std::vector<int>> SeqSet::pairwise_distance(){
+    std::vector<std::vector<int>> result;
+    PairwiseAligner aligner = PairwiseAligner("levenshtein", 0);
+    for(int i = 0; i < n_seqs; i++){
+        std::vector<int> row;
+        row.resize(n_seqs);
+        std::fill(row.begin(), row.end(), 0);
+        for(int j = i; j < n_seqs; j++){
+            aligner.set_target(records[i].get_seq());
+            aligner.set_query(records[j].get_seq());
+            aligner.align();
+
+            row[j] = aligner.get_score();
+        }
+        result.push_back(row);
+    }
+    for(int i = 0; i < n_seqs; i++){
+        for (int j = i; j < n_seqs; j++){
+            result[j][i] = result[i][j];
+        }
+    }
+
+    return result;
+}
+
+SeqSet SeqSet::find_subset_with_names(std::vector<std::string> names){
+    std::unordered_set<std::string> nameset;
+    for (auto t : names){
+        nameset.insert(t);
+    }
+
+    std::vector<Sequence> new_records;
+    for (auto t : records){
+        if (nameset.find(t.get_name()) != nameset.end()) new_records.push_back(t);
+    }
+
+    SeqSet new_sset = SeqSet();
+    new_sset.set_records(new_records);
+    return new_sset;
+}
+
 void init_seq_set(py::module_ &m){
     py::class_<SeqSet>(m, "SeqSet", py::dynamic_attr())
         .def(py::init<>())
@@ -299,6 +372,9 @@ void init_seq_set(py::module_ &m){
         .def("alphabetize", &SeqSet::alphabetize)
         .def("dealign", &SeqSet::dealign)
         .def("remove_duplicates", &SeqSet::remove_duplicates)
+        .def("trim_gaps", &SeqSet::trim_gaps)
+        .def("pairwise_distance", &SeqSet::pairwise_distance)
+        .def("find_subset_with_names", &SeqSet::find_subset_with_names)
         .def("__repr__",
              [](SeqSet &a){
                  return "<sequence_analysis.SeqSet of size " + std::to_string(a.size()) + " >";

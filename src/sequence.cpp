@@ -440,6 +440,36 @@ std::vector<OpenReadingFrame> Sequence::get_open_reading_frames(unsigned int min
     return result;
 }
 
+// calculate autocorr using blosum matrix
+std::vector<float> Sequence::autocorr(){
+    PairScore* ps;
+    if (type.compare("protein") == 0){
+        ps = new PairScore("blosum62");
+    }
+    else{
+        ps = new PairScore("blastn");
+    }
+
+    int max_i = length();
+    int d_i, i_start;
+    char res1, res2;
+    std::vector<float> res;
+    for (d_i = 0; d_i < max_i; d_i++){
+        int count = 0;
+        float val = 0;
+        for (i_start = 0; i_start < (max_i - d_i); i_start++){
+            res1 = seq_str[i_start];
+            res2 = seq_str[i_start + d_i];
+
+            val += ps->query(res1, res2);
+            count++;
+        }
+        val /= count;
+        res.push_back(val);
+    }
+    return res;
+}
+
 void init_sequence(py::module_ &m){
     py::class_<Sequence>(m, "Sequence", py::dynamic_attr())
         .def(py::init<std::string &>())
@@ -460,6 +490,7 @@ void init_sequence(py::module_ &m){
         .def("translate", &Sequence::translate)
         .def("write_fasta", &Sequence::write_fasta)
         .def("get_open_reading_frames", &Sequence::get_open_reading_frames, py::arg("min_len")=80)
+        .def("autocorr", &Sequence::autocorr)
         .def("__repr__",
             [](Sequence &a){
                 return "<sequence_analysis.Sequence " + a.get_seq().substr(0,5) + "... >";

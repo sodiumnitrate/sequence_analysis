@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "orf.hpp"
+#include "pair_score.hpp"
 
 // Sequence class
 class Sequence {
@@ -52,4 +53,7 @@ public:
 
     // get orfs
     std::vector<OpenReadingFrame> get_open_reading_frames(unsigned int min_len);
+
+    // calculate autocorr
+    std::vector<float> autocorr();
 };

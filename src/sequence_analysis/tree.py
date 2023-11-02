@@ -173,6 +173,24 @@ class Tree:
 
         return None
 
+    def change_names(self, name_dicts):
+        """
+        Given a dictionary of old_names -> new_names, change names of nodes.
+        """
+        if not isinstance(name_dicts, dict):
+            raise TypeError
+
+        Q = [self.root]
+        visited = []
+
+        while Q:
+            node = Q.pop(0)
+            node.name = name_dicts[node.name]
+            visited.append(node.idx)
+            for child in node.children:
+                if child.idx not in visited:
+                    Q.append(child)
+
     def get_node_with_idx_bfs(self, idx):
         """
         Given a node index, use BFS to find the first node that matches it.
