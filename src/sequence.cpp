@@ -1,3 +1,8 @@
+/*
+Sequence class and its definitions.
+Part of sequence_analysis, by Irem Altan.
+*/
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <vector>
@@ -14,7 +19,12 @@
 
 namespace py = pybind11;
 
-std::unordered_map<std::string, char> codon_to_aa_map = {
+/* 
+map to translate codons to amino acids
+(not sure how, but generated only once sometime until the point where a sequence object
+is generated, which is nice)
+ */
+const std::unordered_map<std::string, char> codon_to_aa_map = {
     {"UUU", 'F'},
     {"UUC", 'F'},
     {"UUA", 'L'},
@@ -118,6 +128,9 @@ std::unordered_map<std::string, char> codon_to_aa_map = {
     {"GGT", 'G'}
 };
 
+/*
+Given a codon, returns true if it's a stop codon, and false otherwise.
+*/
 bool is_stop(std::string &codon){
     if (codon[0] != 'U' && codon[0] != 'T') return false;
     if (codon[1] != 'A' && codon[1] != 'G') return false;
@@ -126,6 +139,9 @@ bool is_stop(std::string &codon){
     return true;
 }
 
+/*
+Given a codon, returns true if it's a start codon, and false otherwise.
+*/
 bool is_start(std::string &codon){
     if (codon[0] != 'A') return false;
     if (codon[1] != 'T' && codon[1] != 'U') return false;
@@ -133,39 +149,98 @@ bool is_start(std::string &codon){
     return true;
 }
 
+/*
+Returns the single amino acid character, given a codon.
+
+Uses the `codon_to_aa_map` defined in this file, so the lookup should be O(1).
+*/
 char codon_to_aa(std::string &codon){
-    return codon_to_aa_map[codon];
+    return codon_to_aa_map.at(codon);
 }
 
+/*
+Constructor for the Sequence class.
+
+Input: none.
+Output: empty Sequence object.
+*/
 Sequence::Sequence(){};
 
+/*
+Constructor for the Sequence class.
+
+Input: string that contains sequence letters (`seq_str_`).
+*/
 Sequence::Sequence(std::string seq_str_) {
     std::transform(seq_str_.begin(), seq_str_.end(), seq_str_.begin(), ::toupper);
     seq_str = seq_str_;
 }
 
+/*
+Sets the name of the Sequence.
+*/
 void Sequence::set_name(std::string name_) { name = name_; }
+
+/*
+Returns the name of the Sequence.
+*/
 std::string Sequence::get_name() { return name; }
+
+/*
+Sets `seq_str`, the string that represents the sequence.
+*/
 void Sequence::set_seq(std::string seq_str_) { seq_str = seq_str_; }
+
+/*
+Returns `seq_str`, the string that contains the sequence.
+*/
 std::string Sequence::get_seq() { return seq_str; }
+
+/*
+Returns `type`, the type of the sequence.
+*/
 std::string Sequence::get_type() { return type; }
 
-// return length
+/*
+Returns the length of the sequence.
+*/
 int Sequence::length() { return seq_str.length();}
 
-// checking equality
+/*
+Returns true if two Sequence objects are identical, false otherwise.
+
+"Identical" defined as: if sequence strings are identical.
+*/
 bool const Sequence::operator==(const Sequence& other) const{
     if (seq_str.compare(other.seq_str) == 0) return true;
     else return false;
 }
 
-    // checking <
+/*
+Returns true if `other` contains a sequence string that appears lexicographically after
+the sequence string of the present Sequence instance, and false otherwise.
+*/
 bool const Sequence::operator<(const Sequence& other) const{
     if (seq_str < other.seq_str) return true;
     else return false;
 }
 
-// function to set type
+/*
+Function to set the type of the Sequence object.
+
+Optional input: `seq_type`, a string that contains either one of `dna`, `rna`, or `protein`.
+
+If no input is provided, a type is automatically assigned. Note that by definition, this assignment
+cannot be 100% robust. For instance, "ACGT" can also be a protein sequence. However, a consideration
+of nucleic acid letter frequency reduces the probability of false assignments.
+
+This function:
+- checks if there are any letters unique to proteins, if so assigns type as protein.
+- if not, calculates the frequency of A, C, G, T, and N. 
+- assigns dna or rna if there are fewer than 10 unique characters and the frequency of
+nucleic acid-only characters are > 90% of the sequence length.
+- ignores `*` and `-` as characters.
+*/
 void Sequence::set_type(std::string seq_type=""){
     if (seq_str.length() == 0)
     {
