@@ -173,7 +173,7 @@ class Tree:
 
         return None
 
-    def change_names(self, name_dicts):
+    def change_names(self, name_dicts, remove_not_in_dict=True):
         """
         Given a dictionary of old_names -> new_names, change names of nodes.
         """
@@ -185,7 +185,14 @@ class Tree:
 
         while Q:
             node = Q.pop(0)
-            node.name = name_dicts[node.name]
+            n = node.name
+            if remove_not_in_dict:
+                if n not in name_dicts:
+                    node.name = ''
+                else:
+                    node.name = name_dicts[n]
+            else:
+                node.name = name_dicts[n]
             visited.append(node.idx)
             for child in node.children:
                 if child.idx not in visited:
