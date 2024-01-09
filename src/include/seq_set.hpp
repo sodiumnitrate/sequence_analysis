@@ -45,6 +45,7 @@ public:
     std::unordered_map<std::string, unsigned int> get_names_and_lengths_from_fasta(std::string file_name);
 
     void trim_gaps();
+    void trim_gaps(float threshold);
 
     std::vector<std::vector<int>> pairwise_distance();
     SeqSet find_subset_with_names(std::vector<std::string> names);

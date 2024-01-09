@@ -25,10 +25,16 @@ class TestTreeBuilder:
         s3.name = "third"
         s4 = Sequence("CGTCCCACGTGTTACCCCGAGAGATGGATGGACAGGGCCAACTACTGCATGGATATGCAGGGACGCTACATGGACAGATCGGGCCGTCATTGCAACCCTTCT---------------------------------")
         s4.name = "fourth"
+        s5 = Sequence("CGTCCCACGTGTTACCCCGAGAGATGGATTGACAGGGCCAACTACTGCATGGATATGCAGGGACGCTACATGGACAGATCGGGCCGTCATTGCAACCCTTCT---------------------------------")
+        s5.name = "fifth"
+        s6 = Sequence("CGTCCCACGTGTTACCCCGAGAGATGGATTCACAGGGCCAACTACTGCATGGATATGCAGGGACGCTACATGGACAGATCGGGCCGTCATTGCAACCCTTCT---------------------------------")
+        s6.name = "sixth"
         sset.add_sequence(s1)
         sset.add_sequence(s2)
         sset.add_sequence(s3)
         sset.add_sequence(s4)
+        sset.add_sequence(s5)
+        sset.add_sequence(s6)
         with tempfile.TemporaryDirectory() as tmpdirname:
             tb = TreeBuilder(sset, tmpdirname)
 

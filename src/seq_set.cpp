@@ -310,6 +310,45 @@ void SeqSet::trim_gaps(){
     }
 }
 
+void SeqSet::trim_gaps(float threshold){
+    // assumes aligned sequences of the same length
+    int length = records[0].length();
+    // check lengths
+    for(auto& t : records){
+        if (t.length() != length){
+            std::cout << "Sequences have different lengths. Are you sure they are aligned?" << std::endl;
+            throw;
+        }
+    }
+
+    float gap_fraction = 0;
+    int gap_ct = 0;
+    std::unordered_set<int> idx_to_remove;
+    for (int i = 0; i < length; i++){
+        gap_ct = 0;
+        for (auto& t : records){
+            if(t.get_seq()[i] == '-'){
+                gap_ct += 1;
+            }
+        }
+        gap_fraction = ((float) gap_ct) / ((float) n_seqs);
+        if (gap_fraction > (1-threshold)){
+            idx_to_remove.insert(i);
+        }
+    }
+
+    std::string new_seq_str;
+    for (int j = 0; j < records.size(); j++){
+        new_seq_str = "";
+        for (int i = 0; i < length; i++){
+            if ( !idx_to_remove.contains(i)){
+                new_seq_str.push_back(records[j].get_seq()[i]);
+            }
+        }
+        records[j].set_seq(new_seq_str);
+    }
+}
+
 std::vector<std::vector<int>> SeqSet::pairwise_distance(){
     std::vector<std::vector<int>> result;
     PairwiseAligner aligner = PairwiseAligner("levenshtein", 0);
@@ -372,7 +411,8 @@ void init_seq_set(py::module_ &m){
         .def("alphabetize", &SeqSet::alphabetize)
         .def("dealign", &SeqSet::dealign)
         .def("remove_duplicates", &SeqSet::remove_duplicates)
-        .def("trim_gaps", &SeqSet::trim_gaps)
+        .def("trim_gaps_no_threshold", py::overload_cast<>(&SeqSet::trim_gaps))
+        .def("trim_gaps_with_threshold", py::overload_cast<float>(&SeqSet::trim_gaps))
         .def("pairwise_distance", &SeqSet::pairwise_distance)
         .def("find_subset_with_names", &SeqSet::find_subset_with_names)
         .def("__repr__",

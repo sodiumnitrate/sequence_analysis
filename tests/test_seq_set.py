@@ -181,3 +181,40 @@ class TestSeqSet:
         names = [s.name for s in newset.records]
         assert "s1" in names
         assert "s2" in names
+
+    def test_trim_gaps(self):
+        s1 = Sequence("ACGTACGT")
+        s1.name = "s1"
+        s2 = Sequence("GGGGGG--")
+        s2.name = "s2"
+        s3 = Sequence("CGCCCCCC")
+        s3.name = "s3"
+        s4 = Sequence("CCCCCCC-")
+        s4.name = "s4"
+
+        sset = SeqSet(list_of_seqs=[s1, s2, s3, s4])
+
+        sset.trim_gaps()
+        assert len(sset) == 4
+        for seq in sset:
+            assert len(seq) == 6
+
+        sset_2 = SeqSet(list_of_seqs=[s1, s2, s3, s4])
+        sset_2.trim_gaps(0.7)
+        assert len(sset_2) == 4
+        for seq in sset_2:
+            assert len(seq) == 7
+
+    def test_get_seq_with_name(self):
+        s1 = Sequence("ACGTACGT")
+        s1.name = "s1"
+        s2 = Sequence("GGGGGG--")
+        s2.name = "s2"
+        s3 = Sequence("CGCCCCCC")
+        s3.name = "s3"
+        s4 = Sequence("CCCCCCC-")
+        s4.name = "s4"
+
+        sset = SeqSet(list_of_seqs=[s1, s2, s3, s4])
+        selected = sset.get_sequence_with_name('s4')
+        assert selected.name == 's4'

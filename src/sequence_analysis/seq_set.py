@@ -51,3 +51,15 @@ class SeqSet(SeqSet_cpp):
             new_set = SeqSet()
             new_set.add_records(self.records[index])
             return new_set
+        
+    def trim_gaps(self, threshold=None):
+        if not threshold:
+            self.trim_gaps_no_threshold()
+        else:
+            self.trim_gaps_with_threshold(threshold)
+
+    def get_sequence_with_name(self, name):
+        sset = self.find_subset_with_names([name])
+        if len(sset) == 0:
+            return None
+        return sset.records[0]
