@@ -49,4 +49,10 @@ public:
 
     std::vector<std::vector<int>> pairwise_distance();
     SeqSet find_subset_with_names(std::vector<std::string> names);
+
+    // remove columns at given indices
+    void remove_columns(std::vector<int> indices);
+
+    // check if all seqs have the same length
+    bool are_lengths_identical();
 };

@@ -390,6 +390,45 @@ SeqSet SeqSet::find_subset_with_names(std::vector<std::string> names){
     return new_sset;
 }
 
+// check if all seqs have the same length
+bool SeqSet::are_lengths_identical(){
+    int length = records[0].length();
+    for(auto& t : records){
+        if (t.length() != length){
+            return false;
+        }
+    }
+    return true;
+}
+
+void SeqSet::remove_columns(std::vector<int> indices){
+
+    // assumes aligned sequences of the same length
+    if (!this->are_lengths_identical()){
+        std::cout << "Sequences have different lengths." << std::endl;
+        throw;
+    }
+
+    std::unordered_set<int> idx_to_remove;
+    for(auto i : indices){
+        idx_to_remove.insert(i);
+    }
+
+
+    int length = records[0].length();
+    
+    std::string new_seq_str;
+    for(int j = 0; j < records.size(); j++){
+        new_seq_str = "";
+        for(int i = 0; i < length; i++){
+            if(!idx_to_remove.contains(i)){
+                new_seq_str.push_back(records[j].get_seq()[i]);
+            }
+        }
+        records[j].set_seq(new_seq_str);
+    }
+}
+
 void init_seq_set(py::module_ &m){
     py::class_<SeqSet>(m, "SeqSet", py::dynamic_attr())
         .def(py::init<>())
@@ -415,6 +454,7 @@ void init_seq_set(py::module_ &m){
         .def("trim_gaps_with_threshold", py::overload_cast<float>(&SeqSet::trim_gaps))
         .def("pairwise_distance", &SeqSet::pairwise_distance)
         .def("find_subset_with_names", &SeqSet::find_subset_with_names)
+        .def("remove_columns", &SeqSet::remove_columns)
         .def("__repr__",
              [](SeqSet &a){
                  return "<sequence_analysis.SeqSet of size " + std::to_string(a.size()) + " >";
