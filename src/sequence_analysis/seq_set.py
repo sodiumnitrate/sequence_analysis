@@ -7,7 +7,7 @@ from .sequence_analysis_cpp import SeqSet as SeqSet_cpp
 
 class SeqSet(SeqSet_cpp):
     """This class holds a list of sequence objects of a given type."""
-    def __init__(self, file_name=None, list_of_seqs=None):
+    def __init__(self, file_name=None, list_of_seqs=None, force_suffix=True):
         """
         Overload the constructor so that you can set file name in one go.
 
@@ -22,6 +22,8 @@ class SeqSet(SeqSet_cpp):
                 print("ERROR: you provided both a file_name and list_of_seqs. Not setting anything.")
                 raise ValueError
             if Path(file_name).suffix in [".fasta", ".fna", ".fa", ".ffn", ".frn", ".fst"]:
+                self.read_fasta(file_name)
+            elif not force_suffix:
                 self.read_fasta(file_name)
             else:
                 print(f"ERROR: file with suffix {Path(file_name).suffix} not supported.")
