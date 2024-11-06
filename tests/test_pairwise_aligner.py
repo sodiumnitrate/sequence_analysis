@@ -41,6 +41,13 @@ class TestPairwiseAligner:
 
         pa.align()
 
+    def test_align_3(self):
+        pa = PairwiseAligner()
+        pa.algorithm = "local"
+        pa.query = "MPA"
+        pa.target = "MKA"
+        pa.align()
+
     def test_align_blastn(self):
         pa = PairwiseAligner("blastn", -2)
         pa.algorithm = "local"
