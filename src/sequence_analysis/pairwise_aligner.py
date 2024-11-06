@@ -37,3 +37,25 @@ class PairwiseAligner(PairwiseAligner_cpp):
             print(query_aligned[i*char_per_line:(i+1)*char_per_line])
             print(match[i*char_per_line:(i+1)*char_per_line])
             print(target_aligned[i*char_per_line:(i+1)*char_per_line])
+
+
+    # TODO: refactor below.
+    def get_query_range(self):
+        """
+        Function to get the range of the query that aligns with the target.
+        """
+        query_aligned = self.get_query_aligned().replace('-','')
+        start = self.query.find(query_aligned)
+        end = self.query[::-1].find(query_aligned[::-1])
+        end = len(self.query) - end - 1
+        return start, end
+
+    def get_target_range(self):
+        """
+        Function to get the range of the target that aligns with the query.
+        """
+        target_aligned = self.get_target_aligned().replace('-','')
+        start= self.target.find(target_aligned)
+        end = self.target[::-1].find(target_aligned[::-1])
+        end = len(self.target) - end - 1
+        return start, end

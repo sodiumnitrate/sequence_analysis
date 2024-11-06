@@ -48,6 +48,21 @@ class TestPairwiseAligner:
         pa.target = "MKA"
         pa.align()
 
+    def test_get_alignment_range(self):
+        pa = PairwiseAligner()
+        pa.algorithm = "local"
+        pa.query = "MCDDVAALVVD"
+        pa.target = "DVAALV"
+        pa.align()
+
+        qs, qe = pa.get_query_range()
+        assert qs == 3
+        assert qe == 8
+
+        ts, te = pa.get_target_range()
+        assert ts == 0
+        assert te == len(pa.target)-1
+
     def test_align_blastn(self):
         pa = PairwiseAligner("blastn", -2)
         pa.algorithm = "local"
