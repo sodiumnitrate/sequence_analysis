@@ -344,7 +344,7 @@ void init_sam_file(py::module_ &m){
         .def("get_seq_start", &SamFile::get_seq_start)
         .def("get_seq_end", &SamFile::get_seq_end)
         .def("get_genome_map", &SamFile::get_genome_map)
-        //.def("get_entries", &SamFile::get_entries)
+        .def("get_entries", &SamFile::get_entries)
         .def("get_headers", &SamFile::get_headers)
         .def("__repr__",
              [](SamFile &a){

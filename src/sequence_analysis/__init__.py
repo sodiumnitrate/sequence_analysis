@@ -12,6 +12,7 @@ from .genbank_entry import GenBankEntry
 from .msa import MSA
 from .pairwise_aligner import PairwiseAligner
 from .sam_file import SamFile
+from .sam_entry import SamEntry
 from .star_map import StarMap
 from .tree import Tree
 from .easy_search import EasySearch

@@ -10,6 +10,7 @@ TODO: sequence logo class by itself?
 #include <pybind11/stl.h>
 #include "include/seq_set.hpp"
 #include "include/sam_file.hpp"
+#include "include/sam_entry.hpp"
 #include "include/pairwise_aligner.hpp"
 #include "include/genome_map.hpp"
 #include "include/fasta_iterator.hpp"
@@ -23,6 +24,7 @@ void init_sequence(py::module_ &);
 void init_orf(py::module_ &);
 void init_seq_set(py::module_ &);
 void init_sam_file(py::module_ &);
+void init_sam_entry(py::module_ &);
 void init_pairwise_aligner(py::module_ &);
 void init_genome_map(py::module_ &);
 void init_fasta_iterator(py::module_ &);
@@ -32,6 +34,7 @@ PYBIND11_MODULE(sequence_analysis_cpp, m){
     init_orf(m);
     init_seq_set(m);
     init_sam_file(m);
+    init_sam_entry(m);
     init_pairwise_aligner(m);
     init_genome_map(m);
     init_fasta_iterator(m);
