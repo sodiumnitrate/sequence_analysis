@@ -15,6 +15,7 @@ class SamFile{
     std::vector<int> end_indices = {-1};
     std::vector<std::string> mapped_onto = {""};
     float min_score = 0;
+    bool primary_map = false;
 
     // if AS is not normalized, we need to use sequence lengths
     bool normalized_score = true;
@@ -42,6 +43,8 @@ public:
     int size();
     void set_normalized_true();
     void set_normalized_false();
+    void set_primary_map_true();
+    void set_primary_map_false();
     bool get_normalized();
     int get_seq_start();
     int get_seq_end();

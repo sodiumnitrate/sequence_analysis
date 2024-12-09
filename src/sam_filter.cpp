@@ -8,11 +8,12 @@
 #include <iostream>
 #include "include/sam_filter.hpp"
 
-SamFilter::SamFilter(std::vector<std::string>& names, std::vector<int>& starts, std::vector<int>& ends){
+SamFilter::SamFilter(std::vector<std::string>& names, std::vector<int>& starts, std::vector<int>& ends, bool pm){
     // check input sizes
     if (!(names.size() == starts.size() && starts.size() == ends.size())) throw "size mismatch in input";
 
     unsigned int len = names.size();
+    primary_map = pm;
 
     // process names
     for (const auto& name : names){
@@ -94,12 +95,17 @@ SamFilter::SamFilter(std::vector<std::string>& names, std::vector<int>& starts, 
     }
 }
 
-bool SamFilter::query(std::string& name, int start, int end){
+bool SamFilter::query(std::string& name, int start, int end, int bin_flag){
     std::string curr_name = name;
     if(nameset.find(name) == nameset.end()){
         if (!contains_empty) return false;
         else curr_name = "";
     }
+
+    // check if primary alignment, if filter options require it to be so
+    bool not_primary = (bin_flag >> 8) & 1; // true if not primary alignment
+    if (not_primary && primary_map) return false;
+
     int s, e;
     bool works = false;
     for (auto t : nuc_ranges.at(curr_name)){

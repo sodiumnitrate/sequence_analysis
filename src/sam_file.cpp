@@ -45,6 +45,10 @@ int SamFile::get_seq_start() { return seq_start;}
 
 int SamFile::get_seq_end() { return seq_end;}
 
+void SamFile::set_primary_map_true(){primary_map = true;}
+
+void SamFile::set_primary_map_false(){primary_map = false;}
+
 // read in sequence lengths from a fasta file (for when normalization of alignment scores is needed)
 void SamFile::get_lengths_from_fasta(std::string fasta_file_name){
     SeqSet sset;
@@ -71,12 +75,12 @@ void SamFile::read(std::string file_name){
         return;
     }
     std::string dummy, ref_name, seq, flag, seq_name;
-    int pos, length, bin_flag;
+    int pos, length, bin_flag, og_bin_flag;
     float score;
     std::string as_flag = "AS:i:";
 
     // some preprocessing to facilitate filtering
-    SamFilter filter_obj(mapped_onto, start_indices, end_indices);
+    SamFilter filter_obj(mapped_onto, start_indices, end_indices, primary_map);
     
     int idx = 0;
 
@@ -99,9 +103,10 @@ void SamFile::read(std::string file_name){
         ss >> seq_name >> bin_flag >> ref_name >> pos >> dummy >> dummy >> dummy >> dummy >> dummy >> seq >> dummy;
 
         auto length = seq.length();
+        og_bin_flag = bin_flag;
 
         // apply filters----------------
-        if (!(filter_obj.query(ref_name, pos, pos + length - 1))) continue;
+        if (!(filter_obj.query(ref_name, pos, pos + length - 1, bin_flag))) continue;
         // -----------------------------
 
         // check alignment score
@@ -139,14 +144,14 @@ void SamFile::read(std::string file_name){
             seq = seq_r.get_seq();
         }
         
-        SamEntry entry(seq_name, seq, ref_name, pos, pos + length - 1, score);
+        SamEntry entry(seq_name, seq, ref_name, pos, pos + length - 1, score, og_bin_flag);
         entries.push_back(entry);
         seq_start = fmin(seq_start, pos);
         seq_end = fmax(seq_end, pos + length);
     }
 
     std::cout << "Done reading. The final range is: (" << seq_start << ", " << seq_end << ")." << std::endl;
-
+    
     // re-acquire GIL
     py::gil_scoped_acquire acquire;
 }
@@ -365,5 +370,7 @@ void init_sam_file(py::module_ &m){
         .def("get_multiplicity", &SamFile::get_multiplicity)
         .def("to_seq_set", &SamFile::to_seq_set)
         .def("get_seq_names", &SamFile::get_seq_names)
+        .def("set_primary_map_true", &SamFile::set_primary_map_true)
+        .def("set_primary_map_false", &SamFile::set_primary_map_false)
         ;
 }

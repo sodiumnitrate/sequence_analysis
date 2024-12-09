@@ -209,3 +209,16 @@ class TestSamFile:
         names = sf.get_seq_names()
         assert isinstance(names, set)
         assert len(names) == 10
+
+    def test_read_bin_flag_filter(self):
+        sf = SamFile()
+        sf.set_primary_map_true()
+        sf.read("aux_files/sam_test.sam")
+        assert len(sf.get_entries()) == 11
+
+    def test_read_bin_flag_filter_2(self):
+        sf = SamFile()
+        sf.set_filter_options([0], [-1], ["CM042140.1"], 97)
+        sf.set_primary_map_true()
+        sf.read("aux_files/sam_test.sam")
+        assert len(sf.get_entries()) == 8
