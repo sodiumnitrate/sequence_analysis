@@ -156,7 +156,10 @@ Returns the single amino acid character, given a codon.
 Uses the `codon_to_aa_map` defined in this file, so the lookup should be O(1).
 */
 char codon_to_aa(std::string &codon){
-    return codon_to_aa_map.at(codon);
+    if (codon_to_aa_map.contains(codon)) {
+        return codon_to_aa_map.at(codon);
+    }
+    return 'X';
 }
 
 /*
